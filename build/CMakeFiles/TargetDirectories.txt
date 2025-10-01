@@ -1,0 +1,7 @@
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/intrinsics_gen.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/omp_gen.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/acc_gen.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/RISCVTargetParserTableGen.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/expr.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/edit_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/rebuild_cache.dir

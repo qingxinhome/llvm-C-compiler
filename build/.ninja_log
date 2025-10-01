@@ -1,0 +1,9 @@
+# ninja log v5
+3	1139	1759306919336902872	CMakeFiles/expr.dir/main.cc.o	e3fa39fac65863bd
+1434	1659	1759308089066111829	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	c7dee497ee28fa34
+452	802	1759306828771922475	CMakeFiles/expr.dir/printVisitor.cc.o	f4ef44d41ce5d1c
+2	309	1759127699114422437	CMakeFiles/expr.dir/lexer.cc.o	96de8084930cc1b4
+3	452	1759306828421899361	CMakeFiles/expr.dir/parser.cc.o	84c14cba69907ddc
+3	1434	1759308088843097112	CMakeFiles/expr.dir/codegen.cc.o	ad93a79502af62f3
+0	1154	1759322167958354652	CMakeFiles/expr.dir/codegen.cc.o	ad93a79502af62f3
+1154	1367	1759322168170368543	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	c7dee497ee28fa34
