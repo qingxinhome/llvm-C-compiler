@@ -2,20 +2,25 @@
 
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/raw_ostream.h>
+#include "type.h"
 
 // char stream -> token
 
 enum class TokenType {
     unknown,
     number,
+    identifier,
+    kw_int, // int type
     minus, // -
     plus,  // +
     star,  // *
     slash, // '/'
     l_parent, // {
     r_parent, // }
-    semi, // ;
-    eof  // end
+    semi,  // ;
+    equal, // =
+    comma, // ,
+    eof   // end
 };
 
 
@@ -24,6 +29,7 @@ public:
     int row, col;
     TokenType tokenType;
     int value;
+    CType *type;
     llvm::StringRef content;
 
     Token() {

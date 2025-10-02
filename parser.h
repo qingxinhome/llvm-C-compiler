@@ -15,9 +15,10 @@ public:
 
     std::shared_ptr<Program> ParseProgram();
 private:
-    std::shared_ptr<Expr> ParseExpr();
-    std::shared_ptr<Expr> ParseTerm();
-    std::shared_ptr<Expr> ParseFactor();
+    std::vector<std::shared_ptr<AstNode>> ParseDeclare(); // 一个声明语句可以声明多个变量
+    std::shared_ptr<AstNode> ParseExpr();
+    std::shared_ptr<AstNode> ParseTerm();
+    std::shared_ptr<AstNode> ParseFactor();
     
     // 检测当前token是否为指定类型， 不会消费
     bool Expect(TokenType tokenType);

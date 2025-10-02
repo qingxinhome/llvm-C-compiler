@@ -79,6 +79,10 @@
         "locale": "cpp",
         "print": "cpp",
         "queue": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "__config": "cpp",
+        "__hash_table": "cpp",
+        "__node_handle": "cpp",
+        "forward_list": "cpp"
     }
 }

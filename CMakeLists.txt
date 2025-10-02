@@ -27,4 +27,4 @@ endif()
 set(LLVM_LINK_COMPONENTS Support Core)
 
 # 使用 LLVM 的 add_llvm_executable 宏创建可执行文件，名称为 llvm_test（来自 project(llvm_test)），基于源文件 main.cc。
-add_llvm_executable(${PROJECT_NAME} main.cc lexer.cc parser.cc printVisitor.cc codegen.cc)
+add_llvm_executable(${PROJECT_NAME} main.cc lexer.cc parser.cc printVisitor.cc codegen.cc type.cc)

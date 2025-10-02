@@ -3,29 +3,62 @@
 #include <memory>
 #include <vector>
 #include <llvm/IR/Value.h>
+#include "type.h"
 
 class Program;
-class Expr;
+class VariableDecl;
+class VariableAccessExpr;
+class AssignExpr;
 class BinaryExpr;
-class FactorExpr;
+class NumberExpr;
 
+// 抽象访问者
 class Visitor {
 public:
     virtual ~Visitor(){}
     virtual llvm::Value* VisitProgram(Program *program) = 0;
-    virtual llvm::Value* VisitExpr(Expr *expr) {return nullptr;}
+    virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
+    virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
+    virtual llvm::Value* VisitAssignExpr(AssignExpr *expr) = 0;
     virtual llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) = 0;
-    virtual llvm::Value* VisitFactorExpr(FactorExpr *factorExpr) = 0;
+    virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
 };
 
 
-// 定义表达式的抽象基类
-class Expr {
+// llvm rtti
+class AstNode {
 public:
-    virtual ~Expr(){}
+    enum Kind{
+        Node_VariableDecl,
+        Node_BinaryExpr,
+        Node_NumberExor,
+        Node_VariableAccessExpr,
+        Node_AssignExpr
+    };
+private:
+    const Kind kind;
+public:
+    AstNode(Kind kind) : kind(kind) {}
+    virtual ~AstNode(){}
+    CType *type;
+    const Kind GetKind() const {
+        return kind;
+    }
     virtual llvm::Value* Accept(Visitor *v) {return nullptr;}
 };
 
+// 定义语法树节点的抽象基类（对应表达式和语句）
+class VariableDecl : public AstNode {
+public:
+    llvm::StringRef name;
+    VariableDecl() : AstNode(Node_VariableDecl) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitVariableDeclExpr(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_VariableDecl;
+    }
+};
 
 // 操作符枚举
 enum class OpCode {
@@ -35,31 +68,70 @@ enum class OpCode {
     div
 };
 
-
 // 二元表达式
-class BinaryExpr : public Expr {
+class BinaryExpr : public AstNode {
 public:
     OpCode op;
-    std::shared_ptr<Expr> left;
-    std::shared_ptr<Expr> right;
+    std::shared_ptr<AstNode> left;
+    std::shared_ptr<AstNode> right;
+
+    BinaryExpr() : AstNode(Node_BinaryExpr){}
     llvm::Value* Accept(Visitor *v) override {
         return v->VisitBinaryExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_BinaryExpr;
     }
 };
 
 
 // 因子表达式
-class FactorExpr : public Expr{
+class NumberExpr : public AstNode {
 public:
     int number;
+
+    NumberExpr() : AstNode(Node_NumberExor){}
+
     llvm::Value* Accept(Visitor *v) override {
-        return v->VisitFactorExpr(this);
+        return v->VisitNumberExpr(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_NumberExor;
     }
 };
 
 
+class VariableAccessExpr : public AstNode {
+public:
+    llvm::StringRef name;
+
+    VariableAccessExpr() : AstNode(Node_VariableAccessExpr) {}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitVariableAccessExpr(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_VariableAccessExpr;
+    }
+};
+
+
+class AssignExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;
+    std::shared_ptr<AstNode> right;
+
+    AssignExpr() : AstNode(Node_AssignExpr) {}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitAssignExpr(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_AssignExpr;
+    }
+};
+
 // 语法树根节点类型
 class Program {
 public:
-    std::vector<std::shared_ptr<Expr>> exprVec;
+    std::vector<std::shared_ptr<AstNode>> exprVec;
 };

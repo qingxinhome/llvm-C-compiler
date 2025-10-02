@@ -29,11 +29,8 @@ int main(int argc, char* argv[]) {
 
     Parser parser(lexer);
     auto program = parser.ParseProgram();
-
-    // PrintVisitor printVisitor(program);
-
-    CodeGen codegen(program);
-
+    PrintVisitor printVisitor(program);
+    // CodeGen codegen(program);
 
     return 0;
 }

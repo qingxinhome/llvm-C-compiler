@@ -10,15 +10,24 @@ number: ([0-9])+ ;
 std::shared_ptr<Program> Parser::ParseProgram(){
     // while (true) .... exit ?
     // token -> eof
-    std::vector<std::shared_ptr<Expr>> exprVec;
+    std::vector<std::shared_ptr<AstNode>> exprVec;
     while(token.tokenType != TokenType::eof) {
         if (token.tokenType == TokenType::semi) {
-            Advance();
+            // Advance();
+            NextToken();
             continue;
         }
 
-        auto expr = ParseExpr();
-        exprVec.push_back(expr);
+        if (token.tokenType == TokenType::kw_int) {
+            auto exprs = ParseDeclare();
+            for (auto & expr : exprs)
+            {
+                exprVec.push_back(expr);
+            }
+        } else {
+            auto expr = ParseExpr();
+            exprVec.push_back(expr);
+        }
     }
 
     auto program = std::make_shared<Program>();
@@ -26,8 +35,52 @@ std::shared_ptr<Program> Parser::ParseProgram(){
     return program;
 }
 
+// 解析变量声明语句
+std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclare() {
+    Consume(TokenType::kw_int);
+    CType *baseTy = CType::GetIntTy();
+
+    std::vector<std::shared_ptr<AstNode>> astArr;
+    // int a , b = 3;
+    // int a = 3;
+
+    int i = 0;
+    while(token.tokenType != TokenType::semi) {
+        // 如果是第二次进入循环体，判断是否为分号，
+        if (i++ > 0) {
+            Consume(TokenType::comma);
+        }
+
+        assert(token.tokenType == TokenType::identifier);
+
+        std::shared_ptr<VariableDecl> variableDecl = std::make_shared<VariableDecl>();
+        variableDecl->name = token.content;
+        variableDecl->type = baseTy;
+        astArr.push_back(variableDecl);
+
+        Consume(TokenType::identifier);
+        if (token.tokenType == TokenType::equal) {
+            NextToken();
+
+            auto right = ParseExpr();
+            std::shared_ptr<AssignExpr> assignExpr = std::make_shared<AssignExpr>();
+
+            std::shared_ptr<VariableAccessExpr> left = std::make_shared<VariableAccessExpr>();
+            left->name = variableDecl->name;
+            assignExpr->left = left;
+            assignExpr->right = right;
+
+            astArr.push_back(assignExpr);
+        }
+    }
+    Consume(TokenType::semi);
+    return astArr;
+}
+
+
+
 // 左结合
-std::shared_ptr<Expr> Parser::ParseExpr() {
+std::shared_ptr<AstNode> Parser::ParseExpr() {
     auto left = ParseTerm();
     while (token.tokenType == TokenType::plus || token.tokenType == TokenType::minus) {
         OpCode op;
@@ -49,7 +102,7 @@ std::shared_ptr<Expr> Parser::ParseExpr() {
 }
 
 // 左结合
-std::shared_ptr<Expr> Parser::ParseTerm() {
+std::shared_ptr<AstNode> Parser::ParseTerm() {
     auto left = ParseFactor();
     while (token.tokenType == TokenType::star || token.tokenType == TokenType::slash) {
         OpCode op;
@@ -70,17 +123,24 @@ std::shared_ptr<Expr> Parser::ParseTerm() {
     return left;
 }
 
-std::shared_ptr<Expr> Parser::ParseFactor() {
+std::shared_ptr<AstNode> Parser::ParseFactor() {
     if (token.tokenType == TokenType::l_parent) {
         Advance();
         auto expr = ParseExpr();
         assert(Expect(TokenType::r_parent));
-        Advance();
+        NextToken();
         return expr;
-    } else {
-        auto factor = std::make_shared<FactorExpr>();
+    } else if (token.tokenType == TokenType::identifier) {
+        // 说明是变量访问
+        auto expr = std::make_shared<VariableAccessExpr>();
+        expr->name = token.content;
+        NextToken();
+        return expr;
+    }else {
+        auto factor = std::make_shared<NumberExpr>();
         factor->number = token.value;
-        Advance();
+        factor->type = token.type;
+        NextToken();
         return factor;
     }
 }

@@ -76,8 +76,21 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     return nullptr;
 }
 
-llvm::Value* CodeGen::VisitFactorExpr(FactorExpr *factorExpr){
-    return irBuilder.getInt32(factorExpr->number);
+llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
+    return irBuilder.getInt32(numberExpr->number);
 }
+
+llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
+    return nullptr;
+}
+
+llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
+    return nullptr;
+}
+
+llvm::Value* CodeGen::VisitAssignExpr(AssignExpr *expr) {
+    return nullptr;
+}
+
 
 //在llvm IR中一切指令都是值llvm::Value
