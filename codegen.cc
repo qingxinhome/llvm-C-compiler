@@ -36,11 +36,12 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
     BasicBlock *entryBB = BasicBlock::Create(context, "entry", mFunc);
     irBuilder.SetInsertPoint(entryBB);
 
+    llvm::Value* lastValue;
     for (auto &expr : program->exprVec)
     {
-        llvm::Value *p = expr->Accept(this);
-        irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), p});
+        lastValue = expr->Accept(this);
     }
+    irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
 
     // 在llvm IR中一切指令都是值llvm::Value, llvm::Value是一切的基类
     // CreateRet返回的类型是llvm::ReturnInst，但llvm::ReturnInst是llvm::Value的派生类
@@ -81,15 +82,31 @@ llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
 }
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
-    return nullptr;
+    llvm::Type* ty = nullptr;
+    if (decl->type == CType::GetIntTy()) {
+        // ty = llvm::Type::getInt32Ty(context);
+        ty = irBuilder.getInt32Ty();
+    }
+    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, decl->name);
+    varAddrMap.insert({decl->name, value});
+    return value;
 }
 
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
-    return nullptr;
+    llvm::Value* varAddr= varAddrMap[expr->name];
+    llvm::Type* ty = nullptr;
+    if (expr->type = CType::GetIntTy()) {
+        ty = irBuilder.getInt32Ty();
+    }
+    return irBuilder.CreateLoad(ty, varAddr, expr->name);
 }
 
 llvm::Value* CodeGen::VisitAssignExpr(AssignExpr *expr) {
-    return nullptr;
+    auto left = expr->left;
+    VariableAccessExpr *varAccessExpr = (VariableAccessExpr *)left.get();
+    auto leftVarAddr = varAddrMap[varAccessExpr->name];
+    llvm::Value* rightValue = expr->right->Accept(this);
+    return irBuilder.CreateStore(rightValue, leftVarAddr);
 }
 
 

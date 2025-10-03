@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
     Sema sema;
     Parser parser(lexer, sema);
     auto program = parser.ParseProgram();
-    PrintVisitor printVisitor(program);
-    // CodeGen codegen(program);
+    // PrintVisitor printVisitor(program);
+    CodeGen codegen(program);
 
     return 0;
 }

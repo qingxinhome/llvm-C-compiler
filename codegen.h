@@ -24,4 +24,5 @@ private:
     llvm::LLVMContext context;
     std::shared_ptr<llvm::Module> module;
     llvm::IRBuilder<> irBuilder{context}; // // C++11+初始化
+    llvm::StringMap<llvm::Value*> varAddrMap;
 };
