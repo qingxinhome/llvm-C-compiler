@@ -6,7 +6,7 @@ PrintVisitor::PrintVisitor(std::shared_ptr<Program> program) {
 }
 
 llvm::Value* PrintVisitor::VisitProgram(Program *program) {
-    for (auto expr : program->exprVec) {
+    for (auto &expr : program->exprVec) {
         expr->Accept(this);
         llvm::outs() << "\n";
     }
@@ -30,6 +30,7 @@ llvm::Value* PrintVisitor::VisitAssignExpr(AssignExpr *expr) {
 
 llvm::Value* PrintVisitor::VisitVariableAccessExpr(VariableAccessExpr *expr) {
     llvm::outs() << expr->name;
+    return nullptr;
 }
 
 

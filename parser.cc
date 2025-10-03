@@ -50,33 +50,28 @@ std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclare() {
         if (i++ > 0) {
             Consume(TokenType::comma);
         }
-
         assert(token.tokenType == TokenType::identifier);
 
-        std::shared_ptr<VariableDecl> variableDecl = std::make_shared<VariableDecl>();
-        variableDecl->name = token.content;
-        variableDecl->type = baseTy;
+        // 获取变量名
+        auto variableName = token.content;
+
+        std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(variableName, baseTy);
         astArr.push_back(variableDecl);
 
         Consume(TokenType::identifier);
         if (token.tokenType == TokenType::equal) {
             NextToken();
 
+            std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(variableName);
             auto right = ParseExpr();
-            std::shared_ptr<AssignExpr> assignExpr = std::make_shared<AssignExpr>();
-
-            std::shared_ptr<VariableAccessExpr> left = std::make_shared<VariableAccessExpr>();
-            left->name = variableDecl->name;
-            assignExpr->left = left;
-            assignExpr->right = right;
-
+            
+            std::shared_ptr<AssignExpr> assignExpr = sema.semaAssignExprNode(left, right);
             astArr.push_back(assignExpr);
         }
     }
     Consume(TokenType::semi);
     return astArr;
 }
-
 
 
 // 左结合
@@ -91,10 +86,8 @@ std::shared_ptr<AstNode> Parser::ParseExpr() {
         }
         Advance(); // 前进一个token
         
-        auto binaryExpr = std::make_shared<BinaryExpr>();
-        binaryExpr->op = op;
-        binaryExpr->left = left;
-        binaryExpr->right = ParseTerm();
+        auto right = ParseTerm();
+        auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
 
         left = binaryExpr;
     }
@@ -113,10 +106,8 @@ std::shared_ptr<AstNode> Parser::ParseTerm() {
         }
         Advance(); // 前进一个token
         
-        auto binaryExpr = std::make_shared<BinaryExpr>();
-        binaryExpr->op = op;
-        binaryExpr->left = left;
-        binaryExpr->right = ParseFactor();
+        auto right = ParseFactor();
+        auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
 
         left = binaryExpr;
     }
@@ -125,21 +116,20 @@ std::shared_ptr<AstNode> Parser::ParseTerm() {
 
 std::shared_ptr<AstNode> Parser::ParseFactor() {
     if (token.tokenType == TokenType::l_parent) {
-        Advance();
+        NextToken();
+
         auto expr = ParseExpr();
         assert(Expect(TokenType::r_parent));
+
         NextToken();
         return expr;
     } else if (token.tokenType == TokenType::identifier) {
         // 说明是变量访问
-        auto expr = std::make_shared<VariableAccessExpr>();
-        expr->name = token.content;
+        auto expr = sema.semaVariableAccessNode(token.content);
         NextToken();
         return expr;
     }else {
-        auto factor = std::make_shared<NumberExpr>();
-        factor->number = token.value;
-        factor->type = token.type;
+        auto factor = sema.semaNumberExprNode(token.value, token.type);
         NextToken();
         return factor;
     }

@@ -2,13 +2,15 @@
 
 #include "lexer.h"
 #include "ast.h"
+#include "sema.h"
 
 class Parser {
 private:
     Lexer &lexer;
+    Sema &sema;
     Token token;  // 当前token
 public:
-    Parser(Lexer &lexer) : lexer(lexer){
+    Parser(Lexer &lexer, Sema &sema) : lexer(lexer), sema(sema){
         // 初始化Parser的时候首先得到第一个token
         Advance();
     }

@@ -121,6 +121,22 @@ build CMakeFiles/expr.dir/type.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yi
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
+build CMakeFiles/expr.dir/scope.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/scope.cc || cmake_object_order_depends_target_expr
+  DEFINES = -DGTEST_HAS_RTTI=0
+  DEP_FILE = CMakeFiles/expr.dir/scope.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
+  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = CMakeFiles/expr.dir
+  OBJECT_FILE_DIR = CMakeFiles/expr.dir
+
+build CMakeFiles/expr.dir/sema.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/sema.cc || cmake_object_order_depends_target_expr
+  DEFINES = -DGTEST_HAS_RTTI=0
+  DEP_FILE = CMakeFiles/expr.dir/sema.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
+  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = CMakeFiles/expr.dir
+  OBJECT_FILE_DIR = CMakeFiles/expr.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target expr
@@ -129,7 +145,7 @@ build CMakeFiles/expr.dir/type.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yi
 #############################################
 # Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/expr
 
-build /home/yiming/llvmcompiler/02-expr-compiler/bin/expr: CXX_EXECUTABLE_LINKER__expr_Debug CMakeFiles/expr.dir/main.cc.o CMakeFiles/expr.dir/lexer.cc.o CMakeFiles/expr.dir/parser.cc.o CMakeFiles/expr.dir/printVisitor.cc.o CMakeFiles/expr.dir/codegen.cc.o CMakeFiles/expr.dir/type.cc.o | /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+build /home/yiming/llvmcompiler/02-expr-compiler/bin/expr: CXX_EXECUTABLE_LINKER__expr_Debug CMakeFiles/expr.dir/main.cc.o CMakeFiles/expr.dir/lexer.cc.o CMakeFiles/expr.dir/parser.cc.o CMakeFiles/expr.dir/printVisitor.cc.o CMakeFiles/expr.dir/codegen.cc.o CMakeFiles/expr.dir/type.cc.o CMakeFiles/expr.dir/scope.cc.o CMakeFiles/expr.dir/sema.cc.o | /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   FLAGS = -fno-rtti -g
   LINK_FLAGS = -Wl,--gc-sections
   LINK_LIBRARIES = -Wl,-rpath,"\$$ORIGIN/../lib:/usr/local/llvm-18.1.8/lib"  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
