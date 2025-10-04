@@ -1,31 +1,41 @@
 #include "parser.h"
 
-/**
-prog : (expr? ";")*
-expr : term (("+" | "-") term)* ;
-term : factor (("*" | "/") factor)* ;
-factor : number | "(" expr ")" ;
-number: ([0-9])+ ;
- */
+/*
+prog : stmt*     
+stmt : decl-stmt | expr-stmt | null-stmt      
+null-stmt : ";"      
+decl-stmt : "int" identifier ("," identifier (= expr)?)* ";"
+expr-stmt : expr ";"
+expr : assign-expr | add-expr
+assign-expr: identifier "=" expr
+add-expr : mult-expr (("+" | "-") mult-expr)* 
+mult-expr : primary-expr (("*" | "/") primary-expr)* 
+primary-expr : identifier | number | "(" expr ")" 
+number: ([0-9])+ 
+identifier : (a-zA-Z_)(a-zA-Z0-9_)*
+*/
 std::shared_ptr<Program> Parser::ParseProgram(){
     // while (true) .... exit ?
     // token -> eof
     std::vector<std::shared_ptr<AstNode>> exprVec;
     while(token.tokenType != TokenType::eof) {
+        // null statement
         if (token.tokenType == TokenType::semi) {
             // Advance();
             NextToken();
             continue;
         }
 
+        // declare statment
         if (token.tokenType == TokenType::kw_int) {
-            auto exprs = ParseDeclare();
+            auto exprs = ParseDeclareStmt();
             for (auto & expr : exprs)
             {
                 exprVec.push_back(expr);
             }
         } else {
-            auto expr = ParseExpr();
+            // expr statement
+            auto expr = ParseExprStmt();
             exprVec.push_back(expr);
         }
     }
@@ -36,14 +46,14 @@ std::shared_ptr<Program> Parser::ParseProgram(){
 }
 
 // 解析变量声明语句
-std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclare() {
+std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclareStmt() {
     Consume(TokenType::kw_int);
     CType *baseTy = CType::GetIntTy();
 
     std::vector<std::shared_ptr<AstNode>> astArr;
+
     // int a , b = 3;
     // int a = 3;
-
     int i = 0;
     while(token.tokenType != TokenType::semi) {
         // 如果是第二次进入循环体，判断是否为分号，
@@ -74,8 +84,34 @@ std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclare() {
 }
 
 
+std::shared_ptr<AstNode> Parser::ParseExprStmt() {
+    std::shared_ptr<AstNode> expr = ParseExpr();
+    Consume(TokenType::semi);
+    return expr;
+}
+
+
 // 左结合
+// expr : assign-expr | add-expr
+// assign-expr: identifier "=" expr
+// add-expr : mult-expr (("+" | "-") mult-expr)* 
 std::shared_ptr<AstNode> Parser::ParseExpr() {
+    bool isAssignExpr = false;
+    lexer.SaveState();
+    if (token.tokenType == TokenType::identifier) {
+        Token tmp;
+        lexer.NextToken(tmp);
+        if (tmp.tokenType == TokenType::equal) {
+            isAssignExpr = true;
+        }
+    }
+    lexer.RestoreState();
+
+    if (isAssignExpr) {
+        // assign-expr: identifier "=" expr
+        return ParseAssignExpr();
+    }
+
     auto left = ParseTerm();
     while (token.tokenType == TokenType::plus || token.tokenType == TokenType::minus) {
         OpCode op;
@@ -134,6 +170,19 @@ std::shared_ptr<AstNode> Parser::ParseFactor() {
         return factor;
     }
 }
+
+// a = 5;
+// a = b = 3;
+std::shared_ptr<AstNode> Parser::ParseAssignExpr() {
+    Expect(TokenType::identifier);
+    std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(token.content);
+    NextToken();
+
+    Consume(TokenType::equal);
+    auto right = ParseExpr();
+    return sema.semaAssignExprNode(left, right);
+}
+
 
 bool Parser::Expect(TokenType tokenType) {
     if (token.tokenType == tokenType) {

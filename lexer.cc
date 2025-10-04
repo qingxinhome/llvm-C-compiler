@@ -117,6 +117,7 @@ void Lexer::NextToken(Token &token) {
         default:
             token.tokenType = TokenType::unknown;
             token.content = llvm::StringRef(start, 1);
+            llvm::outs() << "unkown char " << *CurBufPtr << "\n";
             CurBufPtr++;
             break;
         }
@@ -124,3 +125,16 @@ void Lexer::NextToken(Token &token) {
 }
 
 
+void Lexer::SaveState() {
+    state.CurBufPtr = CurBufPtr;
+    state.LineHeadPtr = LineHeadPtr;
+    state.BufEnd = BufEnd;
+    state.row = row;
+}
+
+void Lexer::RestoreState() {
+    CurBufPtr = state.CurBufPtr;
+    LineHeadPtr = state.LineHeadPtr;
+    BufEnd = state.BufEnd;
+    row = state.row;
+}

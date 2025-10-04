@@ -88,25 +88,36 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
         ty = irBuilder.getInt32Ty();
     }
     llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, decl->name);
-    varAddrMap.insert({decl->name, value});
+    
+    varAddrTypeMap.insert({decl->name, {value, ty}});
     return value;
 }
 
+// 变量访问返回的应该是一个右值
+//  CreateLoad返回的是一个右值
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
-    llvm::Value* varAddr= varAddrMap[expr->name];
-    llvm::Type* ty = nullptr;
-    if (expr->type = CType::GetIntTy()) {
-        ty = irBuilder.getInt32Ty();
-    }
-    return irBuilder.CreateLoad(ty, varAddr, expr->name);
+    std::pair pair = varAddrTypeMap[expr->name];
+    llvm::Value* addr = pair.first;
+    llvm::Type* ty = pair.second;
+    return irBuilder.CreateLoad(ty, addr, expr->name);
 }
 
+// a = 3; => rvalue 这个表达式的值一个右值（这里说的是表达式不是变量）
+// CreateStore返回的是一个地址（地址对应的是左值）
+//  CreateLoad返回的是一个右值
 llvm::Value* CodeGen::VisitAssignExpr(AssignExpr *expr) {
     auto left = expr->left;
     VariableAccessExpr *varAccessExpr = (VariableAccessExpr *)left.get();
-    auto leftVarAddr = varAddrMap[varAccessExpr->name];
+    std::pair pair = varAddrTypeMap[varAccessExpr->name];
+    llvm::Value *leftAddr = pair.first;
+    llvm::Type *leftTy = pair.second;
+
     llvm::Value* rightValue = expr->right->Accept(this);
-    return irBuilder.CreateStore(rightValue, leftVarAddr);
+
+    irBuilder.CreateStore(rightValue, leftAddr);
+
+    // CreateLoad返回的是一个右值
+    return irBuilder.CreateLoad(leftTy,leftAddr, varAccessExpr->name);
 }
 
 

@@ -46,9 +46,21 @@ class Lexer {
 public:
     Lexer(llvm::StringRef sourceCode);
     void NextToken(Token &token);
+
+    void SaveState();
+    void RestoreState();
 private:
     const char *CurBufPtr;
     const char *LineHeadPtr;
     const char *BufEnd;
     int row;
+
+    // 定义一个token状态，用于恢复到某个位置
+    struct State {
+        const char *CurBufPtr;
+        const char *LineHeadPtr;
+        const char *BufEnd;
+        int row;
+    };
+    State state;
 };

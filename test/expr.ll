@@ -7,15 +7,22 @@ declare i32 @printf(ptr, ...)
 
 define i32 @main() {
 entry:
-  %a = alloca i32, align 4
-  store i32 3, ptr %a, align 4
+  %aa = alloca i32, align 4
+  store i32 3, ptr %aa, align 4
+  %aa1 = load i32, ptr %aa, align 4
   %b = alloca i32, align 4
   store i32 4, ptr %b, align 4
-  %a1 = load i32, ptr %a, align 4
   %b2 = load i32, ptr %b, align 4
-  %0 = mul nsw i32 %b2, 4
-  %1 = add nsw i32 %a1, %0
-  %2 = add nsw i32 %1, 5
-  %3 = call i32 (ptr, ...) @printf(ptr @0, i32 %2)
+  store i32 15, ptr %b, align 4
+  %b3 = load i32, ptr %b, align 4
+  store i32 5, ptr %b, align 4
+  %b4 = load i32, ptr %b, align 4
+  store i32 %b4, ptr %aa, align 4
+  %aa5 = load i32, ptr %aa, align 4
+  %aa6 = load i32, ptr %aa, align 4
+  %b7 = load i32, ptr %b, align 4
+  %0 = mul nsw i32 %b7, 9
+  %1 = add nsw i32 %aa6, %0
+  %2 = call i32 (ptr, ...) @printf(ptr @0, i32 %1)
   ret i32 0
 }
