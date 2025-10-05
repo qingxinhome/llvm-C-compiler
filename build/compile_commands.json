@@ -46,5 +46,11 @@
   "command": "/usr/bin/g++ -DGTEST_HAS_RTTI=0 -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti -o CMakeFiles/expr.dir/sema.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/sema.cc",
   "file": "/home/yiming/llvmcompiler/02-expr-compiler/sema.cc",
   "output": "CMakeFiles/expr.dir/sema.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_HAS_RTTI=0 -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti -o CMakeFiles/expr.dir/diag_engine.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
+  "output": "CMakeFiles/expr.dir/diag_engine.cc.o"
 }
 ]

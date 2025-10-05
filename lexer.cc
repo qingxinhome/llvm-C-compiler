@@ -15,12 +15,6 @@ bool IsLetter(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
 
-Lexer::Lexer(llvm::StringRef sourceCode) {
-    LineHeadPtr = sourceCode.begin();
-    CurBufPtr = sourceCode.begin();
-    BufEnd = sourceCode.end();
-    row = 1;
-}
 
 void Lexer::NextToken(Token &token) {
     // 1. 过滤空格和换行
@@ -117,7 +111,8 @@ void Lexer::NextToken(Token &token) {
         default:
             token.tokenType = TokenType::unknown;
             token.content = llvm::StringRef(start, 1);
-            llvm::outs() << "unkown char " << *CurBufPtr << "\n";
+            // llvm::outs() << "unkown char " << *CurBufPtr << "\n";
+            diagEngine.Report(llvm::SMLoc::getFromPointer(CurBufPtr), diag::err_unknown_char, *CurBufPtr);
             CurBufPtr++;
             break;
         }

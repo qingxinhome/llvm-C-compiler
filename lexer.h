@@ -3,6 +3,7 @@
 #include <llvm/ADT/StringRef.h>
 #include <llvm/Support/raw_ostream.h>
 #include "type.h"
+#include "diag_engine.h"
 
 // char stream -> token
 
@@ -43,8 +44,18 @@ public:
 };
 
 class Lexer {
+private:
+    llvm::SourceMgr &mgr;    // 用于存放源文件
+    DiagEngine &diagEngine;  // 诊断引擎
 public:
-    Lexer(llvm::StringRef sourceCode);
+    Lexer(llvm::SourceMgr &mgr, DiagEngine &diagEngine) : mgr(mgr), diagEngine(diagEngine) {
+        unsigned int id = mgr.getMainFileID();
+        llvm::StringRef buf = mgr.getMemoryBuffer(id)->getBuffer();
+        CurBufPtr = buf.begin();
+        LineHeadPtr = buf.begin();
+        BufEnd = buf.end();
+        row = 1;
+    }
     void NextToken(Token &token);
 
     void SaveState();

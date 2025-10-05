@@ -1,12 +1,17 @@
 # ninja log v5
-1	1153	1759546395311271702	CMakeFiles/expr.dir/main.cc.o	e3fa39fac65863bd
-1153	1379	1759546395536286731	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	a126019c9e309cb5
-739	1095	1759540597097781099	CMakeFiles/expr.dir/printVisitor.cc.o	f4ef44d41ce5d1c
-1	307	1759540596309729776	CMakeFiles/expr.dir/lexer.cc.o	96de8084930cc1b4
+0	1125	1759633771680306050	CMakeFiles/expr.dir/main.cc.o	e3fa39fac65863bd
+798	1000	1759633575148351564	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	c2e4f318d2cd9af0
+359	737	1759633574888334408	CMakeFiles/expr.dir/printVisitor.cc.o	f4ef44d41ce5d1c
+0	359	1759633574509309401	CMakeFiles/expr.dir/lexer.cc.o	96de8084930cc1b4
 752	1115	1759457495432114521	CMakeFiles/expr.dir/scope.cc.o	24038887cd06860a
-2	462	1759542625187093032	CMakeFiles/expr.dir/parser.cc.o	84c14cba69907ddc
+1	449	1759633574598315274	CMakeFiles/expr.dir/parser.cc.o	84c14cba69907ddc
 3	1476	1759546334783228735	CMakeFiles/expr.dir/codegen.cc.o	ad93a79502af62f3
 1070	1082	1759376066927695486	CMakeFiles/expr.dir/type.cc.o	8454c68a5022f000
 1042	1506	1759457495822140474	CMakeFiles/expr.dir/sema.cc.o	b09572831229f421
-3	293	1759546579366491238	CMakeFiles/expr.dir/lexer.cc.o	96de8084930cc1b4
-293	527	1759546579597506430	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	a126019c9e309cb5
+449	798	1759633574948338367	CMakeFiles/expr.dir/diag_engine.cc.o	ed2765166f9c9588
+1	404	1759634119834236075	CMakeFiles/expr.dir/lexer.cc.o	96de8084930cc1b4
+404	887	1759634120317267889	CMakeFiles/expr.dir/parser.cc.o	84c14cba69907ddc
+1	1235	1759634120665290810	CMakeFiles/expr.dir/main.cc.o	e3fa39fac65863bd
+887	1332	1759634120763297265	CMakeFiles/expr.dir/printVisitor.cc.o	f4ef44d41ce5d1c
+1236	1611	1759634121041315575	CMakeFiles/expr.dir/diag_engine.cc.o	ed2765166f9c9588
+1611	1831	1759634121258329868	/home/yiming/llvmcompiler/02-expr-compiler/bin/expr	c2e4f318d2cd9af0
