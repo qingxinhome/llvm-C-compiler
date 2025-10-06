@@ -78,7 +78,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
 }
 
 llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
-    return irBuilder.getInt32(numberExpr->number);
+    return irBuilder.getInt32(numberExpr->token.value);
 }
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
@@ -87,19 +87,22 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
         // ty = llvm::Type::getInt32Ty(context);
         ty = irBuilder.getInt32Ty();
     }
-    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, decl->name);
+
+    llvm::StringRef varName(decl->token.ptr, decl->token.len);
+    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);
     
-    varAddrTypeMap.insert({decl->name, {value, ty}});
+    varAddrTypeMap.insert({varName, {value, ty}});
     return value;
 }
 
 // 变量访问返回的应该是一个右值
 //  CreateLoad返回的是一个右值
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
-    std::pair pair = varAddrTypeMap[expr->name];
+    llvm::StringRef varName(expr->token.ptr, expr->token.len);
+    std::pair pair = varAddrTypeMap[varName];
     llvm::Value* addr = pair.first;
     llvm::Type* ty = pair.second;
-    return irBuilder.CreateLoad(ty, addr, expr->name);
+    return irBuilder.CreateLoad(ty, addr, varName);
 }
 
 // a = 3; => rvalue 这个表达式的值一个右值（这里说的是表达式不是变量）
@@ -108,7 +111,9 @@ llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
 llvm::Value* CodeGen::VisitAssignExpr(AssignExpr *expr) {
     auto left = expr->left;
     VariableAccessExpr *varAccessExpr = (VariableAccessExpr *)left.get();
-    std::pair pair = varAddrTypeMap[varAccessExpr->name];
+
+    llvm::StringRef varName(varAccessExpr->token.ptr, varAccessExpr->token.len);
+    std::pair pair = varAddrTypeMap[varName];
     llvm::Value *leftAddr = pair.first;
     llvm::Type *leftTy = pair.second;
 
@@ -117,7 +122,7 @@ llvm::Value* CodeGen::VisitAssignExpr(AssignExpr *expr) {
     irBuilder.CreateStore(rightValue, leftAddr);
 
     // CreateLoad返回的是一个右值
-    return irBuilder.CreateLoad(leftTy,leftAddr, varAccessExpr->name);
+    return irBuilder.CreateLoad(leftTy, leftAddr, varName);
 }
 
 

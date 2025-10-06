@@ -63,19 +63,21 @@ std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclareStmt() {
         assert(token.tokenType == TokenType::identifier);
 
         // 获取变量名
-        auto variableName = token.content;
+        // auto variableName = token.content;
+        Token tmpToken = token;
 
-        std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(variableName, baseTy);
+        std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(token, baseTy);
         astArr.push_back(variableDecl);
 
         Consume(TokenType::identifier);
         if (token.tokenType == TokenType::equal) {
+            auto opToken = token;
             NextToken();
 
-            std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(variableName);
+            std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(tmpToken);
             auto right = ParseExpr();
             
-            std::shared_ptr<AssignExpr> assignExpr = sema.semaAssignExprNode(left, right);
+            std::shared_ptr<AssignExpr> assignExpr = sema.semaAssignExprNode(left, right, opToken);
             astArr.push_back(assignExpr);
         }
     }
@@ -161,11 +163,12 @@ std::shared_ptr<AstNode> Parser::ParseFactor() {
         return expr;
     } else if (token.tokenType == TokenType::identifier) {
         // 说明是变量访问
-        auto expr = sema.semaVariableAccessNode(token.content);
+        auto expr = sema.semaVariableAccessNode(token);
         NextToken();
         return expr;
     }else {
-        auto factor = sema.semaNumberExprNode(token.value, token.type);
+        Expect(TokenType::number);
+        auto factor = sema.semaNumberExprNode(token, token.type);
         NextToken();
         return factor;
     }
@@ -175,12 +178,13 @@ std::shared_ptr<AstNode> Parser::ParseFactor() {
 // a = b = 3;
 std::shared_ptr<AstNode> Parser::ParseAssignExpr() {
     Expect(TokenType::identifier);
-    std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(token.content);
+    std::shared_ptr<VariableAccessExpr> left = sema.semaVariableAccessNode(token);
     NextToken();
 
+    auto opToken = token;
     Consume(TokenType::equal);
     auto right = ParseExpr();
-    return sema.semaAssignExprNode(left, right);
+    return sema.semaAssignExprNode(left, right, opToken);
 }
 
 
@@ -188,6 +192,11 @@ bool Parser::Expect(TokenType tokenType) {
     if (token.tokenType == tokenType) {
         return true;
     }
+    GetDiagEngine().Report(
+        llvm::SMLoc::getFromPointer(token.ptr), 
+        diag::err_expected, 
+        Token::GetSpellingText(tokenType), 
+        llvm::StringRef(token.ptr, token.len));
     return false;
 }
 

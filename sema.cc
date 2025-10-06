@@ -2,47 +2,50 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Casting.h"
 
-std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(llvm::StringRef name, CType *type) {
+std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, CType *type) {
     // 1. 检查在当前作用域内是否存在重名
-    auto symbol = scope.FindSymbolInCurScope(name);
+    llvm::StringRef text(token.ptr, token.len);
+    auto symbol = scope.FindSymbolInCurScope(text);
     if (symbol) {
-        llvm::errs() << "re define variable name " << name << "\n";
-        return nullptr;
+        // llvm::errs() << "re define variable name " << text << "\n";
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
     }
     // 2. 添加到符号表中
-    scope.AddSymbol(SymbolKind::LocalVariable, type, name);
+    scope.AddSymbol(SymbolKind::LocalVariable, type, text);
 
     std::shared_ptr<VariableDecl> variableDecl = std::make_shared<VariableDecl>();
-    variableDecl->name = name;
+    variableDecl->token = token;
     variableDecl->type = type;
     return variableDecl;
 }
 
 
-std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(llvm::StringRef name) {
+std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
     // 从符号表栈的所有符号表中检查符号是否存在
-    std::shared_ptr<Symbol> symbol = scope.FindSymbol(name);
+    llvm::StringRef text(token.ptr, token.len);
+    std::shared_ptr<Symbol> symbol = scope.FindSymbol(text);
     if(symbol == nullptr) {
-        llvm::errs() << "use undefined symbol " << name << "\n";
-        return nullptr; 
+        // llvm::errs() << "use undefined symbol " << text << "\n";
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
     }
     std::shared_ptr<VariableAccessExpr> expr = std::make_shared<VariableAccessExpr>();
-    expr->name = name;
+    expr->token = token;
     expr->type = symbol->GetType();
     return expr;
 }
 
-std::shared_ptr<AssignExpr> Sema::semaAssignExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right) {
+std::shared_ptr<AssignExpr> Sema::semaAssignExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, Token token) {
     // 1.检查左右表达式节点是否为空
-    if (!left || !right) {
-        llvm::errs() << "left and right node of assign expression cannot be null" << "\n";
-        return nullptr;
-    }
+    assert(left && right);
+    // if (!left || !right) {
+    //     llvm::errs() << "left and right node of assign expression cannot be null" << "\n";
+    //     return nullptr;
+    // }
     
     // 2. 赋值表达式的左节点必须是左值
     if (!llvm::isa<VariableAccessExpr>(left.get())) {
-        llvm::errs() << "left node of assignment expression must be lvalue \n";
-        return nullptr;
+        // llvm::errs() << "left node of assignment expression must be lvalue \n";
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_lvalue);
     }
 
     std::shared_ptr<AssignExpr> assignExpr = std::make_shared<AssignExpr>();
@@ -61,9 +64,9 @@ std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> le
 }
 
 
-std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(int number, CType* type) {
-    std::shared_ptr<NumberExpr> factor = std::make_shared<NumberExpr>();
-    factor->number = number;
-    factor->type = type;
-    return factor;
+std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, CType* type) {
+    std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();
+    expr->token = token;
+    expr->type = type;
+    return expr;
 }

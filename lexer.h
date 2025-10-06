@@ -8,7 +8,6 @@
 // char stream -> token
 
 enum class TokenType {
-    unknown,
     number,
     identifier,
     kw_int, // int type
@@ -16,8 +15,8 @@ enum class TokenType {
     plus,  // +
     star,  // *
     slash, // '/'
-    l_parent, // {
-    r_parent, // }
+    l_parent, // (
+    r_parent, // )
     semi,  // ;
     equal, // =
     comma, // ,
@@ -29,18 +28,18 @@ class Token {
 public:
     int row, col;
     TokenType tokenType;
-    int value;
-    CType *type;
-    llvm::StringRef content;
-
-    Token() {
-        row = col = -1;
-        tokenType = TokenType::unknown;
-        value = -1;
-    }
+    int value;   // for number
+    CType *type; // for built-in type, 内置数据类型通过词法分析即可得到
+    
+    // llvm::StringRef content;
+    const char *ptr;   // for debug && diag
+    int len;
+public:
     void Dump() {
-        llvm::outs() << "{ " << content << " ,row = " << row << ", col = " << col << "}\n";
+        llvm::outs() << "{ " << llvm::StringRef(ptr, len) << " ,row = " << row << ", col = " << col << "}\n";
     }
+    // 静态成员方法
+    static llvm::StringRef GetSpellingText(TokenType tokenType);
 };
 
 class Lexer {
@@ -60,6 +59,9 @@ public:
 
     void SaveState();
     void RestoreState();
+    DiagEngine& GetDiagEngine() const{
+        return diagEngine;
+    }
 private:
     const char *CurBufPtr;
     const char *LineHeadPtr;

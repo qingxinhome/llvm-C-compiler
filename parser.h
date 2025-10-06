@@ -34,4 +34,8 @@ private:
     // 前进一个token
     void Advance();
     void NextToken();
+
+    DiagEngine& GetDiagEngine() {
+        return lexer.GetDiagEngine();
+    }
 };

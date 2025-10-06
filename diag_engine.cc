@@ -12,7 +12,7 @@ static const char*diag_msg[] = {
 // ## 是预处理器中的连接运算符（token pasting），将 DK_ 和 KIND 拼接为一个标识符。
 // 例如，DIAG(err_unknown_char, Error, "unknown char '{0}'") 会生成 DK_Error。
 static llvm::SourceMgr::DiagKind diag_kind[] = {
-    #define DIAG(ID, KIND, MSG) llvm::SourceMgr::DK_##KIND
+    #define DIAG(ID, KIND, MSG) llvm::SourceMgr::DK_##KIND,
     #include "diag.inc"
 };
 

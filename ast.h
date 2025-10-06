@@ -4,6 +4,7 @@
 #include <vector>
 #include <llvm/IR/Value.h>
 #include "type.h"
+#include "lexer.h"
 
 class Program;
 class VariableDecl;
@@ -12,7 +13,7 @@ class AssignExpr;
 class BinaryExpr;
 class NumberExpr;
 
-// 抽象访问者
+// 抽象访问者基类
 class Visitor {
 public:
     virtual ~Visitor(){}
@@ -41,6 +42,7 @@ public:
     AstNode(Kind kind) : kind(kind) {}
     virtual ~AstNode(){}
     CType *type;
+    Token token;
     const Kind GetKind() const {
         return kind;
     }
@@ -50,7 +52,7 @@ public:
 // 定义语法树节点的抽象基类（对应表达式和语句）
 class VariableDecl : public AstNode {
 public:
-    llvm::StringRef name;
+    // llvm::StringRef name;
     VariableDecl() : AstNode(Node_VariableDecl) {}
     llvm::Value* Accept(Visitor *v) {
         return v->VisitVariableDeclExpr(this);
@@ -89,7 +91,7 @@ public:
 // 因子表达式
 class NumberExpr : public AstNode {
 public:
-    int number;
+    // int number;
 
     NumberExpr() : AstNode(Node_NumberExor){}
 
@@ -104,7 +106,7 @@ public:
 
 class VariableAccessExpr : public AstNode {
 public:
-    llvm::StringRef name;
+    // llvm::StringRef name;
 
     VariableAccessExpr() : AstNode(Node_VariableAccessExpr) {}
     llvm::Value* Accept(Visitor *v) override {
