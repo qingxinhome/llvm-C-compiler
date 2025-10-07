@@ -1,0 +1,5 @@
+if(EXISTS "/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/lexer_test[1]_tests.cmake")
+  include("/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/lexer_test[1]_tests.cmake")
+else()
+  add_test(lexer_test_NOT_BUILT lexer_test_NOT_BUILT)
+endif()

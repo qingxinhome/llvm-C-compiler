@@ -5,3 +5,8 @@
 /home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/expr.dir
 /home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/edit_cache.dir
 /home/yiming/llvmcompiler/02-expr-compiler/build/CMakeFiles/rebuild_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/CMakeFiles/edit_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/CMakeFiles/rebuild_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/CMakeFiles/lexer_test.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/CMakeFiles/edit_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/CMakeFiles/rebuild_cache.dir

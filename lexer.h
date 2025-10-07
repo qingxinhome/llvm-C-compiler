@@ -26,8 +26,9 @@ enum class TokenType {
 
 class Token {
 public:
-    int row, col;
     TokenType tokenType;
+    int row, col;
+    
     int value;   // for number
     CType *type; // for built-in type, 内置数据类型通过词法分析即可得到
     

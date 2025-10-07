@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
 project(expr)
-
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -13,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH ${LLVM_CMAKE_DIR})
 
 #包含 LLVM 提供的 AddLLVM 模块。
 include(AddLLVM)
-include_directories("${LLVM_BINARY_DIR}/include" "${LLVM_INCLUDE_DIR}")
+include_directories(. "${LLVM_BINARY_DIR}/include" "${LLVM_INCLUDE_DIR}")
 add_definitions(${LLVM_DEFINITIONS})
 
 # 检查 LLVM 是否启用 RTTI（运行时类型信息）。如果禁用（LLVM_ENABLE_RTTI 为 FALSE），则添加 -fno-rtti 编译标志。
@@ -28,3 +27,6 @@ set(LLVM_LINK_COMPONENTS Support Core)
 
 # 使用 LLVM 的 add_llvm_executable 宏创建可执行文件，名称为 llvm_test（来自 project(llvm_test)），基于源文件 main.cc。
 add_llvm_executable(${PROJECT_NAME} main.cc lexer.cc parser.cc printVisitor.cc codegen.cc type.cc scope.cc sema.cc diag_engine.cc)
+
+# 添加子目录
+add_subdirectory(unittest)

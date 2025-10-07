@@ -77,7 +77,7 @@ build CMakeFiles/expr.dir/main.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yi
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/main.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -85,7 +85,7 @@ build CMakeFiles/expr.dir/lexer.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/y
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/lexer.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -93,7 +93,7 @@ build CMakeFiles/expr.dir/parser.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/parser.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -101,7 +101,7 @@ build CMakeFiles/expr.dir/printVisitor.cc.o: CXX_COMPILER__expr_unscanned_Debug 
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/printVisitor.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -109,7 +109,7 @@ build CMakeFiles/expr.dir/codegen.cc.o: CXX_COMPILER__expr_unscanned_Debug /home
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/codegen.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -117,7 +117,7 @@ build CMakeFiles/expr.dir/type.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yi
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/type.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -125,7 +125,7 @@ build CMakeFiles/expr.dir/scope.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/y
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/scope.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -133,7 +133,7 @@ build CMakeFiles/expr.dir/sema.cc.o: CXX_COMPILER__expr_unscanned_Debug /home/yi
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/sema.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -141,7 +141,7 @@ build CMakeFiles/expr.dir/diag_engine.cc.o: CXX_COMPILER__expr_unscanned_Debug /
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/expr.dir/diag_engine.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/expr.dir
   OBJECT_FILE_DIR = CMakeFiles/expr.dir
 
@@ -188,9 +188,128 @@ build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
 build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
 # =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt
+# =============================================================================
+
+
+#############################################
+# Utility command for edit_cache
+
+build unittest/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/unittest && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  DESC = Running CMake cache editor...
+  pool = console
+  restat = 1
+
+build unittest/edit_cache: phony unittest/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build unittest/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/unittest && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build unittest/rebuild_cache: phony unittest/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
+# Write statements declared in CMakeLists.txt:
+# /home/yiming/llvmcompiler/02-expr-compiler/unittest/CMakeLists.txt
+# =============================================================================
+
+# =============================================================================
+# Object build statements for EXECUTABLE target lexer_test
+
+
+#############################################
+# Order-only phony target for lexer_test
+
+build cmake_object_order_depends_target_lexer_test: phony || unittest/lexer/CMakeFiles/lexer_test.dir
+
+build unittest/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/unittest/lexer/lexer_test.cc || cmake_object_order_depends_target_lexer_test
+  DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
+  DEP_FILE = unittest/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+  OBJECT_FILE_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+
+build unittest/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc || cmake_object_order_depends_target_lexer_test
+  DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
+  DEP_FILE = unittest/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+  OBJECT_FILE_DIR = unittest/lexer/CMakeFiles/lexer_test.dir/__/__
+
+build unittest/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/type.cc || cmake_object_order_depends_target_lexer_test
+  DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
+  DEP_FILE = unittest/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+  OBJECT_FILE_DIR = unittest/lexer/CMakeFiles/lexer_test.dir/__/__
+
+build unittest/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc || cmake_object_order_depends_target_lexer_test
+  DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
+  DEP_FILE = unittest/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o.d
+  FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
+  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  OBJECT_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+  OBJECT_FILE_DIR = unittest/lexer/CMakeFiles/lexer_test.dir/__/__
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target lexer_test
+
+
+#############################################
+# Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
+
+build /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test unittest/lexer/lexer_test[1]_tests.cmake | ${cmake_ninja_workdir}unittest/lexer/lexer_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__lexer_test_Debug unittest/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o unittest/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o unittest/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o unittest/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+  FLAGS = -fno-rtti -g
+  LINK_LIBRARIES = /usr/lib64/libgtest_main.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/lib64/libgtest.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+  OBJECT_DIR = unittest/lexer/CMakeFiles/lexer_test.dir
+  POST_BUILD = cd /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer && /usr/bin/cmake -D TEST_TARGET=lexer_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=lexer_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer/lexer_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
+  PRE_LINK = :
+  RESTAT = 1
+  TARGET_FILE = /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
+  TARGET_PDB = lexer_test.dbg
+
+
+#############################################
+# Utility command for edit_cache
+
+build unittest/lexer/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  DESC = Running CMake cache editor...
+  pool = console
+  restat = 1
+
+build unittest/lexer/edit_cache: phony unittest/lexer/CMakeFiles/edit_cache.util
+
+
+#############################################
+# Utility command for rebuild_cache
+
+build unittest/lexer/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
+  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  DESC = Running CMake to regenerate build system...
+  pool = console
+  restat = 1
+
+build unittest/lexer/rebuild_cache: phony unittest/lexer/CMakeFiles/rebuild_cache.util
+
+# =============================================================================
 # Target aliases.
 
 build expr: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/expr
+
+build lexer_test: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
 
 # =============================================================================
 # Folder targets.
@@ -200,7 +319,21 @@ build expr: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/expr
 #############################################
 # Folder: /home/yiming/llvmcompiler/02-expr-compiler/build
 
-build all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/expr
+build all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/expr unittest/all
+
+# =============================================================================
+
+#############################################
+# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/unittest
+
+build unittest/all: phony unittest/lexer/all
+
+# =============================================================================
+
+#############################################
+# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/lexer
+
+build unittest/lexer/all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
 
 # =============================================================================
 # Built-in targets
@@ -209,14 +342,14 @@ build all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/expr
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/unittest/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/unittest/lexer/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake: phony
+build /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/unittest/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/unittest/lexer/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake: phony
 
 
 #############################################
