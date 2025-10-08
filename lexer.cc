@@ -107,6 +107,10 @@ void Lexer::NextToken(Token &token) {
         llvm::StringRef content = llvm::StringRef(token.ptr, token.len);
         if (content == "int") {
             token.tokenType = TokenType::kw_int;
+        } else if(content == "if") {
+            token.tokenType = TokenType::kw_if;
+        } else if(content == "else") {
+            token.tokenType = TokenType::kw_else;
         }
     } else {
         switch (*CurBufPtr)

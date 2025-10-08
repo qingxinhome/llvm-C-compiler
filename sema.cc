@@ -70,3 +70,12 @@ std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, CType* type) {
     expr->type = type;
     return expr;
 }
+
+
+std::shared_ptr<IfStmt> Sema::semaIfStmtNode(std::shared_ptr<AstNode> condNode, std::shared_ptr<AstNode> thenNode, std::shared_ptr<AstNode> elseNode) {
+    std::shared_ptr<IfStmt> ifStmt = std::make_shared<IfStmt>();
+    ifStmt->condNode = condNode;
+    ifStmt->thenNode = thenNode;
+    ifStmt->elseNode = elseNode;
+    return ifStmt;
+}

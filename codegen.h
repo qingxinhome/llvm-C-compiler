@@ -15,6 +15,8 @@ public:
     }
 private:
     llvm::Value* VisitProgram(Program *program) override;
+    llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) override;
+    llvm::Value* VisitIfStmt(IfStmt *ifstmt) override;
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
     llvm::Value* VisitAssignExpr(AssignExpr *expr) override;
@@ -23,7 +25,10 @@ private:
 private:
     llvm::LLVMContext context;
     std::shared_ptr<llvm::Module> module;
+    // 一个模块里是可以有很多Function的，需要记录当前Function
+    llvm::Function *curFunc{nullptr};
     llvm::IRBuilder<> irBuilder{context}; // // C++11+初始化
+
     // StringMap存储变量的地址和类型
     llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>> varAddrTypeMap;
 };

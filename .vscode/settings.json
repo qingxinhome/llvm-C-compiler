@@ -83,6 +83,8 @@
         "__config": "cpp",
         "__hash_table": "cpp",
         "__node_handle": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "__assert": "cpp",
+        "__availability": "cpp"
     }
 }

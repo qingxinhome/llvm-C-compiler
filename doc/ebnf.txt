@@ -1,7 +1,9 @@
-prog : stmt*     
-stmt : decl-stmt | expr-stmt | null-stmt      
-null-stmt : ";"      
+prog : stmt*
+stmt : decl-stmt | expr-stmt | null-stmt | if-stmt | block-stmt
+null-stmt : ";"
 decl-stmt : "int" identifier ("," identifier (= expr)?)* ";"
+if-stmt : "if" "(" expr ")" stmt ( "else" stmt )?
+block-stmt: "{" stmt* "}"
 expr-stmt : expr ";"
 expr : assign-expr | add-expr
 assign-expr: identifier "=" expr

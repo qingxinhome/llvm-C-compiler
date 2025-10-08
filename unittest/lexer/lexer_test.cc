@@ -57,21 +57,43 @@ TEST_F(LexerTest, NextToken) {
     expectedVec.push_back(Token{TokenType::number, 2, 4});
     expectedVec.push_back(Token{TokenType::semi, 2, 6});
 
-    Token tok;
+    Token token;
     while (true) {
-        lexer->NextToken(tok);
-        if (tok.tokenType == TokenType::eof)
+        lexer->NextToken(token);
+        if (token.tokenType == TokenType::eof)
             break;
-        curVec.push_back(tok);
+        curVec.push_back(token);
     }
 
     ASSERT_EQ(expectedVec.size(), curVec.size());
     for (int i = 0; i < expectedVec.size(); i++) {
-        const auto &expected_tok = expectedVec[i];
-        const auto &cur_tok = curVec[i];
+        const auto &expected_token = expectedVec[i];
+        const auto &cur_token = curVec[i];
 
-        EXPECT_EQ(expected_tok.tokenType, cur_tok.tokenType);
-        EXPECT_EQ(expected_tok.row, cur_tok.row);
-        EXPECT_EQ(expected_tok.col, cur_tok.col);
+        EXPECT_EQ(expected_token.tokenType, cur_token.tokenType);
+        EXPECT_EQ(expected_token.row, cur_token.row);
+        EXPECT_EQ(expected_token.col, cur_token.col);
     }
 }
+
+
+/*
+1. llvm::MemoryBuffer::getFile 返回 llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>>，表示：
+成功：返回 std::unique_ptr<llvm::MemoryBuffer>（文件内容的智能指针）。
+失败：返回 std::error_code（如文件不存在或无权限）。
+
+
+2. 
+TEST_F 是 GoogleTest 中的一个宏，全称为 "Test Fixture"，用于定义一个测试用例，该用例依赖于一个测试夹具类（继承自 ::testing::Test）。
+它的主要作用是：
+关联测试夹具：允许测试用例访问测试夹具类（如 LexerTest）的成员变量和方法（如 SetUp、TearDown 和 lexer）。
+
+语法：
+TEST_F(TestFixtureClassName, TestName) {
+    // 测试代码
+}
+
+TestFixtureClassName：测试夹具类的名称（如 LexerTest）。
+TestName：测试用例的名称（如 NextToken）。
+在测试中，可以直接访问夹具类的成员（如 lexer）。
+*/

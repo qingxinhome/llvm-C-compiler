@@ -17,8 +17,10 @@ public:
 
     std::shared_ptr<Program> ParseProgram();
 private:
+    std::shared_ptr<AstNode> ParseStmt();
     // 一个声明语句可以声明多个变量
-    std::vector<std::shared_ptr<AstNode>> ParseDeclareStmt();
+    std::shared_ptr<AstNode> ParseDeclareStmt();
+    std::shared_ptr<AstNode> ParseIfStmt();
     std::shared_ptr<AstNode> ParseExprStmt();
     std::shared_ptr<AstNode> ParseExpr();
     std::shared_ptr<AstNode> ParseAssignExpr();

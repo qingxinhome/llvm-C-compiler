@@ -10,7 +10,9 @@
 enum class TokenType {
     number,
     identifier,
-    kw_int, // int type
+    kw_int,  // int type
+    kw_if,   // if
+    kw_else, // else
     minus, // -
     plus,  // +
     star,  // *

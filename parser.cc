@@ -1,10 +1,12 @@
 #include "parser.h"
 
 /*
-prog : stmt*     
-stmt : decl-stmt | expr-stmt | null-stmt      
-null-stmt : ";"      
+prog : stmt*
+stmt : decl-stmt | expr-stmt | null-stmt | if-stmt | block-stmt
+null-stmt : ";"
 decl-stmt : "int" identifier ("," identifier (= expr)?)* ";"
+if-stmt : "if" "(" expr ")" stmt ( "else" stmt )?
+block-stmt: "{" stmt* "}"
 expr-stmt : expr ";"
 expr : assign-expr | add-expr
 assign-expr: identifier "=" expr
@@ -17,41 +19,45 @@ identifier : (a-zA-Z_)(a-zA-Z0-9_)*
 std::shared_ptr<Program> Parser::ParseProgram(){
     // while (true) .... exit ?
     // token -> eof
-    std::vector<std::shared_ptr<AstNode>> exprVec;
+    std::vector<std::shared_ptr<AstNode>> nodeVec;
     while(token.tokenType != TokenType::eof) {
-        // null statement
-        if (token.tokenType == TokenType::semi) {
-            // Advance();
-            NextToken();
+        auto stmt = ParseStmt();
+        if (stmt == nullptr) {
             continue;
         }
-
-        // declare statment
-        if (token.tokenType == TokenType::kw_int) {
-            auto exprs = ParseDeclareStmt();
-            for (auto & expr : exprs)
-            {
-                exprVec.push_back(expr);
-            }
-        } else {
-            // expr statement
-            auto expr = ParseExprStmt();
-            exprVec.push_back(expr);
-        }
+        nodeVec.push_back(stmt);
     }
-
     auto program = std::make_shared<Program>();
-    program->exprVec = move(exprVec);
+    program->stmtNodeVec = move(nodeVec);
     return program;
 }
 
+std::shared_ptr<AstNode> Parser::ParseStmt() {
+    // null statement
+    if (token.tokenType == TokenType::semi) {
+        NextToken();
+        return nullptr;
+    }
+    // declare statment
+    else if (token.tokenType == TokenType::kw_int) {
+        return ParseDeclareStmt();
+    }
+    // if statement
+    else if (token.tokenType == TokenType::kw_if) {
+        return ParseIfStmt();
+    }
+    // expr statement
+    else {
+        return ParseExprStmt();
+    }   
+}
+
 // 解析变量声明语句
-std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclareStmt() {
+std::shared_ptr<AstNode> Parser::ParseDeclareStmt() {
     Consume(TokenType::kw_int);
     CType *baseTy = CType::GetIntTy();
 
-    std::vector<std::shared_ptr<AstNode>> astArr;
-
+    auto declareStmt = std::make_shared<DeclareStmt>();
     // int a , b = 3;
     // int a = 3;
     int i = 0;
@@ -67,7 +73,7 @@ std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclareStmt() {
         Token tmpToken = token;
 
         std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(token, baseTy);
-        astArr.push_back(variableDecl);
+        declareStmt->nodeVec.push_back(variableDecl);
 
         Consume(TokenType::identifier);
         if (token.tokenType == TokenType::equal) {
@@ -78,11 +84,11 @@ std::vector<std::shared_ptr<AstNode>> Parser::ParseDeclareStmt() {
             auto right = ParseExpr();
             
             std::shared_ptr<AssignExpr> assignExpr = sema.semaAssignExprNode(left, right, opToken);
-            astArr.push_back(assignExpr);
+            declareStmt->nodeVec.push_back(assignExpr);
         }
     }
     Consume(TokenType::semi);
-    return astArr;
+    return declareStmt;
 }
 
 
@@ -90,6 +96,24 @@ std::shared_ptr<AstNode> Parser::ParseExprStmt() {
     std::shared_ptr<AstNode> expr = ParseExpr();
     Consume(TokenType::semi);
     return expr;
+}
+
+// if-stmt : "if" "(" expr ")" stmt ( "else" stmt )?
+std::shared_ptr<AstNode> Parser::ParseIfStmt() {
+    Consume(TokenType::kw_if);
+    Consume(TokenType::l_parent);
+    auto condExpr = ParseExpr();
+    Consume(TokenType::r_parent);
+    auto thenStmt = ParseStmt();
+
+    std::shared_ptr<AstNode> elseStmt = nullptr;
+    // peek token is 'else'
+    if (token.tokenType == TokenType::kw_else) {
+        Consume(TokenType::kw_else);
+        elseStmt = ParseStmt();
+    }
+
+    return sema.semaIfStmtNode(condExpr, thenStmt, elseStmt);
 }
 
 

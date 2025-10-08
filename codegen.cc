@@ -35,13 +35,20 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
 
     BasicBlock *entryBB = BasicBlock::Create(context, "entry", mFunc);
     irBuilder.SetInsertPoint(entryBB);
+    // 记录当前的Function函数
+    curFunc = mFunc;
 
     llvm::Value* lastValue;
-    for (auto &expr : program->exprVec)
-    {
-        lastValue = expr->Accept(this);
+    for (auto &stmtNode : program->stmtNodeVec){
+        lastValue = stmtNode->Accept(this);
     }
-    irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
+
+    if (lastValue != nullptr) {
+        irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
+    } else {
+        irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("last inst is not expr\n")});
+    }
+    
 
     // 在llvm IR中一切指令都是值llvm::Value, llvm::Value是一切的基类
     // CreateRet返回的类型是llvm::ReturnInst，但llvm::ReturnInst是llvm::Value的派生类
@@ -52,6 +59,61 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
 
     return ret;
 }
+
+llvm::Value* CodeGen::VisitDeclareStmt(DeclareStmt *declstmt) {
+    llvm::Value* lastValue;
+    for (const auto &node : declstmt->nodeVec) {
+        lastValue = node->Accept(this);
+    }
+    return lastValue;
+}
+
+///
+llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
+    llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "cond", curFunc);
+    llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", curFunc);
+    llvm::BasicBlock *elseBB = nullptr;
+    if (ifstmt->elseNode != nullptr) {
+        elseBB = llvm::BasicBlock::Create(context, "else", curFunc);
+    }
+    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "last", curFunc);
+
+    // 将指令执行流无条件跳转至 if 条件块
+    irBuilder.CreateBr(condBB);
+
+    // handl if condBB
+    irBuilder.SetInsertPoint(condBB);
+    llvm::Value* val = ifstmt->condNode->Accept(this);
+    // int32 类型的比较指令ne ：不等于
+    llvm::Value* condval =irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+    
+    if (ifstmt->elseNode != nullptr) {
+        // 条件跳转
+        irBuilder.CreateCondBr(condval, thenBB, elseBB);
+
+        // handle then block
+        irBuilder.SetInsertPoint(thenBB);
+        ifstmt->thenNode->Accept(this);
+        irBuilder.CreateBr(lastBB);// 无条件跳转
+
+        // handle else block
+        irBuilder.SetInsertPoint(elseBB);
+        ifstmt->elseNode->Accept(this);
+        irBuilder.CreateBr(lastBB); // 无条件跳转
+    } else  {
+        // 条件跳转
+        irBuilder.CreateCondBr(condval, thenBB, lastBB);
+
+        // then block
+        irBuilder.SetInsertPoint(thenBB);
+        ifstmt->thenNode->Accept(this);
+        irBuilder.CreateBr(lastBB);// 无条件跳转
+    }
+    irBuilder.SetInsertPoint(lastBB);
+    //  因为if语句不是表达式，if 语句没有值，不需要返回具体的llvm:Value
+    return nullptr;
+}
+
 
 llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     llvm::Value* left = binaryExpr->left->Accept(this);

@@ -7,6 +7,8 @@
 #include "lexer.h"
 
 class Program;
+class DeclareStmt;
+class IfStmt;
 class VariableDecl;
 class VariableAccessExpr;
 class AssignExpr;
@@ -18,6 +20,8 @@ class Visitor {
 public:
     virtual ~Visitor(){}
     virtual llvm::Value* VisitProgram(Program *program) = 0;
+    virtual llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) = 0;
+    virtual llvm::Value* VisitIfStmt(IfStmt *ifstmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
     virtual llvm::Value* VisitAssignExpr(AssignExpr *expr) = 0;
@@ -27,9 +31,12 @@ public:
 
 
 // llvm rtti
+// 定义语法树节点的抽象基类（对应表达式和语句）
 class AstNode {
 public:
     enum Kind{
+        Node_IfStmt,
+        Node_DeclareStmt,
         Node_VariableDecl,
         Node_BinaryExpr,
         Node_NumberExor,
@@ -49,7 +56,37 @@ public:
     virtual llvm::Value* Accept(Visitor *v) {return nullptr;}
 };
 
-// 定义语法树节点的抽象基类（对应表达式和语句）
+
+class DeclareStmt : public AstNode {
+public:
+    std::vector<std::shared_ptr<AstNode>> nodeVec;
+public:
+    DeclareStmt() : AstNode(Node_DeclareStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitDeclareStmt(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_DeclareStmt;
+    }
+};
+
+
+class IfStmt : public AstNode {
+public:
+    std::shared_ptr<AstNode> condNode;
+    std::shared_ptr<AstNode> thenNode;
+    std::shared_ptr<AstNode> elseNode;
+public:
+    IfStmt() : AstNode(Node_IfStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitIfStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_IfStmt;
+    }
+};
+
 class VariableDecl : public AstNode {
 public:
     // llvm::StringRef name;
@@ -135,5 +172,5 @@ public:
 // 语法树根节点类型
 class Program {
 public:
-    std::vector<std::shared_ptr<AstNode>> exprVec;
+    std::vector<std::shared_ptr<AstNode>> stmtNodeVec;
 };

@@ -13,7 +13,7 @@ add_executable(
 
 llvm_map_components_to_libnames(llvm_all Support Core)
 
-message(STATUS "wuxiliang@@@@@@@@@@@@@iiicp: ${llvm_all}")
+#message(STATUS "wuxiliang@@@@@@@@@@@@@iiicp: ${llvm_all}")
 
 # 链接llvm的库
 target_link_libraries(
