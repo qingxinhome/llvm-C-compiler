@@ -68,6 +68,15 @@ llvm::Value* CodeGen::VisitDeclareStmt(DeclareStmt *declstmt) {
     return lastValue;
 }
 
+llvm::Value* CodeGen::VisitBlockStmt(BlockStmt *blockstmt) {
+    // block块中最后的语句有可能是一个表达式
+    llvm::Value* lastValue;
+    for (const auto &node : blockstmt->nodeVec) {
+        lastValue = node->Accept(this);
+    }
+    return lastValue;
+}
+
 ///
 llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "cond", curFunc);

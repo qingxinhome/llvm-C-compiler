@@ -32,6 +32,16 @@ llvm::Value* PrintVisitor::VisitIfStmt(IfStmt *ifstmt) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitBlockStmt(BlockStmt *blockstmt) {
+    llvm::outs() << "{\n";
+    for (const auto & node : blockstmt->nodeVec) {
+        node->Accept(this);
+        llvm::outs() << "\n";
+    }
+    llvm::outs() << "}";
+    return nullptr;
+}
+
 llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
     if (decl->type == CType::GetIntTy()) {
         llvm::StringRef text(decl->token.ptr, decl->token.len);

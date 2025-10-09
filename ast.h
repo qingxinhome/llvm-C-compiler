@@ -9,6 +9,7 @@
 class Program;
 class DeclareStmt;
 class IfStmt;
+class BlockStmt;
 class VariableDecl;
 class VariableAccessExpr;
 class AssignExpr;
@@ -22,6 +23,7 @@ public:
     virtual llvm::Value* VisitProgram(Program *program) = 0;
     virtual llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) = 0;
     virtual llvm::Value* VisitIfStmt(IfStmt *ifstmt) = 0;
+    virtual llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
     virtual llvm::Value* VisitAssignExpr(AssignExpr *expr) = 0;
@@ -36,6 +38,7 @@ class AstNode {
 public:
     enum Kind{
         Node_IfStmt,
+        Node_BlockStmt,
         Node_DeclareStmt,
         Node_VariableDecl,
         Node_BinaryExpr,
@@ -69,6 +72,21 @@ public:
         return node->GetKind() == Node_DeclareStmt;
     }
 };
+
+
+class BlockStmt : public AstNode {
+public:
+    std::vector<std::shared_ptr<AstNode>> nodeVec;
+public:
+    BlockStmt() : AstNode(Node_BlockStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitBlockStmt(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_BlockStmt;
+    }
+};
+
 
 
 class IfStmt : public AstNode {

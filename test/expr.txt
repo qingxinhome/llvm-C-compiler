@@ -1,11 +1,15 @@
 int aa, b = 4;
 aa = 1;
 aa = b = 0-2;
-if (b) 
-    if (3)
+if (b) {
+    if (3) {
         b = 9;
-    else
+    }
+    else{
         aa = 30;
-else
+    }
+}
+else {
     b = 19;
+}
 aa + b*(4 + 5);

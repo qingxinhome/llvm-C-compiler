@@ -46,6 +46,10 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
     else if (token.tokenType == TokenType::kw_if) {
         return ParseIfStmt();
     }
+    // block statment
+    else if (token.tokenType == TokenType::l_brace) {
+        return ParseBlockStmt();
+    }
     // expr statement
     else {
         return ParseExprStmt();
@@ -114,6 +118,20 @@ std::shared_ptr<AstNode> Parser::ParseIfStmt() {
     }
 
     return sema.semaIfStmtNode(condExpr, thenStmt, elseStmt);
+}
+
+std::shared_ptr<AstNode> Parser::ParseBlockStmt() {
+    sema.EnterScope();
+    Consume(TokenType::l_brace);
+
+    auto blockStmt = std::make_shared<BlockStmt>();
+    while(token.tokenType != TokenType::r_brace) {
+        blockStmt->nodeVec.push_back(ParseStmt());
+    }
+    
+    Consume(TokenType::r_brace);
+    sema.ExitScope();
+    return blockStmt;
 }
 
 

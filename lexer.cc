@@ -10,6 +10,8 @@
     slash, // '/'
     l_parent, // (
     r_parent, // )
+    l_brace,  // {
+    r_brace,  // }
     semi,  // ;
     equal, // =
     comma, // ,
@@ -31,6 +33,10 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "(";
     case TokenType::r_parent:
         return ")";
+    case TokenType::l_brace:
+        return "{";
+    case TokenType::r_brace:
+        return "}";
     case TokenType::semi:
         return ";";
     case TokenType::equal:
@@ -165,6 +171,18 @@ void Lexer::NextToken(Token &token) {
             break;
         case ',':
             token.tokenType = TokenType::comma;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case '{':
+            token.tokenType = TokenType::l_brace;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case '}':
+            token.tokenType = TokenType::r_brace;
             token.ptr = startPtr;
             token.len = 1;
             CurBufPtr++;

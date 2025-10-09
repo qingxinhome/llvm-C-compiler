@@ -19,6 +19,8 @@ enum class TokenType {
     slash, // '/'
     l_parent, // (
     r_parent, // )
+    l_brace,  // {
+    r_brace,  // }
     semi,  // ;
     equal, // =
     comma, // ,

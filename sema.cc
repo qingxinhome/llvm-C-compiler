@@ -79,3 +79,12 @@ std::shared_ptr<IfStmt> Sema::semaIfStmtNode(std::shared_ptr<AstNode> condNode, 
     ifStmt->elseNode = elseNode;
     return ifStmt;
 }
+
+
+void Sema::EnterScope() {
+    scope.EnterScope();
+}
+
+void Sema::ExitScope() {
+    scope.ExitScope();
+}

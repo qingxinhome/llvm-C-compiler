@@ -17,6 +17,7 @@ private:
     llvm::Value* VisitProgram(Program *program) override;
     llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) override;
     llvm::Value* VisitIfStmt(IfStmt *ifstmt) override;
+    llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
     llvm::Value* VisitAssignExpr(AssignExpr *expr) override;
