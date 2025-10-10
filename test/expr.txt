@@ -1,8 +1,8 @@
 int aa, b = 4;
 aa = 1;
 aa = b = 0-2;
-if (b) {
-    if (3) {
+if (b != 0) {
+    if (3 <= 0) {
         b = 9;
     }
     else{

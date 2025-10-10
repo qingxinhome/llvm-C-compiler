@@ -5,8 +5,10 @@ decl-stmt : "int" identifier ("," identifier (= expr)?)* ";"
 if-stmt : "if" "(" expr ")" stmt ( "else" stmt )?
 block-stmt: "{" stmt* "}"
 expr-stmt : expr ";"
-expr : assign-expr | add-expr
+expr : assign-expr | equal-expr
 assign-expr: identifier "=" expr
+equal-expr : relational-expr (("==" | "!=") relational-expr)*
+relational-expr: add-expr (("<"|">"|"<="|">=") add-expr)*
 add-expr : mult-expr (("+" | "-") mult-expr)* 
 mult-expr : primary-expr (("*" | "/") primary-expr)* 
 primary-expr : identifier | number | "(" expr ")" 

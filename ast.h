@@ -122,7 +122,13 @@ enum class OpCode {
     add,
     sub,
     mul,
-    div
+    div,
+    equal_equal,
+    not_equal,
+    less,
+    less_equal,
+    greater,
+    greater_equal
 };
 
 // 二元表达式

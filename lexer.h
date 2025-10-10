@@ -24,6 +24,12 @@ enum class TokenType {
     semi,  // ;
     equal, // =
     comma, // ,
+    equal_equal, // ==
+    not_equal,  // !=
+    less,       // <
+    less_equal,  // <=
+    greater,     // >
+    greater_equal, // >=
     eof   // end
 };
 

@@ -22,7 +22,9 @@ entry:
 cond:                                             ; preds = %entry
   %b5 = load i32, ptr %b, align 4
   %0 = icmp ne i32 %b5, 0
-  br i1 %0, label %then, label %else
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %then, label %else
 
 then:                                             ; preds = %cond
   br label %cond6
@@ -35,13 +37,13 @@ else:                                             ; preds = %cond
 last:                                             ; preds = %else, %last9
   %aa13 = load i32, ptr %aa, align 4
   %b14 = load i32, ptr %b, align 4
-  %1 = mul nsw i32 %b14, 9
-  %2 = add nsw i32 %aa13, %1
-  %3 = call i32 (ptr, ...) @printf(ptr @0, i32 %2)
+  %3 = mul nsw i32 %b14, 9
+  %4 = add nsw i32 %aa13, %3
+  %5 = call i32 (ptr, ...) @printf(ptr @0, i32 %4)
   ret i32 0
 
 cond6:                                            ; preds = %then
-  br i1 true, label %then7, label %else8
+  br i1 false, label %then7, label %else8
 
 then7:                                            ; preds = %cond6
   store i32 9, ptr %b, align 4

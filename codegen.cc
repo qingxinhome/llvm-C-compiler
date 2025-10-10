@@ -142,6 +142,31 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     case OpCode::div:{
         return irBuilder.CreateSDiv(left, right);
     }
+    case OpCode::equal_equal:{
+        // 比较运算返回的结果是一个1byte整形值， 返回后无法与后来的int32表达式做运算
+        llvm::Value *value = irBuilder.CreateICmpEQ(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }
+    case OpCode::not_equal:{
+        llvm::Value *value = irBuilder.CreateICmpNE(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }
+    case OpCode::less:{
+        llvm::Value *value = irBuilder.CreateICmpSLT(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }
+    case OpCode::less_equal:{
+        llvm::Value *value = irBuilder.CreateICmpSLE(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }
+    case OpCode::greater:{
+        llvm::Value *value = irBuilder.CreateICmpSGT(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }
+    case OpCode::greater_equal:{
+        llvm::Value *value = irBuilder.CreateICmpSGE(left, right);
+        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+    }    
     default:
         break;
     }

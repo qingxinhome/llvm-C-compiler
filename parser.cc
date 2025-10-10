@@ -155,8 +155,59 @@ std::shared_ptr<AstNode> Parser::ParseExpr() {
         // assign-expr: identifier "=" expr
         return ParseAssignExpr();
     }
+    return ParseEqualExpr();
+}
 
-    auto left = ParseTerm();
+
+// equal-expr : relational-expr (("==" | "!=") relational-expr)*
+std::shared_ptr<AstNode> Parser::ParseEqualExpr() {
+    auto left = ParseRelationalExpr();
+    while (token.tokenType == TokenType::equal_equal || token.tokenType == TokenType::not_equal) {
+        OpCode op;
+        if (token.tokenType == TokenType::equal_equal) {
+            op = OpCode::equal_equal;
+        } else {
+            op = OpCode::not_equal;
+        }
+        Advance(); // 前进一个token
+        
+        auto right = ParseRelationalExpr();
+        auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
+
+        left = binaryExpr;
+    }
+    return left;
+}
+
+// relational-expr: add-expr (("<"|">"|"<="|">=") add-expr)*
+std::shared_ptr<AstNode> Parser::ParseRelationalExpr() {
+    auto left = ParseAddExpr();
+    while (token.tokenType == TokenType::less || token.tokenType == TokenType::less_equal || 
+            token.tokenType == TokenType::greater || token.tokenType == TokenType::greater_equal) {
+        OpCode op;
+        if (token.tokenType == TokenType::less) {
+            op = OpCode::less;
+        } else if (token.tokenType == TokenType::less_equal) {
+            op = OpCode::less_equal;
+        } else if (token.tokenType == TokenType::greater) {
+            op = OpCode::greater;
+        } else if (token.tokenType == TokenType::greater_equal) {
+            op = OpCode::greater_equal;
+        }
+        Advance(); // 前进一个token
+        
+        auto right = ParseAddExpr();
+        auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
+
+        left = binaryExpr;
+    }
+    return left;
+}
+
+
+// add-expr : mult-expr (("+" | "-") mult-expr)* 
+std::shared_ptr<AstNode> Parser::ParseAddExpr() {
+    auto left = ParseMultExpr();
     while (token.tokenType == TokenType::plus || token.tokenType == TokenType::minus) {
         OpCode op;
         if (token.tokenType == TokenType::plus) {
@@ -166,7 +217,7 @@ std::shared_ptr<AstNode> Parser::ParseExpr() {
         }
         Advance(); // 前进一个token
         
-        auto right = ParseTerm();
+        auto right = ParseMultExpr();
         auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
 
         left = binaryExpr;
@@ -175,8 +226,9 @@ std::shared_ptr<AstNode> Parser::ParseExpr() {
 }
 
 // 左结合
-std::shared_ptr<AstNode> Parser::ParseTerm() {
-    auto left = ParseFactor();
+// mult-expr : primary-expr (("*" | "/") primary-expr)* 
+std::shared_ptr<AstNode> Parser::ParseMultExpr() {
+    auto left = ParsePrimaryExpr();
     while (token.tokenType == TokenType::star || token.tokenType == TokenType::slash) {
         OpCode op;
         if (token.tokenType == TokenType::star) {
@@ -186,7 +238,7 @@ std::shared_ptr<AstNode> Parser::ParseTerm() {
         }
         Advance(); // 前进一个token
         
-        auto right = ParseFactor();
+        auto right = ParsePrimaryExpr();
         auto binaryExpr = sema.semaBinaryExprNode(left, right, op);
 
         left = binaryExpr;
@@ -194,7 +246,8 @@ std::shared_ptr<AstNode> Parser::ParseTerm() {
     return left;
 }
 
-std::shared_ptr<AstNode> Parser::ParseFactor() {
+// primary-expr : identifier | number | "(" expr ")" 
+std::shared_ptr<AstNode> Parser::ParsePrimaryExpr() {
     if (token.tokenType == TokenType::l_parent) {
         NextToken();
 

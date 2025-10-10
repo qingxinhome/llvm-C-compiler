@@ -84,6 +84,30 @@ llvm::Value* PrintVisitor::VisitBinaryExpr(BinaryExpr *binaryExpr) {
         llvm::outs() << " / ";
         break;
     }
+    case OpCode::equal_equal:{
+        llvm::outs() << " == ";
+        break;
+    }
+    case OpCode::not_equal:{
+        llvm::outs() << " != ";
+        break;
+    }
+    case OpCode::less:{
+        llvm::outs() << " < ";
+        break;
+    }
+    case OpCode::less_equal:{
+        llvm::outs() << " <= ";
+        break;
+    }
+    case OpCode::greater:{
+        llvm::outs() << " > ";
+        break;
+    }
+    case OpCode::greater_equal:{
+        llvm::outs() << " >= ";
+        break;
+    }
     default:
         break;
     }

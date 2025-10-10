@@ -25,8 +25,11 @@ private:
     std::shared_ptr<AstNode> ParseExprStmt();
     std::shared_ptr<AstNode> ParseExpr();
     std::shared_ptr<AstNode> ParseAssignExpr();
-    std::shared_ptr<AstNode> ParseTerm();
-    std::shared_ptr<AstNode> ParseFactor();
+    std::shared_ptr<AstNode> ParseEqualExpr();
+    std::shared_ptr<AstNode> ParseRelationalExpr();
+    std::shared_ptr<AstNode> ParseAddExpr();
+    std::shared_ptr<AstNode> ParseMultExpr(); //std::shared_ptr<AstNode> ParseTerm();
+    std::shared_ptr<AstNode> ParsePrimaryExpr(); //std::shared_ptr<AstNode> ParseFactor();
     
     // 检测当前token是否为指定类型， 不会消费
     bool Expect(TokenType tokenType);

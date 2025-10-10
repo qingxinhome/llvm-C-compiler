@@ -15,6 +15,12 @@
     semi,  // ;
     equal, // =
     comma, // ,
+    equal_equal, // ==
+    not_equal,  // !=
+    less,       // <
+    less_equal,  // <=
+    greater,     // >
+    greater_equal, // >=
 */
 llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
     switch (tokenType)
@@ -45,6 +51,18 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return ",";
     case TokenType::number:
         return "number";
+    case TokenType::equal_equal: // ==
+        return "==";
+    case TokenType::not_equal:  // !=
+        return "!=";
+    case TokenType::less:       // <
+        return "<";
+    case TokenType::less_equal:  // <=
+        return "<=";
+    case TokenType::greater:     // >
+        return ">";
+    case TokenType::greater_equal: // >=
+        return ">=";
     case TokenType::identifier:
         return "identifier";
     default:
@@ -164,10 +182,17 @@ void Lexer::NextToken(Token &token) {
             CurBufPtr++;
             break;
         case '=':
-            token.tokenType = TokenType::equal;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::equal_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::equal;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case ',':
             token.tokenType = TokenType::comma;
@@ -187,6 +212,41 @@ void Lexer::NextToken(Token &token) {
             token.len = 1;
             CurBufPtr++;
             break;
+        case '<':
+            if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::less_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::less;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
+            break;
+        case '>':
+            if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::greater_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::greater;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
+            break;
+        case '!':
+            if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::not_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+                break;
+            }
+            // pass through
         default:
             // token.content = llvm::StringRef(startPtr, 1);
             // llvm::outs() << "unkown char " << *CurBufPtr << "\n";
