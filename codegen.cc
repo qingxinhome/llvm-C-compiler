@@ -123,6 +123,77 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     return nullptr;
 }
 
+llvm::Value* CodeGen::VisitForStmt(ForStmt *forstmt) {
+    llvm::BasicBlock *initBB = llvm::BasicBlock::Create(context, "for.init", curFunc);
+    llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "for.cond", curFunc);
+    llvm::BasicBlock *incBB = llvm::BasicBlock::Create(context, "for.inc", curFunc);
+    llvm::BasicBlock *bodyBB = llvm::BasicBlock::Create(context, "for.body", curFunc);
+    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "for.last", curFunc);
+
+    // 将for循环语句中可以被break跳转到的block块记录在breakBBs Map中
+    breakBBs.insert({forstmt, lastBB});
+    // 将for循环语句中可以被continue跳转到的block块记录在breakBBs Map中
+    continueBBs.insert({forstmt, incBB});
+
+    // 1. 先无条件跳转到init块中
+    irBuilder.CreateBr(initBB);
+    irBuilder.SetInsertPoint(initBB);
+    if (forstmt->initNode != nullptr) {
+        forstmt->initNode->Accept(this);
+    }
+    // 由初始快无条件跳转至条件块
+    irBuilder.CreateBr(condBB);
+
+    irBuilder.SetInsertPoint(condBB);
+    if (forstmt->condNode != nullptr) {
+        llvm::Value *val = forstmt->condNode->Accept(this);
+        llvm::Value *condVal = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+        irBuilder.CreateCondBr(condVal, bodyBB, lastBB);
+    } else {
+         irBuilder.CreateBr(bodyBB);
+    }
+
+    irBuilder.SetInsertPoint(bodyBB);
+    if (forstmt->bodyNode != nullptr) {
+        forstmt->bodyNode->Accept(this);
+    }
+    irBuilder.CreateBr(incBB);
+
+    irBuilder.SetInsertPoint(incBB);
+    if (forstmt->incNode != nullptr) {
+        forstmt->incNode->Accept(this);
+    }
+    irBuilder.CreateBr(condBB);
+
+    irBuilder.SetInsertPoint(lastBB);
+
+    breakBBs.erase(forstmt);
+    continueBBs.erase(forstmt);
+
+    return nullptr;
+}
+
+
+llvm::Value* CodeGen::VisitContinueStmt(ContinueStmt *continuestmt) {
+    /// jump incBB;
+    llvm::BasicBlock *targetBB = continueBBs[continuestmt->targetNode.get()];
+    irBuilder.CreateBr(targetBB);
+
+    llvm::BasicBlock *out = llvm::BasicBlock::Create(context, "for.continue.death", curFunc);
+    irBuilder.SetInsertPoint(out);
+    return nullptr;
+}
+
+llvm::Value* CodeGen::VisitBreakStmt(BreakStmt *breakstmt) {
+    /// jump lastBB;
+    llvm::BasicBlock* targetBB = breakBBs[breakstmt->targetNode.get()];
+    irBuilder.CreateBr(targetBB);
+
+    llvm::BasicBlock *out = llvm::BasicBlock::Create(context, "for.break.death", curFunc);
+    irBuilder.SetInsertPoint(out);
+    return nullptr;
+}
+
 
 llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     llvm::Value* left = binaryExpr->left->Accept(this);

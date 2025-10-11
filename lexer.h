@@ -13,6 +13,9 @@ enum class TokenType {
     kw_int,  // int type
     kw_if,   // if
     kw_else, // else
+    kw_for,  // for
+    kw_break, // break
+    kw_continue, // continue
     minus, // -
     plus,  // +
     star,  // *
@@ -42,7 +45,6 @@ public:
     int value;   // for number
     CType *type; // for built-in type, 内置数据类型通过词法分析即可得到
     
-    // llvm::StringRef content;
     const char *ptr;   // for debug && diag
     int len;
 public:

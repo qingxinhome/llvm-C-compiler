@@ -9,6 +9,9 @@
 class Program;
 class DeclareStmt;
 class IfStmt;
+class ForStmt;
+class ContinueStmt;
+class BreakStmt;
 class BlockStmt;
 class VariableDecl;
 class VariableAccessExpr;
@@ -23,6 +26,9 @@ public:
     virtual llvm::Value* VisitProgram(Program *program) = 0;
     virtual llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) = 0;
     virtual llvm::Value* VisitIfStmt(IfStmt *ifstmt) = 0;
+    virtual llvm::Value* VisitForStmt(ForStmt *ifstmt) = 0;
+    virtual llvm::Value* VisitBreakStmt(BreakStmt *breakstmt) = 0;
+    virtual llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) = 0;
     virtual llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
@@ -38,6 +44,9 @@ class AstNode {
 public:
     enum Kind{
         Node_IfStmt,
+        Node_ForStmt,
+        Node_BreakStmt,
+        Node_ContinueStmt,
         Node_BlockStmt,
         Node_DeclareStmt,
         Node_VariableDecl,
@@ -88,7 +97,6 @@ public:
 };
 
 
-
 class IfStmt : public AstNode {
 public:
     std::shared_ptr<AstNode> condNode;
@@ -104,6 +112,64 @@ public:
         return node->GetKind() == Node_IfStmt;
     }
 };
+
+
+/*
+for (int i = 0; i < 100; i = i+1) {
+    aa = aa + 1;
+}
+*/
+class ForStmt : public AstNode {
+public:
+    std::shared_ptr<AstNode> initNode;
+    std::shared_ptr<AstNode> condNode;
+    std::shared_ptr<AstNode> incNode;
+    std::shared_ptr<AstNode> bodyNode;
+public:
+    ForStmt() : AstNode(Node_ForStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitForStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_ForStmt;
+    }
+};
+
+
+class BreakStmt : public AstNode {
+public:
+    // continue 所针对的语句
+    std::shared_ptr<AstNode> targetNode;
+public:
+    BreakStmt() : AstNode(Node_BreakStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitBreakStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_BreakStmt;
+    }
+};
+
+
+class ContinueStmt : public AstNode {
+public:
+    // continue 所针对的语句
+    std::shared_ptr<AstNode> targetNode;
+public:
+    ContinueStmt() : AstNode(Node_ContinueStmt) {}
+    llvm::Value* Accept(Visitor *v) {
+        return v->VisitContinueStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_ContinueStmt;
+    }
+};
+
+
+
 
 class VariableDecl : public AstNode {
 public:

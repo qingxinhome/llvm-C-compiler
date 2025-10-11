@@ -21,7 +21,7 @@ llvm::Value* PrintVisitor::VisitDeclareStmt(DeclareStmt *declstmt) {
 }
 
 llvm::Value* PrintVisitor::VisitIfStmt(IfStmt *ifstmt) {
-    llvm::outs() << "if(";
+    llvm::outs() << "if (";
     ifstmt->condNode->Accept(this);
     llvm::outs() << ")\n";
     ifstmt->thenNode->Accept(this);
@@ -41,6 +41,37 @@ llvm::Value* PrintVisitor::VisitBlockStmt(BlockStmt *blockstmt) {
     llvm::outs() << "}";
     return nullptr;
 }
+
+llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
+    llvm::outs() << "for (";
+    if (ifstmt->incNode != nullptr) {
+        ifstmt->incNode->Accept(this);
+    }
+    llvm::outs() << "; ";
+    if (ifstmt->condNode != nullptr) {
+        ifstmt->condNode->Accept(this);
+    }
+    llvm::outs() << "; ";
+    if (ifstmt->incNode != nullptr) {
+        ifstmt->incNode->Accept(this);
+    }
+    llvm::outs() << ") ";
+    if (ifstmt->bodyNode != nullptr) {
+        ifstmt->bodyNode->Accept(this);
+    }
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitBreakStmt(BreakStmt *breakstmt) {
+    llvm::outs() << "break;";
+     return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitContinueStmt(ContinueStmt *continuestmt) {
+    llvm::outs() << "continue;";
+    return nullptr;
+}
+
 
 llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
     if (decl->type == CType::GetIntTy()) {

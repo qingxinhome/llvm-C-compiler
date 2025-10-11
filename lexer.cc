@@ -4,6 +4,9 @@
     number,
     identifier,
     kw_int, // int type
+    kw_if,   // if
+    kw_else, // else
+    kw_for,  // for
     minus, // -
     plus,  // +
     star,  // *
@@ -27,6 +30,12 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
     {
     case TokenType::kw_int:
         return "int";
+    case TokenType::kw_if:
+        return "if";
+    case TokenType::kw_else:
+        return "else";
+    case TokenType::kw_for:
+        return "for";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -129,12 +138,19 @@ void Lexer::NextToken(Token &token) {
         token.ptr = startPtr;
         token.len = CurBufPtr - startPtr;
         llvm::StringRef content = llvm::StringRef(token.ptr, token.len);
+
         if (content == "int") {
             token.tokenType = TokenType::kw_int;
         } else if(content == "if") {
             token.tokenType = TokenType::kw_if;
         } else if(content == "else") {
             token.tokenType = TokenType::kw_else;
+        } else if (content == "for") {
+            token.tokenType = TokenType::kw_for;
+        } else if (content == "break") {
+            token.tokenType = TokenType::kw_break;
+        } else if (content == "continue") {
+            token.tokenType = TokenType::kw_continue;
         }
     } else {
         switch (*CurBufPtr)

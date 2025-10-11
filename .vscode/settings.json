@@ -86,5 +86,6 @@
         "forward_list": "cpp",
         "__assert": "cpp",
         "__availability": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

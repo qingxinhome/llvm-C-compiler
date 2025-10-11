@@ -9,6 +9,11 @@ private:
     Lexer &lexer;
     Sema &sema;
     Token token;  // 当前token
+
+    // 存储能够被break的语句节点（利用vector的栈特性）
+    std::vector<std::shared_ptr<AstNode>> breakNodes;
+    // 存储能够被continue的语句节点（利用vector的栈特性）
+    std::vector<std::shared_ptr<AstNode>> continueNodes;
 public:
     Parser(Lexer &lexer, Sema &sema) : lexer(lexer), sema(sema){
         // 初始化Parser的时候首先得到第一个token
@@ -21,6 +26,9 @@ private:
     // 一个声明语句可以声明多个变量
     std::shared_ptr<AstNode> ParseDeclareStmt();
     std::shared_ptr<AstNode> ParseIfStmt();
+    std::shared_ptr<AstNode> ParseForStmt();
+    std::shared_ptr<AstNode> ParseBreakStmt();
+    std::shared_ptr<AstNode> ParseContinueStmt();
     std::shared_ptr<AstNode> ParseBlockStmt();
     std::shared_ptr<AstNode> ParseExprStmt();
     std::shared_ptr<AstNode> ParseExpr();
@@ -40,6 +48,9 @@ private:
     // 前进一个token
     void Advance();
     void NextToken();
+
+    // 判断当前token是否为是类型声明关键字
+    bool IsTypeName();
 
     DiagEngine& GetDiagEngine() {
         return lexer.GetDiagEngine();

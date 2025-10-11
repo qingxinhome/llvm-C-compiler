@@ -50,6 +50,18 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
     else if (token.tokenType == TokenType::l_brace) {
         return ParseBlockStmt();
     }
+    // for statement
+    else if (token.tokenType == TokenType::kw_for) {
+        return ParseForStmt();
+    }
+    // break statement
+    else if (token.tokenType == TokenType::kw_break) {
+        return ParseBreakStmt();
+    }
+    // continue statement
+    else if (token.tokenType == TokenType::kw_continue) {
+        return ParseContinueStmt();
+    }
     // expr statement
     else {
         return ParseExprStmt();
@@ -132,6 +144,83 @@ std::shared_ptr<AstNode> Parser::ParseBlockStmt() {
     Consume(TokenType::r_brace);
     sema.ExitScope();
     return blockStmt;
+}
+
+
+// for-stmt : "for" "(" expr? ";" expr? ";" expr? ")" stmt
+// 	          "for" "(" decl-stmt expr? ";" expr? ")" stmt
+std::shared_ptr<AstNode> Parser::ParseForStmt() {
+    Consume(TokenType::kw_for);
+    Consume(TokenType::l_parent);
+
+    sema.EnterScope();
+
+    std::shared_ptr<ForStmt> forStmt = std::make_shared<ForStmt>();
+    breakNodes.push_back(forStmt);
+    continueNodes.push_back(forStmt);
+
+    std::shared_ptr<AstNode> initNode;
+    std::shared_ptr<AstNode> condNode;
+    std::shared_ptr<AstNode> incNode;
+    std::shared_ptr<AstNode> bodyNode;
+
+    if (IsTypeName()) {
+        initNode = ParseDeclareStmt();
+    } else {
+        if (token.tokenType != TokenType::semi) {
+            initNode =  ParseExpr();
+        }
+        Consume(TokenType::semi);
+    }
+
+    if (token.tokenType != TokenType::semi) {
+        condNode = ParseExpr();
+    }
+    Consume(TokenType::semi);
+
+    if (token.tokenType != TokenType::r_parent) {
+        incNode = ParseExpr();
+    }
+    Consume(TokenType::r_parent);
+
+    bodyNode = ParseStmt();
+
+    forStmt->initNode = initNode;
+    forStmt->condNode = condNode;
+    forStmt->incNode = incNode;
+    forStmt->bodyNode = bodyNode;
+
+
+    breakNodes.pop_back();
+    continueNodes.pop_back();
+    sema.ExitScope();
+
+    return forStmt;
+}
+
+
+std::shared_ptr<AstNode> Parser::ParseBreakStmt() {
+    if (breakNodes.size() == 0) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_break_stmt);
+    }
+    Consume(TokenType::kw_break);
+    auto breakStmt = std::make_shared<BreakStmt>();
+    breakStmt->targetNode = breakNodes.back();
+    
+    Consume(TokenType::semi);
+    return breakStmt;
+}
+
+std::shared_ptr<AstNode> Parser::ParseContinueStmt() {
+    if (continueNodes.size() == 0) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_continue_stmt);
+    }
+    Consume(TokenType::kw_continue);
+    auto continueStmt = std::make_shared<ContinueStmt>();
+    continueStmt->targetNode = continueNodes.back();
+
+    Consume(TokenType::semi);
+    return continueStmt;
 }
 
 
@@ -309,4 +398,12 @@ void Parser::Advance() {
 
 void Parser::NextToken() {
     lexer.NextToken(token);
+}
+
+
+bool Parser::IsTypeName() {
+    if (token.tokenType == TokenType::kw_int) {
+        return true;
+    }
+    return false;
 }
