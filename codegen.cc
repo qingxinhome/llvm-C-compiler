@@ -196,48 +196,160 @@ llvm::Value* CodeGen::VisitBreakStmt(BreakStmt *breakstmt) {
 
 
 llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
-    llvm::Value* left = binaryExpr->left->Accept(this);
-    llvm::Value* right = binaryExpr->right->Accept(this);
-
     switch (binaryExpr->op)
     {
     case OpCode::add:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         return irBuilder.CreateNSWAdd(left, right);
     }
     case OpCode::sub:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         return irBuilder.CreateNSWSub(left, right);
     }
     case OpCode::mul:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         return irBuilder.CreateNSWMul(left, right);
     }
     case OpCode::div:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         return irBuilder.CreateSDiv(left, right);
     }
+    case OpCode::mod:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateSRem(left, right);
+    }
+    case OpCode::bitOr: {
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateOr(left, right);
+    }
+    case OpCode::bitAnd: {
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateAnd(left, right);
+    }
+    case OpCode::bitXor: {
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateXor(left, right);
+    }
+    case OpCode::leftShift: {
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateShl(left, right);
+    }
+    case OpCode::rightShift: {
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        return irBuilder.CreateAShr(left, right);
+    }
     case OpCode::equal_equal:{
-        // 比较运算返回的结果是一个1byte整形值， 返回后无法与后来的int32表达式做运算
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        // 比较运算返回的结果是一个1byte整形值， 返回后无法与后来的int32表达式做运算, 需要做类型转换
         llvm::Value *value = irBuilder.CreateICmpEQ(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
     }
     case OpCode::not_equal:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         llvm::Value *value = irBuilder.CreateICmpNE(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
     }
     case OpCode::less:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         llvm::Value *value = irBuilder.CreateICmpSLT(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
     }
     case OpCode::less_equal:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         llvm::Value *value = irBuilder.CreateICmpSLE(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
     }
     case OpCode::greater:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         llvm::Value *value = irBuilder.CreateICmpSGT(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
     }
     case OpCode::greater_equal:{
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* right = binaryExpr->right->Accept(this);
         llvm::Value *value = irBuilder.CreateICmpSGE(left, right);
         return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
-    }    
+    }
+    case OpCode::logAnd:{
+        // A && B
+        llvm::BasicBlock* nextBB = llvm::BasicBlock::Create(context, "nextBB", curFunc);
+        llvm::BasicBlock* falseBB = llvm::BasicBlock::Create(context, "falseBB", curFunc);
+        llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB", curFunc);
+
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
+        irBuilder.CreateCondBr(lval, nextBB, falseBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(nextBB);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        // LLVM IR的比较指令（icmp）返回结果是 1 位（i1 类型），而不是 32 位。
+        llvm::Value* rval = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        /*
+        IRBuilder::CreateZExt函数用于生成LLVM IR的zext（零扩展）指令。零扩展是指将较小位宽的整数
+        类型（如i1或i8）扩展为较大位宽的整数类型（如i32或 i64），通过在高位填充 0 来保持值的无符号语义
+        */
+        llvm::Value* rextend = irBuilder.CreateZExt(rval, irBuilder.getInt32Ty());
+        irBuilder.CreateBr(mergeBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(falseBB);
+        irBuilder.CreateBr(mergeBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(mergeBB);
+        /*
+        PHI指令用于在控制流图CFG中处理值合并。它出现在基本块Basic Block的开头，当一个基本块有多个前驱
+        predecessor基本块时，PHI节点从每个前驱选择合适的值，确保 SSA形式：每个变量只有一次赋值。
+        */
+        llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
+        phi->addIncoming(rextend, nextBB);
+        phi->addIncoming(irBuilder.getInt32(0), falseBB);
+        return phi;
+    }
+    case OpCode::logOr:{
+        // A || B
+        llvm::BasicBlock* nextBB = llvm::BasicBlock::Create(context, "nextBB", curFunc);
+        llvm::BasicBlock* trueBB = llvm::BasicBlock::Create(context, "trueBB", curFunc);
+        llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB", curFunc);
+
+        llvm::Value* left = binaryExpr->left->Accept(this);
+        llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
+        irBuilder.CreateCondBr(lval, trueBB, nextBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(nextBB);
+        llvm::Value* right = binaryExpr->right->Accept(this);
+        llvm::Value* rval = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        llvm::Value* rextend = irBuilder.CreateZExt(rval, irBuilder.getInt32Ty());
+        irBuilder.CreateBr(mergeBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(trueBB);
+        irBuilder.CreateBr(mergeBB);
+
+        //-----------------------------------------------------------------------------------------
+        irBuilder.SetInsertPoint(mergeBB);
+        llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
+        phi->addIncoming(rextend, nextBB);
+        phi->addIncoming(irBuilder.getInt32(1), trueBB);
+        return phi;
+    }
     default:
         break;
     }

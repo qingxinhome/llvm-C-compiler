@@ -12,7 +12,16 @@ if (b != 0) {
 else {
     b = 19;
 }
+
+
+// dadd
+
+
 for (int i = 0; i < 100; i = i+1) {
+    /*
+    dddd
+           dddd
+        */
     aa = aa + i;
     if (i >= 55) {
         break;
@@ -24,4 +33,15 @@ for (int i = 0; i < 100; i = i+1) {
         b = b * j;
     }
 }
+
+if (aa && b || b) {
+    aa = aa + 8;
+}
+
+aa = aa << 2;
+b = b >> 1;
+aa = aa & b;
+aa = aa | b;
+aa = aa ^ b;
+aa = aa % 10;
 aa + b*(4 + 5);

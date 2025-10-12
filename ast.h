@@ -189,12 +189,20 @@ enum class OpCode {
     sub,
     mul,
     div,
+    mod,
     equal_equal,
     not_equal,
     less,
     less_equal,
     greater,
-    greater_equal
+    greater_equal,
+    logOr,
+    logAnd,
+    bitOr,
+    bitAnd,
+    bitXor,
+    leftShift,
+    rightShift
 };
 
 // 二元表达式

@@ -33,6 +33,14 @@ private:
     std::shared_ptr<AstNode> ParseExprStmt();
     std::shared_ptr<AstNode> ParseExpr();
     std::shared_ptr<AstNode> ParseAssignExpr();
+
+    std::shared_ptr<AstNode> ParseLogOrExpr();
+    std::shared_ptr<AstNode> ParseLogAndExpr();
+    std::shared_ptr<AstNode> ParseBitOrExpr();
+    std::shared_ptr<AstNode> ParseBitXorExpr();
+    std::shared_ptr<AstNode> ParseBitAndExpr();
+    std::shared_ptr<AstNode> ParseShiftExpr();
+
     std::shared_ptr<AstNode> ParseEqualExpr();
     std::shared_ptr<AstNode> ParseRelationalExpr();
     std::shared_ptr<AstNode> ParseAddExpr();

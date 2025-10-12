@@ -82,19 +82,14 @@ for.body:                                         ; preds = %for.cond
   br label %cond18
 
 for.last:                                         ; preds = %then19, %for.cond
-  %aa40 = load i32, ptr %aa, align 4
-  %b41 = load i32, ptr %b, align 4
-  %8 = mul nsw i32 %b41, 9
-  %9 = add nsw i32 %aa40, %8
-  %10 = call i32 (ptr, ...) @printf(ptr @0, i32 %9)
-  ret i32 0
+  br label %cond40
 
 cond18:                                           ; preds = %for.body
   %i21 = load i32, ptr %i, align 4
-  %11 = icmp sge i32 %i21, 55
-  %12 = sext i1 %11 to i32
-  %13 = icmp ne i32 %12, 0
-  br i1 %13, label %then19, label %last20
+  %8 = icmp sge i32 %i21, 55
+  %9 = sext i1 %8 to i32
+  %10 = icmp ne i32 %9, 0
+  br i1 %10, label %then19, label %last20
 
 then19:                                           ; preds = %cond18
   br label %for.last
@@ -113,15 +108,15 @@ for.init22:                                       ; preds = %last20
 
 for.cond23:                                       ; preds = %for.inc24, %for.init22
   %j28 = load i32, ptr %j, align 4
-  %14 = icmp slt i32 %j28, 10
-  %15 = sext i1 %14 to i32
-  %16 = icmp ne i32 %15, 0
-  br i1 %16, label %for.body25, label %for.last26
+  %11 = icmp slt i32 %j28, 10
+  %12 = sext i1 %11 to i32
+  %13 = icmp ne i32 %12, 0
+  br i1 %13, label %for.body25, label %for.last26
 
 for.inc24:                                        ; preds = %last31, %then30
   %j36 = load i32, ptr %j, align 4
-  %17 = add nsw i32 %j36, 2
-  store i32 %17, ptr %j, align 4
+  %14 = add nsw i32 %j36, 2
+  store i32 %14, ptr %j, align 4
   %j37 = load i32, ptr %j, align 4
   br label %for.cond23
 
@@ -133,10 +128,10 @@ for.last26:                                       ; preds = %for.cond23
 
 cond29:                                           ; preds = %for.body25
   %i32 = load i32, ptr %i, align 4
-  %18 = icmp eq i32 %i32, 10
-  %19 = sext i1 %18 to i32
-  %20 = icmp ne i32 %19, 0
-  br i1 %20, label %then30, label %last31
+  %15 = icmp eq i32 %i32, 10
+  %16 = sext i1 %15 to i32
+  %17 = icmp ne i32 %16, 0
+  br i1 %17, label %then30, label %last31
 
 then30:                                           ; preds = %cond29
   br label %for.inc24
@@ -144,11 +139,86 @@ then30:                                           ; preds = %cond29
 last31:                                           ; preds = %for.continue.death, %cond29
   %b33 = load i32, ptr %b, align 4
   %j34 = load i32, ptr %j, align 4
-  %21 = mul nsw i32 %b33, %j34
-  store i32 %21, ptr %b, align 4
+  %18 = mul nsw i32 %b33, %j34
+  store i32 %18, ptr %b, align 4
   %b35 = load i32, ptr %b, align 4
   br label %for.inc24
 
 for.continue.death:                               ; No predecessors!
   br label %last31
+
+cond40:                                           ; preds = %for.last
+  %aa45 = load i32, ptr %aa, align 4
+  %19 = icmp ne i32 %aa45, 0
+  br i1 %19, label %nextBB43, label %falseBB
+
+then41:                                           ; preds = %mergeBB
+  %aa48 = load i32, ptr %aa, align 4
+  %20 = add nsw i32 %aa48, 8
+  store i32 %20, ptr %aa, align 4
+  %aa49 = load i32, ptr %aa, align 4
+  br label %last42
+
+last42:                                           ; preds = %then41, %mergeBB
+  %aa50 = load i32, ptr %aa, align 4
+  %21 = shl i32 %aa50, 2
+  store i32 %21, ptr %aa, align 4
+  %aa51 = load i32, ptr %aa, align 4
+  %b52 = load i32, ptr %b, align 4
+  %22 = ashr i32 %b52, 1
+  store i32 %22, ptr %b, align 4
+  %b53 = load i32, ptr %b, align 4
+  %aa54 = load i32, ptr %aa, align 4
+  %b55 = load i32, ptr %b, align 4
+  %23 = and i32 %aa54, %b55
+  store i32 %23, ptr %aa, align 4
+  %aa56 = load i32, ptr %aa, align 4
+  %aa57 = load i32, ptr %aa, align 4
+  %b58 = load i32, ptr %b, align 4
+  %24 = or i32 %aa57, %b58
+  store i32 %24, ptr %aa, align 4
+  %aa59 = load i32, ptr %aa, align 4
+  %aa60 = load i32, ptr %aa, align 4
+  %b61 = load i32, ptr %b, align 4
+  %25 = xor i32 %aa60, %b61
+  store i32 %25, ptr %aa, align 4
+  %aa62 = load i32, ptr %aa, align 4
+  %aa63 = load i32, ptr %aa, align 4
+  %26 = srem i32 %aa63, 10
+  store i32 %26, ptr %aa, align 4
+  %aa64 = load i32, ptr %aa, align 4
+  %aa65 = load i32, ptr %aa, align 4
+  %b66 = load i32, ptr %b, align 4
+  %27 = mul nsw i32 %b66, 9
+  %28 = add nsw i32 %aa65, %27
+  %29 = call i32 (ptr, ...) @printf(ptr @0, i32 %28)
+  ret i32 0
+
+nextBB:                                           ; preds = %mergeBB44
+  %b47 = load i32, ptr %b, align 4
+  %30 = icmp ne i32 %b47, 0
+  %31 = zext i1 %30 to i32
+  br label %mergeBB
+
+trueBB:                                           ; preds = %mergeBB44
+  br label %mergeBB
+
+mergeBB:                                          ; preds = %trueBB, %nextBB
+  %32 = phi i32 [ %31, %nextBB ], [ 1, %trueBB ]
+  %33 = icmp ne i32 %32, 0
+  br i1 %33, label %then41, label %last42
+
+nextBB43:                                         ; preds = %cond40
+  %b46 = load i32, ptr %b, align 4
+  %34 = icmp ne i32 %b46, 0
+  %35 = zext i1 %34 to i32
+  br label %mergeBB44
+
+falseBB:                                          ; preds = %cond40
+  br label %mergeBB44
+
+mergeBB44:                                        ; preds = %falseBB, %nextBB43
+  %36 = phi i32 [ %35, %nextBB43 ], [ 0, %falseBB ]
+  %37 = icmp ne i32 %36, 0
+  br i1 %37, label %trueBB, label %nextBB
 }

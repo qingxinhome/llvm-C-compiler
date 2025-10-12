@@ -33,6 +33,14 @@ enum class TokenType {
     less_equal,  // <=
     greater,     // >
     greater_equal, // >=
+    pipepipe,     // ||
+    pipe,       // |
+    ampamp,     // &&
+    amp,        // &
+    caret,      // ^
+    percent,    // %
+    less_less,  // <<
+    greater_greater, // >>
     eof   // end
 };
 
@@ -75,6 +83,8 @@ public:
     DiagEngine& GetDiagEngine() const{
         return diagEngine;
     }
+private:
+    bool StartWith(const char* p);
 private:
     const char *CurBufPtr;
     const char *LineHeadPtr;

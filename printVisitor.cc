@@ -139,6 +139,38 @@ llvm::Value* PrintVisitor::VisitBinaryExpr(BinaryExpr *binaryExpr) {
         llvm::outs() << " >= ";
         break;
     }
+    case OpCode::mod:{
+        llvm::outs() << " % ";
+        break;
+    }
+    case OpCode::logOr:{
+        llvm::outs() << " || ";
+        break;
+    }
+    case OpCode::logAnd:{
+        llvm::outs() << " && ";
+        break;
+    }
+    case OpCode::bitAnd:{
+        llvm::outs() << " & ";
+        break;
+    }
+    case OpCode::bitOr:{
+        llvm::outs() << " | ";
+        break;
+    }
+    case OpCode::bitXor:{
+        llvm::outs() << " ^ ";
+        break;
+    }
+    case OpCode::leftShift:{
+        llvm::outs() << " << ";
+        break;
+    }
+    case OpCode::rightShift:{
+        llvm::outs() << " >> ";
+        break;
+    }
     default:
         break;
     }

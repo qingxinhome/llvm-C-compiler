@@ -24,6 +24,14 @@
     less_equal,  // <=
     greater,     // >
     greater_equal, // >=
+    pipepipe,     // ||
+    pipe,       // |
+    ampamp,     // &&
+    amp,        // &
+    caret,      // ^
+    percent,    // %
+    less_less,  // <<
+    greater_greater // >>
 */
 llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
     switch (tokenType)
@@ -72,6 +80,22 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return ">";
     case TokenType::greater_equal: // >=
         return ">=";
+    case TokenType::pipepipe:
+        return "||";
+    case TokenType::pipe:
+        return "|";
+    case TokenType::ampamp:
+        return "&&";
+    case TokenType::amp:
+        return "&";
+    case TokenType::caret:
+        return "^";
+    case TokenType::percent:
+        return "%";
+    case TokenType::less_less:
+        return "<<";
+    case TokenType::greater_greater:
+        return ">>";
     case TokenType::identifier:
         return "identifier";
     default:
@@ -93,16 +117,44 @@ bool IsLetter(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
 
+bool Lexer::StartWith(const char* p) {
+    return !strncmp(CurBufPtr, p, strlen(p));
+}
 
 void Lexer::NextToken(Token &token) {
     // 1. 过滤空格和换行
-    while(IsWhiteSpace(*CurBufPtr)) {
+    while(IsWhiteSpace(*CurBufPtr) || StartWith("//") || StartWith("/*")) {
+        // 过滤单行注释
+        if (StartWith("//")) {
+            while (*CurBufPtr != '\n') {
+                CurBufPtr++;
+            }
+            if (*CurBufPtr == '\n' ) {
+                row++;
+                LineHeadPtr = CurBufPtr + 1;
+            }
+            CurBufPtr++;
+        }
+
+        // 过滤多行注释
+        if (StartWith("/*")) {
+            while (CurBufPtr[0] != '*' || CurBufPtr[1] != '/') {
+                if (*CurBufPtr == '\n' ) {
+                    row++;
+                    LineHeadPtr = CurBufPtr + 1;
+                }
+                CurBufPtr++;
+            }
+            CurBufPtr += 2;
+        }
+
         if (*CurBufPtr == '\n' ) {
             row++;
             LineHeadPtr = CurBufPtr + 1;
         }
         CurBufPtr++;
     }
+
 
     // 2. 判断是否到达结尾
     if (CurBufPtr >= BufEnd) {
@@ -179,6 +231,12 @@ void Lexer::NextToken(Token &token) {
             token.len = 1;
             CurBufPtr++;
             break;
+        case '%':
+            token.tokenType = TokenType::percent;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
         case ';':
             token.tokenType = TokenType::semi;
             token.ptr = startPtr;
@@ -210,6 +268,38 @@ void Lexer::NextToken(Token &token) {
                 CurBufPtr++;
             }
             break;
+        case '|':
+            if (*(CurBufPtr+1) == '|') {
+                token.tokenType = TokenType::pipepipe;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::pipe;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
+            break;
+        case '&':
+            if (*(CurBufPtr+1) == '&') {
+                token.tokenType = TokenType::ampamp;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::amp;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
+            break;
+        case '^':
+            token.tokenType = TokenType::caret;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
         case ',':
             token.tokenType = TokenType::comma;
             token.ptr = startPtr;
@@ -234,6 +324,11 @@ void Lexer::NextToken(Token &token) {
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
+            } else if (*(CurBufPtr+1) == '<') {
+                token.tokenType = TokenType::less_less;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
             } else {
                 token.tokenType = TokenType::less;
                 token.ptr = startPtr;
@@ -244,6 +339,11 @@ void Lexer::NextToken(Token &token) {
         case '>':
             if (*(CurBufPtr+1) == '=') {
                 token.tokenType = TokenType::greater_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else if (*(CurBufPtr+1) == '>') {
+                token.tokenType = TokenType::greater_greater;
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
