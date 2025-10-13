@@ -148,9 +148,9 @@ for.continue.death:                               ; No predecessors!
   br label %last31
 
 cond40:                                           ; preds = %for.last
-  %aa45 = load i32, ptr %aa, align 4
-  %19 = icmp ne i32 %aa45, 0
-  br i1 %19, label %nextBB43, label %falseBB
+  %aa43 = load i32, ptr %aa, align 4
+  %19 = icmp ne i32 %aa43, 0
+  br i1 %19, label %trueBB, label %nextBB
 
 then41:                                           ; preds = %mergeBB
   %aa48 = load i32, ptr %aa, align 4
@@ -194,31 +194,31 @@ last42:                                           ; preds = %then41, %mergeBB
   %29 = call i32 (ptr, ...) @printf(ptr @0, i32 %28)
   ret i32 0
 
-nextBB:                                           ; preds = %mergeBB44
-  %b47 = load i32, ptr %b, align 4
-  %30 = icmp ne i32 %b47, 0
-  %31 = zext i1 %30 to i32
-  br label %mergeBB
-
-trueBB:                                           ; preds = %mergeBB44
-  br label %mergeBB
-
-mergeBB:                                          ; preds = %trueBB, %nextBB
-  %32 = phi i32 [ %31, %nextBB ], [ 1, %trueBB ]
-  %33 = icmp ne i32 %32, 0
-  br i1 %33, label %then41, label %last42
-
-nextBB43:                                         ; preds = %cond40
+nextBB:                                           ; preds = %cond40
   %b46 = load i32, ptr %b, align 4
-  %34 = icmp ne i32 %b46, 0
-  %35 = zext i1 %34 to i32
-  br label %mergeBB44
+  %30 = icmp ne i32 %b46, 0
+  br i1 %30, label %nextBB44, label %falseBB
 
-falseBB:                                          ; preds = %cond40
-  br label %mergeBB44
+trueBB:                                           ; preds = %cond40
+  br label %mergeBB
 
-mergeBB44:                                        ; preds = %falseBB, %nextBB43
-  %36 = phi i32 [ %35, %nextBB43 ], [ 0, %falseBB ]
-  %37 = icmp ne i32 %36, 0
-  br i1 %37, label %trueBB, label %nextBB
+mergeBB:                                          ; preds = %trueBB, %mergeBB45
+  %31 = phi i32 [ %37, %mergeBB45 ], [ 1, %trueBB ]
+  %32 = icmp ne i32 %31, 0
+  br i1 %32, label %then41, label %last42
+
+nextBB44:                                         ; preds = %nextBB
+  %b47 = load i32, ptr %b, align 4
+  %33 = icmp ne i32 %b47, 0
+  %34 = zext i1 %33 to i32
+  br label %mergeBB45
+
+falseBB:                                          ; preds = %nextBB
+  br label %mergeBB45
+
+mergeBB45:                                        ; preds = %falseBB, %nextBB44
+  %35 = phi i32 [ %34, %nextBB44 ], [ 0, %falseBB ]
+  %36 = icmp ne i32 %35, 0
+  %37 = zext i1 %36 to i32
+  br label %mergeBB
 }

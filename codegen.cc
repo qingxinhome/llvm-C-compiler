@@ -297,15 +297,20 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
 
         //-----------------------------------------------------------------------------------------
         irBuilder.SetInsertPoint(nextBB);
+        /// 右子树内部也生成了基本块
         llvm::Value* right = binaryExpr->right->Accept(this);
         // LLVM IR的比较指令（icmp）返回结果是 1 位（i1 类型），而不是 32 位。
-        llvm::Value* rval = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        right = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
         /*
-        IRBuilder::CreateZExt函数用于生成LLVM IR的zext（零扩展）指令。零扩展是指将较小位宽的整数
+        IRBuilder::CreateZExt函数用于生成IR的zext零扩展指令，零扩展是指将较小位宽的整数
         类型（如i1或i8）扩展为较大位宽的整数类型（如i32或 i64），通过在高位填充 0 来保持值的无符号语义
         */
-        llvm::Value* rextend = irBuilder.CreateZExt(rval, irBuilder.getInt32Ty());
+        right = irBuilder.CreateZExt(right, irBuilder.getInt32Ty());
         irBuilder.CreateBr(mergeBB);
+
+        // 拿到当前插入的block,对nextBB指针重新赋值， 建立一个值和基本块的关系 {right, nextBB}
+        nextBB = irBuilder.GetInsertBlock();
+
 
         //-----------------------------------------------------------------------------------------
         irBuilder.SetInsertPoint(falseBB);
@@ -318,7 +323,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         predecessor基本块时，PHI节点从每个前驱选择合适的值，确保 SSA形式：每个变量只有一次赋值。
         */
         llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
-        phi->addIncoming(rextend, nextBB);
+        phi->addIncoming(right, nextBB);
         phi->addIncoming(irBuilder.getInt32(0), falseBB);
         return phi;
     }
@@ -334,10 +339,16 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
 
         //-----------------------------------------------------------------------------------------
         irBuilder.SetInsertPoint(nextBB);
+        /// 右子树内部也生成了基本块
         llvm::Value* right = binaryExpr->right->Accept(this);
-        llvm::Value* rval = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
-        llvm::Value* rextend = irBuilder.CreateZExt(rval, irBuilder.getInt32Ty());
+        right = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        right = irBuilder.CreateZExt(right, irBuilder.getInt32Ty());
         irBuilder.CreateBr(mergeBB);
+        /// right 这个值，所在的基本块，并不一定是 之前的nextBB了.
+        /// 原因是：binaryExpr->right->Accept(this) 内部会生成新的基本块
+
+        /// 拿到当前插入的block, 建立一个值和基本块的关系 {right, nextBB}
+        nextBB = irBuilder.GetInsertBlock();
 
         //-----------------------------------------------------------------------------------------
         irBuilder.SetInsertPoint(trueBB);
@@ -346,7 +357,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         //-----------------------------------------------------------------------------------------
         irBuilder.SetInsertPoint(mergeBB);
         llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
-        phi->addIncoming(rextend, nextBB);
+        phi->addIncoming(right, nextBB);
         phi->addIncoming(irBuilder.getInt32(1), trueBB);
         return phi;
     }

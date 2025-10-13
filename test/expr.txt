@@ -34,7 +34,7 @@ for (int i = 0; i < 100; i = i+1) {
     }
 }
 
-if (aa && b || b) {
+if (aa || b && b) {
     aa = aa + 8;
 }
 
