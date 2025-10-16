@@ -19,16 +19,21 @@ identifier : (a-zA-Z_)(a-zA-Z0-9_)*
 std::shared_ptr<Program> Parser::ParseProgram(){
     // while (true) .... exit ?
     // token -> eof
-    std::vector<std::shared_ptr<AstNode>> nodeVec;
-    while(token.tokenType != TokenType::eof) {
-        auto stmt = ParseStmt();
-        if (stmt == nullptr) {
-            continue;
-        }
-        nodeVec.push_back(stmt);
-    }
+    // std::vector<std::shared_ptr<AstNode>> nodeVec;
+    // while(token.tokenType != TokenType::eof) {
+    //     auto stmt = ParseStmt();
+    //     if (stmt == nullptr) {
+    //         continue;
+    //     }
+    //     nodeVec.push_back(stmt);
+    // }
+
     auto program = std::make_shared<Program>();
-    program->stmtNodeVec = move(nodeVec);
+    if (token.tokenType != TokenType::eof) {
+        auto stmt = ParseBlockStmt();
+        program->node = stmt;
+    }
+    Expect(TokenType::eof);
     return program;
 }
 
@@ -71,7 +76,7 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
 // 解析变量声明语句
 std::shared_ptr<AstNode> Parser::ParseDeclareStmt() {
     Consume(TokenType::kw_int);
-    CType *baseTy = CType::GetIntTy();
+    std::shared_ptr<CType> baseTy = CType::IntType;
 
     auto declareStmt = std::make_shared<DeclareStmt>();
     // int a , b = 3;

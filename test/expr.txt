@@ -1,3 +1,4 @@
+{
 int aa, b = 4;
 aa = 1;
 aa = b = 0-2;
@@ -45,3 +46,4 @@ aa = aa | b;
 aa = aa ^ b;
 aa = aa % 10;
 aa + b*(4 + 5);
+}

@@ -44,6 +44,12 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "else";
     case TokenType::kw_for:
         return "for";
+    case TokenType::kw_break:
+        return "break";
+    case TokenType::kw_continue:
+        return "continue";
+    case TokenType::kw_sizeof:
+        return "sizeof";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -96,6 +102,36 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "<<";
     case TokenType::greater_greater:
         return ">>";
+    case TokenType::plus_plus:      
+        return "++";
+    case TokenType::minus_minus:    
+        return "--";
+    case TokenType::tilde:          
+        return "~";
+    case TokenType::exclaim:        
+        return "!";
+    case TokenType::plus_equal:
+        return "+=";
+    case TokenType::minus_equal:
+        return "-=";
+    case TokenType::star_equal:
+        return "*=";
+    case TokenType::slash_equal:
+        return "/=";
+    case TokenType::less_less_equal:
+        return "<<=";
+    case TokenType::greater_greater_equal:
+        return ">>=";
+    case TokenType::amp_equal:
+        return "&=";
+    case TokenType::caret_equal:
+        return "^=";
+    case TokenType::pipe_equal:
+        return "|=";
+    case TokenType::question:
+        return  "?";
+    case TokenType::colon:
+        return ":";
     case TokenType::identifier:
         return "identifier";
     default:
@@ -179,7 +215,7 @@ void Lexer::NextToken(Token &token) {
         }
         token.tokenType = TokenType::number;
         token.value = number;
-        token.type = CType::GetIntTy();
+        token.type = CType::IntType;
         token.ptr = startPtr;
         token.len = CurBufPtr - startPtr;
     } else if (IsLetter(*CurBufPtr)) {
@@ -203,39 +239,86 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_break;
         } else if (content == "continue") {
             token.tokenType = TokenType::kw_continue;
+        } else if (content == "sizeof") {
+            token.tokenType == TokenType::kw_sizeof;
         }
     } else {
         switch (*CurBufPtr)
         {
         case '+':
-            token.tokenType = TokenType::plus;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '+') {
+                token.tokenType = TokenType::plus_plus;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else if (CurBufPtr[1] == '=') {
+                token.tokenType = TokenType::plus_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::plus;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case '-':
-            token.tokenType = TokenType::minus;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '-') {
+                token.tokenType = TokenType::minus_minus;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else if (CurBufPtr[1] == '=') {
+                token.tokenType = TokenType::minus_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::minus;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case '*':
-            token.tokenType = TokenType::star;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '=') {
+                token.tokenType = TokenType::star_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                 token.tokenType = TokenType::star;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case '/':
-            token.tokenType = TokenType::slash;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '=') {
+                token.tokenType = TokenType::slash_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::slash;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case '%':
-            token.tokenType = TokenType::percent;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '=') {
+                token.tokenType = TokenType::percent_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                 token.tokenType = TokenType::percent;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case ';':
             token.tokenType = TokenType::semi;
@@ -274,6 +357,11 @@ void Lexer::NextToken(Token &token) {
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
+            } else if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::pipe_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
             } else {
                 token.tokenType = TokenType::pipe;
                 token.ptr = startPtr;
@@ -287,6 +375,11 @@ void Lexer::NextToken(Token &token) {
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
+            } else if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::amp_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
             } else {
                 token.tokenType = TokenType::amp;
                 token.ptr = startPtr;
@@ -295,10 +388,17 @@ void Lexer::NextToken(Token &token) {
             }
             break;
         case '^':
-            token.tokenType = TokenType::caret;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (*(CurBufPtr+1) == '=') {
+                token.tokenType = TokenType::caret_equal;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr+=2;
+            } else {
+                token.tokenType = TokenType::caret;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         case ',':
             token.tokenType = TokenType::comma;
@@ -325,10 +425,17 @@ void Lexer::NextToken(Token &token) {
                 token.len = 2;
                 CurBufPtr+=2;
             } else if (*(CurBufPtr+1) == '<') {
-                token.tokenType = TokenType::less_less;
-                token.ptr = startPtr;
-                token.len = 2;
-                CurBufPtr+=2;
+                if (CurBufPtr[2] == '=') {
+                    token.tokenType = TokenType::less_less_equal;
+                    token.ptr = startPtr;
+                    token.len = 3;
+                    CurBufPtr+=3;
+                } else {
+                    token.tokenType = TokenType::less_less;
+                    token.ptr = startPtr;
+                    token.len = 2;
+                    CurBufPtr+=2;
+                }
             } else {
                 token.tokenType = TokenType::less;
                 token.ptr = startPtr;
@@ -343,10 +450,17 @@ void Lexer::NextToken(Token &token) {
                 token.len = 2;
                 CurBufPtr+=2;
             } else if (*(CurBufPtr+1) == '>') {
-                token.tokenType = TokenType::greater_greater;
-                token.ptr = startPtr;
-                token.len = 2;
-                CurBufPtr+=2;
+                if (CurBufPtr[2] == '=') {
+                    token.tokenType = TokenType::greater_greater_equal;
+                    token.ptr = startPtr;
+                    token.len = 3;
+                    CurBufPtr+=3;
+                } else {
+                    token.tokenType = TokenType::greater_greater;
+                    token.ptr = startPtr;
+                    token.len = 2;
+                    CurBufPtr+=2;
+                }
             } else {
                 token.tokenType = TokenType::greater;
                 token.ptr = startPtr;
@@ -360,9 +474,25 @@ void Lexer::NextToken(Token &token) {
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
-                break;
+            } else {
+                token.tokenType = TokenType::exclaim;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
             }
-            // pass through
+            break;
+        case '?':
+            token.tokenType = TokenType::question;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case ':':
+            token.tokenType = TokenType::colon;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
         default:
             // token.content = llvm::StringRef(startPtr, 1);
             // llvm::outs() << "unkown char " << *CurBufPtr << "\n";

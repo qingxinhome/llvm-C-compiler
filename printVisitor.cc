@@ -6,10 +6,11 @@ PrintVisitor::PrintVisitor(std::shared_ptr<Program> program) {
 }
 
 llvm::Value* PrintVisitor::VisitProgram(Program *program) {
-    for (const auto &stmtNode : program->stmtNodeVec) {
-        stmtNode->Accept(this);
-        llvm::outs() << "\n";
-    }
+    // for (const auto &stmtNode : program->stmtNodeVec) {
+    //     stmtNode->Accept(this);
+    //     llvm::outs() << "\n";
+    // }
+    program->node->Accept(this);
     return nullptr;
 }
 
@@ -74,7 +75,7 @@ llvm::Value* PrintVisitor::VisitContinueStmt(ContinueStmt *continuestmt) {
 
 
 llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
-    if (decl->type == CType::GetIntTy()) {
+    if (decl->type == CType::IntType) {
         llvm::StringRef text(decl->token.ptr, decl->token.len);
         llvm::outs() << "int " << text << ";";
     }

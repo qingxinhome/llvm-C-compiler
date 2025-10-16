@@ -16,6 +16,7 @@ enum class TokenType {
     kw_for,  // for
     kw_break, // break
     kw_continue, // continue
+    kw_sizeof,   // sizeof
     minus, // -
     plus,  // +
     star,  // *
@@ -41,6 +42,22 @@ enum class TokenType {
     percent,    // %
     less_less,  // <<
     greater_greater, // >>
+    plus_plus,      // ++
+    minus_minus,    // --
+    tilde,          // ~
+    exclaim,        // !
+    plus_equal,     // +=
+    minus_equal,    // -=
+    star_equal,     // *=
+    slash_equal,    // /=
+    percent_equal,  // %=
+    less_less_equal, // <<=
+    greater_greater_equal, // >>=
+    amp_equal,       // &=
+    caret_equal,     // ^=
+    pipe_equal,      // |=
+    question,        // ?
+    colon,           // :
     eof   // end
 };
 
@@ -51,7 +68,9 @@ public:
     int row, col;
     
     int value;   // for number
-    CType *type; // for built-in type, 内置数据类型通过词法分析即可得到
+    
+    // CType *type; 
+    std::shared_ptr<CType> type; // for built-in type, 内置数据类型通过词法分析即可得到
     
     const char *ptr;   // for debug && diag
     int len;

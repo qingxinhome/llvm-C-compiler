@@ -38,11 +38,12 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
     // 记录当前的Function函数
     curFunc = mFunc;
 
-    llvm::Value* lastValue;
-    for (auto &stmtNode : program->stmtNodeVec){
-        lastValue = stmtNode->Accept(this);
-    }
+    // llvm::Value* lastValue;
+    // for (auto &stmtNode : program->stmtNodeVec){
+    //     lastValue = stmtNode->Accept(this);
+    // }
 
+    llvm::Value* lastValue = program->node->Accept(this);
     if (lastValue != nullptr) {
         irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
     } else {
@@ -373,7 +374,7 @@ llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = nullptr;
-    if (decl->type == CType::GetIntTy()) {
+    if (decl->type == CType::IntType) {
         // ty = llvm::Type::getInt32Ty(context);
         ty = irBuilder.getInt32Ty();
     }
