@@ -171,8 +171,7 @@
 				4,
 				5,
 				6,
-				7,
-				8
+				7
 			]
 		}
 	],
@@ -286,14 +285,14 @@
 				4,
 				5,
 				6,
-				7,
-				8
+				7
 			]
 		},
 		{
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
+				8,
 				9,
 				10,
 				11,
@@ -301,8 +300,7 @@
 				13,
 				14,
 				15,
-				16,
-				17
+				16
 			]
 		}
 	],
@@ -330,12 +328,6 @@
 			"backtrace" : 2,
 			"compileGroupIndex" : 0,
 			"path" : "printVisitor.cc",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 2,
-			"compileGroupIndex" : 0,
-			"path" : "codegen.cc",
 			"sourceGroupIndex" : 0
 		},
 		{

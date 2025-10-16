@@ -15,5 +15,6 @@ DIAG(err_continue_stmt, Error, "'continue' statement not in loop or switch state
 DIAG(err_redefined, Error, "redefined symbol '{0}'")
 DIAG(err_undefined, Error, "undefined symbol '{0}'")
 DIAG(err_lvalue, Error, "required lvalue on the assignment operation left side")
+DIAG(err_type, Error, "typename expected")
 
 #undef DIAG

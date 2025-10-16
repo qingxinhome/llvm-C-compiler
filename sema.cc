@@ -34,28 +34,8 @@ std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
     return expr;
 }
 
-std::shared_ptr<AssignExpr> Sema::semaAssignExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, Token token) {
-    // 1.检查左右表达式节点是否为空
-    assert(left && right);
-    // if (!left || !right) {
-    //     llvm::errs() << "left and right node of assign expression cannot be null" << "\n";
-    //     return nullptr;
-    // }
-    
-    // 2. 赋值表达式的左节点必须是左值
-    if (!llvm::isa<VariableAccessExpr>(left.get())) {
-        // llvm::errs() << "left node of assignment expression must be lvalue \n";
-        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_lvalue);
-    }
 
-    std::shared_ptr<AssignExpr> assignExpr = std::make_shared<AssignExpr>();
-    assignExpr->left = left;
-    assignExpr->right = right;
-    return assignExpr;
-}
-
-
-std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, OpCode op){
+std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op){
     auto binaryExpr = std::make_shared<BinaryExpr>();
     binaryExpr->op = op;
     binaryExpr->left = left;
