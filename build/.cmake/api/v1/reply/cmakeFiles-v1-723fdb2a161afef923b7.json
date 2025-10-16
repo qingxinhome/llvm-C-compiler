@@ -389,6 +389,14 @@
 			"isCMake" : true,
 			"isExternal" : true,
 			"path" : "/usr/share/cmake/Modules/GoogleTest.cmake"
+		},
+		{
+			"path" : "unittest/parser/CMakeLists.txt"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/usr/share/cmake/Modules/GoogleTest.cmake"
 		}
 	],
 	"kind" : "cmakeFiles",

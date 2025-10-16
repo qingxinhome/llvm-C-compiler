@@ -30,7 +30,8 @@
 					"build" : "unittest",
 					"childIndexes" : 
 					[
-						2
+						2,
+						3
 					],
 					"jsonFile" : "directory-unittest-Debug-7c581efee5a5aedb7674.json",
 					"minimumCMakeVersion" : 
@@ -55,6 +56,21 @@
 					[
 						4
 					]
+				},
+				{
+					"build" : "unittest/parser",
+					"jsonFile" : "directory-unittest.parser-Debug-7f412348d9236bd1cbd0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "unittest/parser",
+					"targetIndexes" : 
+					[
+						6
+					]
 				}
 			],
 			"name" : "Debug",
@@ -65,7 +81,8 @@
 					[
 						0,
 						1,
-						2
+						2,
+						3
 					],
 					"name" : "expr",
 					"targetIndexes" : 
@@ -75,7 +92,8 @@
 						2,
 						3,
 						4,
-						5
+						5,
+						6
 					]
 				}
 			],
@@ -121,6 +139,13 @@
 					"id" : "omp_gen::@6890427a1f51a3e7e1df",
 					"jsonFile" : "target-omp_gen-Debug-3e9fd7837b00dd966f54.json",
 					"name" : "omp_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "parser_test::@ad0fad795f3316a71008",
+					"jsonFile" : "target-parser_test-Debug-dc3dd559ccc619ca77f4.json",
+					"name" : "parser_test",
 					"projectIndex" : 0
 				}
 			]

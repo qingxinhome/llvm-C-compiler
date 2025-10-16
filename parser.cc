@@ -364,6 +364,7 @@ std::shared_ptr<AstNode> Parser::ParseConditionalExpr() {
     if (token.tokenType != TokenType::question) {
         return left;
     }
+    Consume(TokenType::question);
     auto then = ParseExpr();
     Consume(TokenType::colon);
     auto els = ParseConditionalExpr();
@@ -508,8 +509,8 @@ std::shared_ptr<AstNode> Parser::ParseMultExpr() {
 }
 
 std::shared_ptr<AstNode> Parser::ParseUnaryExpr() {
-    auto left = ParsePostfixExpr();
     if (!IsUnaryOperator()) {
+        auto left = ParsePostfixExpr();
         return left;
     }
 

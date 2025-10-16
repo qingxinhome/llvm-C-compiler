@@ -41,10 +41,10 @@ llvm::Value* PrintVisitor::VisitIfStmt(IfStmt *ifstmt) {
 }
 
 llvm::Value* PrintVisitor::VisitBlockStmt(BlockStmt *blockstmt) {
-    *out << "{\n";
+    *out << "{";
     for (const auto & node : blockstmt->nodeVec) {
         node->Accept(this);
-        *out << "\n";
+        *out << ";";
     }
     *out << "}";
     return nullptr;
@@ -52,8 +52,8 @@ llvm::Value* PrintVisitor::VisitBlockStmt(BlockStmt *blockstmt) {
 
 llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
     *out << "for (";
-    if (ifstmt->incNode != nullptr) {
-        ifstmt->incNode->Accept(this);
+    if (ifstmt->initNode != nullptr) {
+        ifstmt->initNode->Accept(this);
     }
     *out << "; ";
     if (ifstmt->condNode != nullptr) {
@@ -71,12 +71,12 @@ llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
 }
 
 llvm::Value* PrintVisitor::VisitBreakStmt(BreakStmt *breakstmt) {
-    *out << "break;";
+    *out << "break";
      return nullptr;
 }
 
 llvm::Value* PrintVisitor::VisitContinueStmt(ContinueStmt *continuestmt) {
-    *out << "continue;";
+    *out << "continue";
     return nullptr;
 }
 
@@ -266,7 +266,7 @@ llvm::Value* PrintVisitor::VisitUnaryExpr(UnaryExpr *unaryExpr) {
         *out << "++";
         break;
     case UnaryOp::dec:
-        *out << "++";
+        *out << "--";
         break;
     default:
         break;
@@ -276,7 +276,7 @@ llvm::Value* PrintVisitor::VisitUnaryExpr(UnaryExpr *unaryExpr) {
 }
 
 llvm::Value* PrintVisitor::VisitSizeOfExpr(SizeOfExpr *sizeofExpr) {
-    *out << "sizeof";
+    *out << "sizeof ";
     if (sizeofExpr->type != nullptr) {
         *out << "(";
         sizeofExpr->type->Accept(this);

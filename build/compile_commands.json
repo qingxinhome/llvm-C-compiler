@@ -70,5 +70,53 @@
   "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
   "file": "/home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
   "output": "unittest/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/parser_test.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/unittest/parser/parser_test.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/unittest/parser/parser_test.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/parser_test.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/lexer.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/type.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/type.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/parser.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/parser.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/printVisitor.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/printVisitor.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/sema.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/sema.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o"
+},
+{
+  "directory": "/home/yiming/llvmcompiler/02-expr-compiler/build",
+  "command": "/usr/bin/g++ -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include  -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o unittest/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o -c /home/yiming/llvmcompiler/02-expr-compiler/scope.cc",
+  "file": "/home/yiming/llvmcompiler/02-expr-compiler/scope.cc",
+  "output": "unittest/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o"
 }
 ]

@@ -240,7 +240,7 @@ void Lexer::NextToken(Token &token) {
         } else if (content == "continue") {
             token.tokenType = TokenType::kw_continue;
         } else if (content == "sizeof") {
-            token.tokenType == TokenType::kw_sizeof;
+            token.tokenType = TokenType::kw_sizeof;
         }
     } else {
         switch (*CurBufPtr)
@@ -399,6 +399,12 @@ void Lexer::NextToken(Token &token) {
                 token.len = 1;
                 CurBufPtr++;
             }
+            break;
+        case '~':
+            token.tokenType = TokenType::tilde;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
             break;
         case ',':
             token.tokenType = TokenType::comma;
