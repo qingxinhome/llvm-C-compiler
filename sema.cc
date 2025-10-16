@@ -2,7 +2,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Casting.h"
 
-std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, CType *type) {
+std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::shared_ptr<CType> type) {
     // 1. 检查在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
     auto symbol = scope.FindSymbolInCurScope(text);
@@ -64,7 +64,7 @@ std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> le
 }
 
 
-std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, CType* type) {
+std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, std::shared_ptr<CType> type) {
     std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();
     expr->token = token;
     expr->type = type;

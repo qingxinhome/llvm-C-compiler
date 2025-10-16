@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 
 enum TypeKind {
     Int
@@ -9,9 +10,9 @@ enum TypeKind {
 // 单例模式
 class CType {
 public:
-    static CType* GetIntTy(); 
-private:
     CType(TypeKind kind, int size, int align): kind(kind), size(size), align(align) {};
+    // static CType* GetIntTy(); 
+    static std::shared_ptr<CType> IntType;  // 静态成员变量必须在类内声明，在类外初始化
 private:
     TypeKind kind;
     int size;      // 类型占用空间大小(字节)

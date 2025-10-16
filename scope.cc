@@ -29,7 +29,7 @@ std::shared_ptr<Symbol> Scope::FindSymbolInCurScope(llvm::StringRef name){
     }
     return nullptr;
 }
-void Scope::AddSymbol(SymbolKind kind, CType *type, llvm::StringRef name){
+void Scope::AddSymbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name){
     auto symbol = std::make_shared<Symbol>(kind, type, name);
     // 当你将一个对象赋值给新变量时，C++ 会创建该对象的完整拷贝，新变量拥有独立的内存，包含相同的状态（数据）。
     // 引用是现有对象的别名，操作引用等同于操作原对象（共享同一块内存）。

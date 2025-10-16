@@ -60,7 +60,7 @@ private:
 public:
     AstNode(Kind kind) : kind(kind) {}
     virtual ~AstNode(){}
-    CType *type;
+    std::shared_ptr<CType> type;
     Token token;
     const Kind GetKind() const {
         return kind;
@@ -270,5 +270,6 @@ public:
 // 语法树根节点类型
 class Program {
 public:
-    std::vector<std::shared_ptr<AstNode>> stmtNodeVec;
+    // std::vector<std::shared_ptr<AstNode>> stmtNodeVec;
+    std::shared_ptr<AstNode> node;
 };

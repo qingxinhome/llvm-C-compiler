@@ -14,11 +14,11 @@ enum SymbolKind {
 class Symbol {
 private:
     SymbolKind symKind;
-    CType *type;
+    std::shared_ptr<CType> type;
     llvm::StringRef name;
 public:
-    Symbol(SymbolKind kind, CType *type, llvm::StringRef name) : symKind(kind), type(type), name(name) {}
-    CType* GetType(){return type;}
+    Symbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name) : symKind(kind), type(type), name(name) {}
+    std::shared_ptr<CType> GetType(){return type;}
 };
 
 
@@ -39,5 +39,5 @@ public:
     void ExitScope();
     std::shared_ptr<Symbol> FindSymbol(llvm::StringRef name);
     std::shared_ptr<Symbol> FindSymbolInCurScope(llvm::StringRef name);
-    void AddSymbol(SymbolKind kind, CType *type, llvm::StringRef name);
+    void AddSymbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name);
 };
