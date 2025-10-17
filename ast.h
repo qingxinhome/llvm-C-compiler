@@ -75,6 +75,9 @@ public:
 
     std::shared_ptr<CType> type;
     Token token;
+    // 是否为左值
+    bool isLValue{false}; 
+
     const Kind GetKind() const {
         return kind;
     }
