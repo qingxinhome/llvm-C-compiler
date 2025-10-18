@@ -13,3 +13,6 @@
 /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/parser/CMakeFiles/parser_test.dir
 /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/parser/CMakeFiles/edit_cache.dir
 /home/yiming/llvmcompiler/02-expr-compiler/build/unittest/parser/CMakeFiles/rebuild_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/codegen/CMakeFiles/codegen_test.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/codegen/CMakeFiles/edit_cache.dir
+/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/codegen/CMakeFiles/rebuild_cache.dir
