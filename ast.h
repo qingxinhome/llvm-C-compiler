@@ -300,7 +300,7 @@ public:
 class SizeOfExpr : public AstNode {
 public:
     std::shared_ptr<AstNode> node;
-    std::shared_ptr<CType> type;
+    std::shared_ptr<CType> ty;
 
     SizeOfExpr() : AstNode(Node_SizeOfExpr){}
     llvm::Value* Accept(Visitor *v) override {

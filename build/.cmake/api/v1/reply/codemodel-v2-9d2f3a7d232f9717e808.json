@@ -1,0 +1,190 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						3,
+						4,
+						6
+					]
+				},
+				{
+					"build" : "unittest",
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4
+					],
+					"jsonFile" : "directory-unittest-Debug-7c581efee5a5aedb7674.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "unittest"
+				},
+				{
+					"build" : "unittest/lexer",
+					"jsonFile" : "directory-unittest.lexer-Debug-49c872ed23b0987537a3.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "unittest/lexer",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "unittest/parser",
+					"jsonFile" : "directory-unittest.parser-Debug-7f412348d9236bd1cbd0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "unittest/parser",
+					"targetIndexes" : 
+					[
+						7
+					]
+				},
+				{
+					"build" : "unittest/codegen",
+					"jsonFile" : "directory-unittest.codegen-Debug-a6049e37a10a2010354a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "unittest/codegen",
+					"targetIndexes" : 
+					[
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					],
+					"name" : "expr",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "RISCVTargetParserTableGen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-RISCVTargetParserTableGen-Debug-be8595d481e833f86b8b.json",
+					"name" : "RISCVTargetParserTableGen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "acc_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-acc_gen-Debug-ab55edf58fd538e6e4bd.json",
+					"name" : "acc_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "codegen_test::@5fcf56b918558847482d",
+					"jsonFile" : "target-codegen_test-Debug-2ed68177cca1f9269ce5.json",
+					"name" : "codegen_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "expr::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-expr-Debug-083aa8d79f415ad67ed8.json",
+					"name" : "expr",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "intrinsics_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-intrinsics_gen-Debug-4e3a010f3774c2c36d3a.json",
+					"name" : "intrinsics_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "lexer_test::@ca6141796f57f525559f",
+					"jsonFile" : "target-lexer_test-Debug-133b385944d99c642797.json",
+					"name" : "lexer_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "omp_gen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-omp_gen-Debug-3e9fd7837b00dd966f54.json",
+					"name" : "omp_gen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "parser_test::@ad0fad795f3316a71008",
+					"jsonFile" : "target-parser_test-Debug-dc3dd559ccc619ca77f4.json",
+					"name" : "parser_test",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/yiming/llvmcompiler/02-expr-compiler/build",
+		"source" : "/home/yiming/llvmcompiler/02-expr-compiler"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}

@@ -20,8 +20,8 @@ public:
 class CType {
 public:
     enum Kind {
-        TY_Int,
-        TY_Point
+        TY_Int,     // 基础类型
+        TY_Point    // 指针类型
     };
 public:
     CType(Kind kind, int size, int align): kind(kind), size(size), align(align) {};

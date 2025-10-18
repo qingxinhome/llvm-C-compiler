@@ -7,13 +7,19 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/ADT/DenseMap.h>
 
-class CodeGen : public Visitor {
+class CodeGen : public Visitor, public TypeVisitor {
 public:
     // 构造函数
     CodeGen(std::shared_ptr<Program> program) {
-        module = std::make_shared<llvm::Module>("expr", context);
+        module = std::make_unique<llvm::Module>("expr", context);
         VisitProgram(program.get());
     }
+
+    // 返回一个引用
+    std::unique_ptr<llvm::Module> & GetModule() {
+        return module;
+    }
+
 private:
     llvm::Value* VisitProgram(Program *program) override;
     llvm::Value* VisitDeclareStmt(DeclareStmt *declstmt) override;
@@ -25,11 +31,20 @@ private:
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
     llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) override;
+    llvm::Value* VisitThreeExpr(ThreeExpr *expr) override;
+    llvm::Value* VisitUnaryExpr(UnaryExpr *unaryExpr) override;
+    llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) override;
+    llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) override;
+    llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) override;
     llvm::Value* VisitNumberExpr(NumberExpr *numberExpr) override;
+
+    llvm::Type* VisitPrimaryType(CPrimaryType *type) override;
+    llvm::Type* VisitPointType(CPointType *type) override;
+
 private:
     llvm::LLVMContext context;
-    std::shared_ptr<llvm::Module> module;
-    // 当前Function, 注：一个模块里是可以有很多Function的，需要记录当前Function
+    std::unique_ptr<llvm::Module> module;
+    // 当前Function, 注：一个Module模块里是可以有很多Function的，需要记录当前Function
     llvm::Function *curFunc{nullptr};
     llvm::IRBuilder<> irBuilder{context}; // // C++11+初始化
 

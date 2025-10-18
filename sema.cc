@@ -100,10 +100,10 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
         if (unary->type->GetKind() != CType::TY_Point) {
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_type, "pointer type");
         }
-        if (!unary->isLValue) {
-            // 要求只能针对左值进行解引用
-            diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
-        }
+        // if (!unary->isLValue) {
+        //     // 要求只能针对左值进行解引用？ 未必，比如：int *p = &a; *(p+1)
+        //     diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
+        // }
 
         CPointType *pty = llvm::dyn_cast<CPointType>(unary->type.get());
         unaryExpr->type = pty->GetBaseType();
@@ -143,7 +143,7 @@ std::shared_ptr<ThreeExpr> Sema::semaThreeExprNode(std::shared_ptr<AstNode> cond
 std::shared_ptr<SizeOfExpr> Sema::semaSizeOfExprNode(std::shared_ptr<AstNode> unary, std::shared_ptr<CType> type) {
     auto sizeOfExpr = std::make_shared<SizeOfExpr>();
     sizeOfExpr->node = unary;
-    sizeOfExpr->type = type;
+    sizeOfExpr->ty = type;
     // sizeof的类型是int
     sizeOfExpr->type = CType::IntType;
     return sizeOfExpr;
