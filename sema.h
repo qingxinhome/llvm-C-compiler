@@ -11,8 +11,14 @@ public:
     std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type);
     std::shared_ptr<VariableAccessExpr> semaVariableAccessNode(Token token);
     std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, std::shared_ptr<CType> type);
-    std::shared_ptr<AssignExpr> semaAssignExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, Token token);
-    std::shared_ptr<BinaryExpr> semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, OpCode op);
+
+    std::shared_ptr<UnaryExpr> semaUnaryExprNode(std::shared_ptr<AstNode> unary, UnaryOp op, Token token);
+    std::shared_ptr<BinaryExpr> semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op);
+    std::shared_ptr<ThreeExpr> semaThreeExprNode(std::shared_ptr<AstNode> cond, std::shared_ptr<AstNode> then, std::shared_ptr<AstNode> els, Token token);
+    std::shared_ptr<SizeOfExpr> semaSizeOfExprNode(std::shared_ptr<AstNode> unary, std::shared_ptr<CType> type);
+    std::shared_ptr<PostIncExpr> semaPostIncExprNode(std::shared_ptr<AstNode> left, Token token);
+    std::shared_ptr<PostDecExpr> semaPostDecExprNode(std::shared_ptr<AstNode> left, Token token);
+ 
     std::shared_ptr<IfStmt> semaIfStmtNode(std::shared_ptr<AstNode> condNode, std::shared_ptr<AstNode> thenNode, std::shared_ptr<AstNode> elseNode);
     void EnterScope();
     void ExitScope();

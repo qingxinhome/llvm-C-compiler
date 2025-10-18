@@ -1,7 +1,8 @@
 #include "printVisitor.h"
 
 
-PrintVisitor::PrintVisitor(std::shared_ptr<Program> program) {
+PrintVisitor::PrintVisitor(std::shared_ptr<Program> program, llvm::raw_ostream* out) {
+    this->out = out;
     VisitProgram(program.get());
 }
 
@@ -15,48 +16,54 @@ llvm::Value* PrintVisitor::VisitProgram(Program *program) {
 }
 
 llvm::Value* PrintVisitor::VisitDeclareStmt(DeclareStmt *declstmt) {
+    int i = 0;
+    int size = declstmt->nodeVec.size();
     for (const auto & node : declstmt->nodeVec){
         node->Accept(this);
+        if (i != size-1) {
+            *out << ";";
+        }
+        i++;
     }
     return nullptr;
 }
 
 llvm::Value* PrintVisitor::VisitIfStmt(IfStmt *ifstmt) {
-    llvm::outs() << "if (";
+    *out << "if (";
     ifstmt->condNode->Accept(this);
-    llvm::outs() << ")\n";
+    *out << ")\n";
     ifstmt->thenNode->Accept(this);
     if (ifstmt->elseNode != nullptr) {
-        llvm::outs() << "\nelse\n";
+        *out << "\nelse\n";
         ifstmt->elseNode->Accept(this);
     }
     return nullptr;
 }
 
 llvm::Value* PrintVisitor::VisitBlockStmt(BlockStmt *blockstmt) {
-    llvm::outs() << "{\n";
+    *out << "{";
     for (const auto & node : blockstmt->nodeVec) {
         node->Accept(this);
-        llvm::outs() << "\n";
+        *out << ";";
     }
-    llvm::outs() << "}";
+    *out << "}";
     return nullptr;
 }
 
 llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
-    llvm::outs() << "for (";
-    if (ifstmt->incNode != nullptr) {
-        ifstmt->incNode->Accept(this);
+    *out << "for (";
+    if (ifstmt->initNode != nullptr) {
+        ifstmt->initNode->Accept(this);
     }
-    llvm::outs() << "; ";
+    *out << "; ";
     if (ifstmt->condNode != nullptr) {
         ifstmt->condNode->Accept(this);
     }
-    llvm::outs() << "; ";
+    *out << "; ";
     if (ifstmt->incNode != nullptr) {
         ifstmt->incNode->Accept(this);
     }
-    llvm::outs() << ") ";
+    *out << ") ";
     if (ifstmt->bodyNode != nullptr) {
         ifstmt->bodyNode->Accept(this);
     }
@@ -64,34 +71,38 @@ llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
 }
 
 llvm::Value* PrintVisitor::VisitBreakStmt(BreakStmt *breakstmt) {
-    llvm::outs() << "break;";
+    *out << "break";
      return nullptr;
 }
 
 llvm::Value* PrintVisitor::VisitContinueStmt(ContinueStmt *continuestmt) {
-    llvm::outs() << "continue;";
+    *out << "continue";
     return nullptr;
 }
 
 
 llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
-    if (decl->type == CType::IntType) {
-        llvm::StringRef text(decl->token.ptr, decl->token.len);
-        llvm::outs() << "int " << text << ";";
+    decl->type->Accept(this);
+
+    llvm::StringRef text(decl->token.ptr, decl->token.len);
+    *out << text;
+
+    if (decl->init != nullptr) {
+        *out << " = ";
+        decl->init->Accept(this);
     }
     return nullptr;
+
+    // if (decl->type == CType::IntType) {
+    //     llvm::StringRef text(decl->token.ptr, decl->token.len);
+    //     *out << "int " << text << ";";
+    // }
+    // return nullptr;
 }
 
-
-llvm::Value* PrintVisitor::VisitAssignExpr(AssignExpr *expr) {
-    expr->left->Accept(this);
-    llvm::outs() << " = ";
-    expr->right->Accept(this);
-    return nullptr;
-}
 
 llvm::Value* PrintVisitor::VisitVariableAccessExpr(VariableAccessExpr *expr) {
-    llvm::outs() << llvm::StringRef(expr->token.ptr, expr->token.len);
+    *out << llvm::StringRef(expr->token.ptr, expr->token.len);
     return nullptr;
 }
 
@@ -100,78 +111,114 @@ llvm::Value* PrintVisitor::VisitBinaryExpr(BinaryExpr *binaryExpr) {
     binaryExpr->left->Accept(this);
     switch (binaryExpr->op)
     {
-    case OpCode::add:{
-        llvm::outs() << " + ";
+    case BinaryOp::add:{
+        *out << " + ";
         break;
     }
-    case OpCode::sub:{
-        llvm::outs() << " - ";
+    case BinaryOp::sub:{
+        *out << " - ";
         break;
     }
-    case OpCode::mul:{
-        llvm::outs() << " * ";
+    case BinaryOp::mul:{
+        *out << " * ";
         break;
     }
-    case OpCode::div:{
-        llvm::outs() << " / ";
+    case BinaryOp::div:{
+        *out << " / ";
         break;
     }
-    case OpCode::equal_equal:{
-        llvm::outs() << " == ";
+    case BinaryOp::equal:{
+        *out << " == ";
         break;
     }
-    case OpCode::not_equal:{
-        llvm::outs() << " != ";
+    case BinaryOp::not_equal:{
+        *out << " != ";
         break;
     }
-    case OpCode::less:{
-        llvm::outs() << " < ";
+    case BinaryOp::less:{
+        *out << " < ";
         break;
     }
-    case OpCode::less_equal:{
-        llvm::outs() << " <= ";
+    case BinaryOp::less_equal:{
+        *out << " <= ";
         break;
     }
-    case OpCode::greater:{
-        llvm::outs() << " > ";
+    case BinaryOp::greater:{
+        *out << " > ";
         break;
     }
-    case OpCode::greater_equal:{
-        llvm::outs() << " >= ";
+    case BinaryOp::greater_equal:{
+        *out << " >= ";
         break;
     }
-    case OpCode::mod:{
-        llvm::outs() << " % ";
+    case BinaryOp::mod:{
+        *out << " % ";
         break;
     }
-    case OpCode::logOr:{
-        llvm::outs() << " || ";
+    case BinaryOp::logic_or:{
+        *out << " || ";
         break;
     }
-    case OpCode::logAnd:{
-        llvm::outs() << " && ";
+    case BinaryOp::logic_and:{
+        *out << " && ";
         break;
     }
-    case OpCode::bitAnd:{
-        llvm::outs() << " & ";
+    case BinaryOp::bitwise_and:{
+        *out << " & ";
         break;
     }
-    case OpCode::bitOr:{
-        llvm::outs() << " | ";
+    case BinaryOp::bitwise_or:{
+        *out << " | ";
         break;
     }
-    case OpCode::bitXor:{
-        llvm::outs() << " ^ ";
+    case BinaryOp::bitwise_xor:{
+        *out << " ^ ";
         break;
     }
-    case OpCode::leftShift:{
-        llvm::outs() << " << ";
+    case BinaryOp::left_shift:{
+        *out << " << ";
         break;
     }
-    case OpCode::rightShift:{
-        llvm::outs() << " >> ";
+    case BinaryOp::right_shift:{
+        *out << " >> ";
         break;
     }
+    case BinaryOp::comma:
+        *out << " , ";
+        break;
+    case BinaryOp::assign:
+        *out << " = ";
+        break;
+    case BinaryOp::add_assign:
+        *out << " += ";
+        break;
+    case BinaryOp::sub_assign:
+        *out << " -= ";
+        break;
+    case BinaryOp::mul_assign:
+        *out << " *= ";
+        break;
+    case BinaryOp::div_assign:
+        *out << " /= ";
+        break;
+    case BinaryOp::mod_assign:
+        *out << " %= ";
+        break;
+    case BinaryOp::bitwise_and_assign:
+        *out << " &= ";
+        break;
+    case BinaryOp::bitwise_or_assign:
+        *out << " |= ";
+        break;
+    case BinaryOp::bitwise_xor_assign:
+        *out << " ^= ";
+        break;
+    case BinaryOp::left_shift_assign:
+        *out << " <<= ";
+        break;
+    case BinaryOp::right_shift_assign:
+        *out << " >>= ";
+        break;
     default:
         break;
     }
@@ -180,7 +227,89 @@ llvm::Value* PrintVisitor::VisitBinaryExpr(BinaryExpr *binaryExpr) {
 }
 
 llvm::Value* PrintVisitor::VisitNumberExpr(NumberExpr *expr) {
-    llvm::outs() << llvm::StringRef(expr->token.ptr, expr->token.len);
+    *out << llvm::StringRef(expr->token.ptr, expr->token.len);
     return nullptr;
 }
 
+
+llvm::Value* PrintVisitor::VisitThreeExpr(ThreeExpr *threeExpr) {
+    threeExpr->cond->Accept(this);
+    *out << "?";
+    threeExpr->then->Accept(this);
+    *out << ":";
+    threeExpr->els->Accept(this);
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitUnaryExpr(UnaryExpr *unaryExpr) {
+    switch (unaryExpr->op)
+    {
+    case UnaryOp::positive:
+        *out << "+";
+        break;
+    case UnaryOp::negative:
+        *out << "-";
+        break;
+    case UnaryOp::deref:
+        *out << "*";
+        break;
+    case UnaryOp::addr:
+        *out << "&";
+        break;
+    case UnaryOp::logic_not:
+        *out << "!";
+        break;
+    case UnaryOp::bitwise_not:
+        *out << "~";
+        break;
+    case UnaryOp::inc:
+        *out << "++";
+        break;
+    case UnaryOp::dec:
+        *out << "--";
+        break;
+    default:
+        break;
+    }
+    unaryExpr->node->Accept(this);
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitSizeOfExpr(SizeOfExpr *sizeofExpr) {
+    *out << "sizeof ";
+    if (sizeofExpr->type != nullptr) {
+        *out << "(";
+        sizeofExpr->type->Accept(this);
+        *out << ")";
+    } else {
+        sizeofExpr->node->Accept(this);
+    }
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitPostIncExpr(PostIncExpr *postIncExpr) {
+    postIncExpr->left->Accept(this);
+    *out << "++";
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitPostDecExpr(PostDecExpr *postDecExpr) {
+    postDecExpr->left->Accept(this);
+    *out << "--";
+    return nullptr;
+}
+
+
+llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
+    if (type->GetKind() == CType::TY_Int) {
+        *out << "int ";
+    }
+    return nullptr;
+}
+
+llvm::Type* PrintVisitor::VisitPointType(CPointType *type) {
+    /// 逆序输出
+    type->GetBaseType()->Accept(this);
+    *out << "*";
+    return nullptr;
+}

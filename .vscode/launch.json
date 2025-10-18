@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/expr",
             "args": [
-                "test/expr.txt"
+                "test/e1.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -24,7 +24,6 @@ private:
     llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
-    llvm::Value* VisitAssignExpr(AssignExpr *expr) override;
     llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) override;
     llvm::Value* VisitNumberExpr(NumberExpr *numberExpr) override;
 private:

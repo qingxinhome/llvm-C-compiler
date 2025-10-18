@@ -15,8 +15,12 @@ class BreakStmt;
 class BlockStmt;
 class VariableDecl;
 class VariableAccessExpr;
-class AssignExpr;
 class BinaryExpr;
+class ThreeExpr;
+class UnaryExpr;
+class SizeOfExpr;
+class PostDecExpr;
+class PostIncExpr;
 class NumberExpr;
 
 // 抽象访问者基类
@@ -32,8 +36,12 @@ public:
     virtual llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
-    virtual llvm::Value* VisitAssignExpr(AssignExpr *expr) = 0;
     virtual llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) = 0;
+    virtual llvm::Value* VisitThreeExpr(ThreeExpr *threeExpr) = 0;
+    virtual llvm::Value* VisitUnaryExpr(UnaryExpr *unaryExpr) = 0;
+    virtual llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) = 0;
+    virtual llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) = 0;
+    virtual llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) = 0;
     virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
 };
 
@@ -51,17 +59,25 @@ public:
         Node_DeclareStmt,
         Node_VariableDecl,
         Node_BinaryExpr,
+        Node_ThreeExpr,
+        Node_UnaryExpr,
+        Node_SizeOfExpr,
+        Node_PostIncExpr,
+        Node_PostDecExpr,
         Node_NumberExor,
-        Node_VariableAccessExpr,
-        Node_AssignExpr
+        Node_VariableAccessExpr
     };
 private:
     const Kind kind;
 public:
     AstNode(Kind kind) : kind(kind) {}
     virtual ~AstNode(){}
+
     std::shared_ptr<CType> type;
     Token token;
+    // 是否为左值
+    bool isLValue{false}; 
+
     const Kind GetKind() const {
         return kind;
     }
@@ -169,11 +185,11 @@ public:
 };
 
 
-
-
 class VariableDecl : public AstNode {
 public:
-    // llvm::StringRef name;
+    // 变量声明的初始值表达式，有可能为空
+    std::shared_ptr<AstNode> init;  
+
     VariableDecl() : AstNode(Node_VariableDecl) {}
     llvm::Value* Accept(Visitor *v) {
         return v->VisitVariableDeclExpr(this);
@@ -183,32 +199,45 @@ public:
     }
 };
 
-// 操作符枚举
-enum class OpCode {
+// 二元操作符枚举
+enum class BinaryOp {
     add,
     sub,
     mul,
     div,
     mod,
-    equal_equal,
-    not_equal,
+    equal, // ==
+    not_equal, // !=
     less,
-    less_equal,
+    less_equal, // <=
     greater,
-    greater_equal,
-    logOr,
-    logAnd,
-    bitOr,
-    bitAnd,
-    bitXor,
-    leftShift,
-    rightShift
+    greater_equal, // >=
+    logic_or,
+    logic_and,
+    bitwise_or,
+    bitwise_and,
+    bitwise_xor,
+    left_shift,
+    right_shift,
+    comma,       // 逗号表达式
+
+    assign,
+    add_assign,
+    sub_assign,
+    mul_assign,
+    div_assign,
+    mod_assign,
+    bitwise_or_assign,
+    bitwise_and_assign,
+    bitwise_xor_assign,
+    left_shift_assign,
+    right_shift_assign
 };
 
 // 二元表达式
 class BinaryExpr : public AstNode {
 public:
-    OpCode op;
+    BinaryOp op;
     std::shared_ptr<AstNode> left;
     std::shared_ptr<AstNode> right;
 
@@ -221,6 +250,98 @@ public:
         return node->GetKind() == Node_BinaryExpr;
     }
 };
+
+
+class ThreeExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> cond;
+    std::shared_ptr<AstNode> then;
+    std::shared_ptr<AstNode> els;
+
+    ThreeExpr() : AstNode(Node_ThreeExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitThreeExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_ThreeExpr;
+    }    
+};
+
+
+// 一元操作符枚举
+enum class UnaryOp {
+    positive, // 正号
+    negative, // 负号
+    deref,   // 指针解引用
+    addr,    // 取地址
+    inc,     // ++
+    dec,     // --
+    logic_not, // 逻辑取反，就是逻辑非：！
+    bitwise_not  // 按位取反， 就是按位非：~
+};
+
+class UnaryExpr : public AstNode {
+public:
+    UnaryOp op;
+    std::shared_ptr<AstNode> node;
+
+    UnaryExpr() : AstNode(Node_UnaryExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitUnaryExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_UnaryExpr;
+    }
+};
+
+
+class SizeOfExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> node;
+    std::shared_ptr<CType> type;
+
+    SizeOfExpr() : AstNode(Node_SizeOfExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitSizeOfExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_SizeOfExpr;
+    }
+};
+
+// 后置++ 表达式
+class PostIncExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;
+
+    PostIncExpr() : AstNode(Node_PostIncExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostIncExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostIncExpr;
+    }
+};
+
+// 后置-- 表达式
+class PostDecExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;
+
+    PostDecExpr() : AstNode(Node_PostDecExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostDecExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostDecExpr;
+    }
+};
+
 
 
 // 因子表达式
@@ -249,21 +370,6 @@ public:
     }
     static bool classof(const AstNode *node) {
         return node->GetKind() == Node_VariableAccessExpr;
-    }
-};
-
-
-class AssignExpr : public AstNode {
-public:
-    std::shared_ptr<AstNode> left;
-    std::shared_ptr<AstNode> right;
-
-    AssignExpr() : AstNode(Node_AssignExpr) {}
-    llvm::Value* Accept(Visitor *v) override {
-        return v->VisitAssignExpr(this);
-    }
-    static bool classof(const AstNode *node) {
-        return node->GetKind() == Node_AssignExpr;
     }
 };
 
