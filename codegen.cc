@@ -54,10 +54,26 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
 
     verifyFunction(*mFunc);
 
-    // verifyModule函数： 如果执行有错误则返回true
+    // 注：verifyModule函数： 如果检查module有错误则返回true。 检查module正确则返回false
     if (verifyModule(*module, &llvm::outs())) {
         module->print(outs(), nullptr);
     }
+    
+#if 0
+    if (lastValue != nullptr) {
+        irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
+    } else {
+        irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("last inst is not expr\n")});
+    }
+    /* 
+      在llvm IR中一切指令都是值llvm::Value, llvm::Value是一切的基类
+      CreateRet返回的类型是llvm::ReturnInst，但llvm::ReturnInst是llvm::Value的派生类 
+    */
+    llvm::Value* ret = irBuilder.CreateRet(irBuilder.getInt32(0));
+
+    verifyFunction(*mFunc);
+    module->print(outs(), nullptr);
+#endif
 
     return ret;
 }
