@@ -277,9 +277,9 @@ llvm::Value* PrintVisitor::VisitUnaryExpr(UnaryExpr *unaryExpr) {
 
 llvm::Value* PrintVisitor::VisitSizeOfExpr(SizeOfExpr *sizeofExpr) {
     *out << "sizeof ";
-    if (sizeofExpr->type != nullptr) {
+    if (sizeofExpr->ty != nullptr) {
         *out << "(";
-        sizeofExpr->type->Accept(this);
+        sizeofExpr->ty->Accept(this);
         *out << ")";
     } else {
         sizeofExpr->node->Accept(this);

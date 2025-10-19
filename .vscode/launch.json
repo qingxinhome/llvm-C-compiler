@@ -5,9 +5,9 @@
             "name": "expr debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/expr",
+            "program": "${workspaceFolder}/bin/codegen_test",
             "args": [
-                "test/e1.txt"
+                "demo/expr.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
