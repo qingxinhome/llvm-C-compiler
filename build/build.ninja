@@ -39,7 +39,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/yiming/llvmcompiler/02-expr-compiler/build/
+cmake_ninja_workdir = /home/yiming/llvmcompiler/llvm-C-compiler/build/
 
 #############################################
 # Utility command for intrinsics_gen
@@ -73,77 +73,95 @@ build RISCVTargetParserTableGen: phony
 
 build cmake_object_order_depends_target_subc: phony || CMakeFiles/subc.dir
 
-build CMakeFiles/subc.dir/main.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/main.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/main.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/main.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/main.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/lexer.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/lexer.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/lexer.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/lexer.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/parser.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/parser.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/parser.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/parser.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/parser.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/printVisitor.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/printVisitor.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/printVisitor.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/printVisitor.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/printVisitor.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/type.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/type.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/type.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/type.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/type.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/scope.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/scope.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/scope.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/scope.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/scope.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/sema.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/sema.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/sema.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/sema.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/sema.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/diag_engine.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/diag_engine.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/diag_engine.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/diag_engine.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
-build CMakeFiles/subc.dir/codegen.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/codegen.cc || cmake_object_order_depends_target_subc
+build CMakeFiles/subc.dir/codegen.cc.o: CXX_COMPILER__subc_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/codegen.cc || cmake_object_order_depends_target_subc
   DEFINES = -DGTEST_HAS_RTTI=0
   DEP_FILE = CMakeFiles/subc.dir/codegen.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS  -fno-exceptions -funwind-tables -fno-rtti
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = CMakeFiles/subc.dir
   OBJECT_FILE_DIR = CMakeFiles/subc.dir
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
 
 # =============================================================================
@@ -151,24 +169,25 @@ build CMakeFiles/subc.dir/codegen.cc.o: CXX_COMPILER__subc_unscanned_Debug /home
 
 
 #############################################
-# Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/subc
+# Link the executable /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc
 
-build /home/yiming/llvmcompiler/02-expr-compiler/bin/subc: CXX_EXECUTABLE_LINKER__subc_Debug CMakeFiles/subc.dir/main.cc.o CMakeFiles/subc.dir/lexer.cc.o CMakeFiles/subc.dir/parser.cc.o CMakeFiles/subc.dir/printVisitor.cc.o CMakeFiles/subc.dir/type.cc.o CMakeFiles/subc.dir/scope.cc.o CMakeFiles/subc.dir/sema.cc.o CMakeFiles/subc.dir/diag_engine.cc.o CMakeFiles/subc.dir/codegen.cc.o | /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a /usr/local/llvm-18.1.8/lib/libLLVMPasses.a /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a /usr/local/llvm-18.1.8/lib/libLLVMipo.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a /usr/local/llvm-18.1.8/lib/libLLVMLinker.a /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a /usr/local/llvm-18.1.8/lib/libLLVMOption.a /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMTarget.a /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a /usr/local/llvm-18.1.8/lib/libLLVMObject.a /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+build /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc: CXX_EXECUTABLE_LINKER__subc_Debug CMakeFiles/subc.dir/main.cc.o CMakeFiles/subc.dir/lexer.cc.o CMakeFiles/subc.dir/parser.cc.o CMakeFiles/subc.dir/printVisitor.cc.o CMakeFiles/subc.dir/type.cc.o CMakeFiles/subc.dir/scope.cc.o CMakeFiles/subc.dir/sema.cc.o CMakeFiles/subc.dir/diag_engine.cc.o CMakeFiles/subc.dir/codegen.cc.o | /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a /usr/local/llvm-18.1.8/lib/libLLVMPasses.a /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a /usr/local/llvm-18.1.8/lib/libLLVMipo.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a /usr/local/llvm-18.1.8/lib/libLLVMLinker.a /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a /usr/local/llvm-18.1.8/lib/libLLVMOption.a /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMTarget.a /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a /usr/local/llvm-18.1.8/lib/libLLVMObject.a /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   FLAGS = -fno-rtti -g
   LINK_FLAGS = -Wl,--gc-sections
   LINK_LIBRARIES = -Wl,-rpath,"\$$ORIGIN/../lib:/usr/local/llvm-18.1.8/lib"  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a  /usr/local/llvm-18.1.8/lib/libLLVMMC.a  /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a  /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a  /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a  /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a  /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a  /usr/local/llvm-18.1.8/lib/libLLVMPasses.a  /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a  /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a  /usr/local/llvm-18.1.8/lib/libLLVMipo.a  /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a  /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a  /usr/local/llvm-18.1.8/lib/libLLVMLinker.a  /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a  /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a  /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a  /usr/local/llvm-18.1.8/lib/libLLVMOption.a  /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a  /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a  /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a  /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a  /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a  /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a  /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a  /usr/local/llvm-18.1.8/lib/libLLVMTarget.a  /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a  /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a  /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a  /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a  /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a  /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a  /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a  /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a  /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a  /usr/local/llvm-18.1.8/lib/libLLVMObject.a  /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a  /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a  /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a  /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a  /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a  /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a  /usr/local/llvm-18.1.8/lib/libLLVMMC.a  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   OBJECT_DIR = CMakeFiles/subc.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = /home/yiming/llvmcompiler/02-expr-compiler/bin/subc
-  TARGET_PDB = subc.dbg
+  TARGET_COMPILE_PDB = CMakeFiles/subc.dir/
+  TARGET_FILE = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc.pdb
 
 
 #############################################
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build && /usr/bin/ccmake -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -180,7 +199,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -189,7 +208,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt
+# /home/yiming/llvmcompiler/llvm-C-compiler/CMakeLists.txt
 # =============================================================================
 
 
@@ -197,7 +216,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # Utility command for edit_cache
 
 build test/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test && /usr/bin/ccmake -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -209,7 +228,7 @@ build test/edit_cache: phony test/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build test/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -218,7 +237,7 @@ build test/rebuild_cache: phony test/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# /home/yiming/llvmcompiler/02-expr-compiler/test/CMakeLists.txt
+# /home/yiming/llvmcompiler/llvm-C-compiler/test/CMakeLists.txt
 # =============================================================================
 
 # =============================================================================
@@ -230,37 +249,45 @@ build test/rebuild_cache: phony test/CMakeFiles/rebuild_cache.util
 
 build cmake_object_order_depends_target_lexer_test: phony || test/lexer/CMakeFiles/lexer_test.dir
 
-build test/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/test/lexer/lexer_test.cc || cmake_object_order_depends_target_lexer_test
+build test/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/test/lexer/lexer_test.cc || cmake_object_order_depends_target_lexer_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/lexer/CMakeFiles/lexer_test.dir
   OBJECT_FILE_DIR = test/lexer/CMakeFiles/lexer_test.dir
+  TARGET_COMPILE_PDB = test/lexer/CMakeFiles/lexer_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test.pdb
 
-build test/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc || cmake_object_order_depends_target_lexer_test
+build test/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/lexer.cc || cmake_object_order_depends_target_lexer_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/lexer/CMakeFiles/lexer_test.dir
   OBJECT_FILE_DIR = test/lexer/CMakeFiles/lexer_test.dir/__/__
+  TARGET_COMPILE_PDB = test/lexer/CMakeFiles/lexer_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test.pdb
 
-build test/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/type.cc || cmake_object_order_depends_target_lexer_test
+build test/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/type.cc || cmake_object_order_depends_target_lexer_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/lexer/CMakeFiles/lexer_test.dir
   OBJECT_FILE_DIR = test/lexer/CMakeFiles/lexer_test.dir/__/__
+  TARGET_COMPILE_PDB = test/lexer/CMakeFiles/lexer_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test.pdb
 
-build test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc || cmake_object_order_depends_target_lexer_test
+build test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__lexer_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/diag_engine.cc || cmake_object_order_depends_target_lexer_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/lexer/CMakeFiles/lexer_test.dir
   OBJECT_FILE_DIR = test/lexer/CMakeFiles/lexer_test.dir/__/__
+  TARGET_COMPILE_PDB = test/lexer/CMakeFiles/lexer_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test.pdb
 
 
 # =============================================================================
@@ -268,24 +295,25 @@ build test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER_
 
 
 #############################################
-# Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
+# Link the executable /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test
 
-build /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test test/lexer/lexer_test[1]_tests.cmake | ${cmake_ninja_workdir}test/lexer/lexer_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__lexer_test_Debug test/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+build /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test test/lexer/lexer_test[1]_tests.cmake | ${cmake_ninja_workdir}test/lexer/lexer_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__lexer_test_Debug test/lexer/CMakeFiles/lexer_test.dir/lexer_test.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/lexer.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/type.cc.o test/lexer/CMakeFiles/lexer_test.dir/__/__/diag_engine.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   FLAGS = -fno-rtti -g
   LINK_LIBRARIES = /usr/lib64/libgtest_main.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/lib64/libgtest.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   OBJECT_DIR = test/lexer/CMakeFiles/lexer_test.dir
-  POST_BUILD = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer && /usr/bin/cmake -D TEST_TARGET=lexer_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=lexer_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer/lexer_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
+  POST_BUILD = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer && /usr/bin/cmake -D TEST_TARGET=lexer_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=lexer_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer/lexer_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
   PRE_LINK = :
   RESTAT = 1
-  TARGET_FILE = /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
-  TARGET_PDB = lexer_test.dbg
+  TARGET_COMPILE_PDB = test/lexer/CMakeFiles/lexer_test.dir/
+  TARGET_FILE = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test.pdb
 
 
 #############################################
 # Utility command for edit_cache
 
 build test/lexer/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer && /usr/bin/ccmake -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -297,7 +325,7 @@ build test/lexer/edit_cache: phony test/lexer/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build test/lexer/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -306,7 +334,7 @@ build test/lexer/rebuild_cache: phony test/lexer/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# /home/yiming/llvmcompiler/02-expr-compiler/test/CMakeLists.txt
+# /home/yiming/llvmcompiler/llvm-C-compiler/test/CMakeLists.txt
 # =============================================================================
 
 # =============================================================================
@@ -318,69 +346,85 @@ build test/lexer/rebuild_cache: phony test/lexer/CMakeFiles/rebuild_cache.util
 
 build cmake_object_order_depends_target_parser_test: phony || test/parser/CMakeFiles/parser_test.dir
 
-build test/parser/CMakeFiles/parser_test.dir/parser_test.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/test/parser/parser_test.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/parser_test.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/test/parser/parser_test.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/parser_test.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/lexer.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/type.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/type.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/diag_engine.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/parser.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/parser.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/printVisitor.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/printVisitor.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/sema.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/sema.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
-build test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/scope.cc || cmake_object_order_depends_target_parser_test
+build test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o: CXX_COMPILER__parser_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/scope.cc || cmake_object_order_depends_target_parser_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
   OBJECT_FILE_DIR = test/parser/CMakeFiles/parser_test.dir/__/__
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
 
 # =============================================================================
@@ -388,24 +432,25 @@ build test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o: CXX_COMPILER__par
 
 
 #############################################
-# Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test
+# Link the executable /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test
 
-build /home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test test/parser/parser_test[1]_tests.cmake | ${cmake_ninja_workdir}test/parser/parser_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__parser_test_Debug test/parser/CMakeFiles/parser_test.dir/parser_test.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+build /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test test/parser/parser_test[1]_tests.cmake | ${cmake_ninja_workdir}test/parser/parser_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__parser_test_Debug test/parser/CMakeFiles/parser_test.dir/parser_test.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/lexer.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/type.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/diag_engine.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/parser.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/printVisitor.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/sema.cc.o test/parser/CMakeFiles/parser_test.dir/__/__/scope.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   FLAGS = -fno-rtti -g
   LINK_LIBRARIES = /usr/lib64/libgtest_main.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/lib64/libgtest.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   OBJECT_DIR = test/parser/CMakeFiles/parser_test.dir
-  POST_BUILD = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/parser && /usr/bin/cmake -D TEST_TARGET=parser_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/02-expr-compiler/build/test/parser -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=parser_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/02-expr-compiler/build/test/parser/parser_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
+  POST_BUILD = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser && /usr/bin/cmake -D TEST_TARGET=parser_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=parser_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser/parser_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
   PRE_LINK = :
   RESTAT = 1
-  TARGET_FILE = /home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test
-  TARGET_PDB = parser_test.dbg
+  TARGET_COMPILE_PDB = test/parser/CMakeFiles/parser_test.dir/
+  TARGET_FILE = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test.pdb
 
 
 #############################################
 # Utility command for edit_cache
 
 build test/parser/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/parser && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser && /usr/bin/ccmake -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -417,7 +462,7 @@ build test/parser/edit_cache: phony test/parser/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build test/parser/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/parser && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -426,7 +471,7 @@ build test/parser/rebuild_cache: phony test/parser/CMakeFiles/rebuild_cache.util
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# /home/yiming/llvmcompiler/02-expr-compiler/test/CMakeLists.txt
+# /home/yiming/llvmcompiler/llvm-C-compiler/test/CMakeLists.txt
 # =============================================================================
 
 # =============================================================================
@@ -438,69 +483,85 @@ build test/parser/rebuild_cache: phony test/parser/CMakeFiles/rebuild_cache.util
 
 build cmake_object_order_depends_target_codegen_test: phony || test/codegen/CMakeFiles/codegen_test.dir
 
-build test/codegen/CMakeFiles/codegen_test.dir/codegen_test.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/test/codegen/codegen_test.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/codegen_test.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/test/codegen/codegen_test.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/codegen_test.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/lexer.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/lexer.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/lexer.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/lexer.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/lexer.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/type.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/type.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/type.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/type.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/type.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/diag_engine.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/diag_engine.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/diag_engine.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/diag_engine.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/parser.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/parser.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/parser.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/parser.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/parser.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/sema.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/sema.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/sema.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/sema.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/sema.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/scope.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/scope.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/scope.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/scope.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/scope.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
-build test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/02-expr-compiler/codegen.cc || cmake_object_order_depends_target_codegen_test
+build test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o: CXX_COMPILER__codegen_test_unscanned_Debug /home/yiming/llvmcompiler/llvm-C-compiler/codegen.cc || cmake_object_order_depends_target_codegen_test
   DEFINES = -DGTEST_LINKED_AS_SHARED_LIBRARY=1
   DEP_FILE = test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o.d
   FLAGS = -fno-rtti -g -std=gnu++17   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-  INCLUDES = -I/home/yiming/llvmcompiler/02-expr-compiler/. -I/usr/local/llvm-18.1.8/include
+  INCLUDES = -I/home/yiming/llvmcompiler/llvm-C-compiler/. -I/usr/local/llvm-18.1.8/include
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
   OBJECT_FILE_DIR = test/codegen/CMakeFiles/codegen_test.dir/__/__
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
 
 # =============================================================================
@@ -508,24 +569,25 @@ build test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o: CXX_COMPILER_
 
 
 #############################################
-# Link the executable /home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test
+# Link the executable /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test
 
-build /home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test test/codegen/codegen_test[1]_tests.cmake | ${cmake_ninja_workdir}test/codegen/codegen_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__codegen_test_Debug test/codegen/CMakeFiles/codegen_test.dir/codegen_test.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/lexer.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/type.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/diag_engine.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/parser.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/sema.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/scope.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a /usr/local/llvm-18.1.8/lib/libLLVMPasses.a /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a /usr/local/llvm-18.1.8/lib/libLLVMipo.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a /usr/local/llvm-18.1.8/lib/libLLVMLinker.a /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a /usr/local/llvm-18.1.8/lib/libLLVMOption.a /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMTarget.a /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a /usr/local/llvm-18.1.8/lib/libLLVMObject.a /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
+build /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test test/codegen/codegen_test[1]_tests.cmake | ${cmake_ninja_workdir}test/codegen/codegen_test[1]_tests.cmake: CXX_EXECUTABLE_LINKER__codegen_test_Debug test/codegen/CMakeFiles/codegen_test.dir/codegen_test.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/lexer.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/type.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/diag_engine.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/parser.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/sema.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/scope.cc.o test/codegen/CMakeFiles/codegen_test.dir/__/__/codegen.cc.o | /usr/lib64/libgtest_main.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a /usr/lib64/libgtest.so.1.11.0 /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a /usr/local/llvm-18.1.8/lib/libLLVMPasses.a /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a /usr/local/llvm-18.1.8/lib/libLLVMipo.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a /usr/local/llvm-18.1.8/lib/libLLVMLinker.a /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a /usr/local/llvm-18.1.8/lib/libLLVMOption.a /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a /usr/local/llvm-18.1.8/lib/libLLVMTarget.a /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a /usr/local/llvm-18.1.8/lib/libLLVMObject.a /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a /usr/local/llvm-18.1.8/lib/libLLVMCore.a /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a /usr/local/llvm-18.1.8/lib/libLLVMMC.a /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a /usr/local/llvm-18.1.8/lib/libLLVMSupport.a /usr/lib64/libz.so /usr/lib64/libzstd.so /usr/lib64/libtinfo.so /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   FLAGS = -fno-rtti -g
   LINK_LIBRARIES = /usr/lib64/libgtest_main.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a  /usr/local/llvm-18.1.8/lib/libLLVMMC.a  /usr/local/llvm-18.1.8/lib/libLLVMMCJIT.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcJIT.a  /usr/local/llvm-18.1.8/lib/libLLVMX86CodeGen.a  /usr/local/llvm-18.1.8/lib/libLLVMX86AsmParser.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Desc.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Disassembler.a  /usr/local/llvm-18.1.8/lib/libLLVMX86Info.a  /usr/lib64/libgtest.so.1.11.0  /usr/local/llvm-18.1.8/lib/libLLVMExecutionEngine.a  /usr/local/llvm-18.1.8/lib/libLLVMRuntimeDyld.a  /usr/local/llvm-18.1.8/lib/libLLVMPasses.a  /usr/local/llvm-18.1.8/lib/libLLVMCoroutines.a  /usr/local/llvm-18.1.8/lib/libLLVMHipStdPar.a  /usr/local/llvm-18.1.8/lib/libLLVMipo.a  /usr/local/llvm-18.1.8/lib/libLLVMFrontendOpenMP.a  /usr/local/llvm-18.1.8/lib/libLLVMFrontendOffloading.a  /usr/local/llvm-18.1.8/lib/libLLVMLinker.a  /usr/local/llvm-18.1.8/lib/libLLVMVectorize.a  /usr/local/llvm-18.1.8/lib/libLLVMJITLink.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcTargetProcess.a  /usr/local/llvm-18.1.8/lib/libLLVMOrcShared.a  /usr/local/llvm-18.1.8/lib/libLLVMWindowsDriver.a  /usr/local/llvm-18.1.8/lib/libLLVMOption.a  /usr/local/llvm-18.1.8/lib/libLLVMAsmPrinter.a  /usr/local/llvm-18.1.8/lib/libLLVMCFGuard.a  /usr/local/llvm-18.1.8/lib/libLLVMGlobalISel.a  /usr/local/llvm-18.1.8/lib/libLLVMIRPrinter.a  /usr/local/llvm-18.1.8/lib/libLLVMInstrumentation.a  /usr/local/llvm-18.1.8/lib/libLLVMSelectionDAG.a  /usr/local/llvm-18.1.8/lib/libLLVMCodeGen.a  /usr/local/llvm-18.1.8/lib/libLLVMTarget.a  /usr/local/llvm-18.1.8/lib/libLLVMBitWriter.a  /usr/local/llvm-18.1.8/lib/libLLVMScalarOpts.a  /usr/local/llvm-18.1.8/lib/libLLVMAggressiveInstCombine.a  /usr/local/llvm-18.1.8/lib/libLLVMInstCombine.a  /usr/local/llvm-18.1.8/lib/libLLVMObjCARCOpts.a  /usr/local/llvm-18.1.8/lib/libLLVMTransformUtils.a  /usr/local/llvm-18.1.8/lib/libLLVMAnalysis.a  /usr/local/llvm-18.1.8/lib/libLLVMProfileData.a  /usr/local/llvm-18.1.8/lib/libLLVMSymbolize.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoDWARF.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoPDB.a  /usr/local/llvm-18.1.8/lib/libLLVMObject.a  /usr/local/llvm-18.1.8/lib/libLLVMIRReader.a  /usr/local/llvm-18.1.8/lib/libLLVMBitReader.a  /usr/local/llvm-18.1.8/lib/libLLVMAsmParser.a  /usr/local/llvm-18.1.8/lib/libLLVMCore.a  /usr/local/llvm-18.1.8/lib/libLLVMRemarks.a  /usr/local/llvm-18.1.8/lib/libLLVMBitstreamReader.a  /usr/local/llvm-18.1.8/lib/libLLVMTextAPI.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoMSF.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoBTF.a  /usr/local/llvm-18.1.8/lib/libLLVMCodeGenTypes.a  /usr/local/llvm-18.1.8/lib/libLLVMMCParser.a  /usr/local/llvm-18.1.8/lib/libLLVMMCDisassembler.a  /usr/local/llvm-18.1.8/lib/libLLVMMC.a  /usr/local/llvm-18.1.8/lib/libLLVMBinaryFormat.a  /usr/local/llvm-18.1.8/lib/libLLVMDebugInfoCodeView.a  /usr/local/llvm-18.1.8/lib/libLLVMTargetParser.a  /usr/local/llvm-18.1.8/lib/libLLVMSupport.a  -lrt  -ldl  -lm  /usr/lib64/libz.so  /usr/lib64/libzstd.so  /usr/lib64/libtinfo.so  /usr/local/llvm-18.1.8/lib/libLLVMDemangle.a
   OBJECT_DIR = test/codegen/CMakeFiles/codegen_test.dir
-  POST_BUILD = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen && /usr/bin/cmake -D TEST_TARGET=codegen_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=codegen_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen/codegen_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
+  POST_BUILD = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen && /usr/bin/cmake -D TEST_TARGET=codegen_test -D TEST_EXECUTABLE=/home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test -D TEST_EXECUTOR= -D TEST_WORKING_DIR=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen -D TEST_EXTRA_ARGS= -D TEST_PROPERTIES= -D TEST_PREFIX= -D TEST_SUFFIX= -D TEST_FILTER= -D NO_PRETTY_TYPES=FALSE -D NO_PRETTY_VALUES=FALSE -D TEST_LIST=codegen_test_TESTS -D CTEST_FILE=/home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen/codegen_test[1]_tests.cmake -D TEST_DISCOVERY_TIMEOUT=5 -D TEST_XML_OUTPUT_DIR= -P /usr/share/cmake/Modules/GoogleTestAddTests.cmake
   PRE_LINK = :
   RESTAT = 1
-  TARGET_FILE = /home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test
-  TARGET_PDB = codegen_test.dbg
+  TARGET_COMPILE_PDB = test/codegen/CMakeFiles/codegen_test.dir/
+  TARGET_FILE = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test
+  TARGET_PDB = /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test.pdb
 
 
 #############################################
 # Utility command for edit_cache
 
 build test/codegen/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen && /usr/bin/ccmake -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen && /usr/bin/ccmake -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -537,7 +599,7 @@ build test/codegen/edit_cache: phony test/codegen/CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build test/codegen/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/02-expr-compiler -B/home/yiming/llvmcompiler/02-expr-compiler/build
+  COMMAND = cd /home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen && /usr/bin/cmake --regenerate-during-build -S/home/yiming/llvmcompiler/llvm-C-compiler -B/home/yiming/llvmcompiler/llvm-C-compiler/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -547,13 +609,13 @@ build test/codegen/rebuild_cache: phony test/codegen/CMakeFiles/rebuild_cache.ut
 # =============================================================================
 # Target aliases.
 
-build codegen_test: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test
+build codegen_test: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test
 
-build lexer_test: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
+build lexer_test: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test
 
-build parser_test: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test
+build parser_test: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test
 
-build subc: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/subc
+build subc: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc
 
 # =============================================================================
 # Folder targets.
@@ -561,37 +623,37 @@ build subc: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/subc
 # =============================================================================
 
 #############################################
-# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build
+# Folder: /home/yiming/llvmcompiler/llvm-C-compiler/build
 
-build all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/subc test/all
+build all: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/subc test/all
 
 # =============================================================================
 
 #############################################
-# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/test
+# Folder: /home/yiming/llvmcompiler/llvm-C-compiler/build/test
 
 build test/all: phony test/lexer/all test/parser/all test/codegen/all
 
 # =============================================================================
 
 #############################################
-# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen
+# Folder: /home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen
 
-build test/codegen/all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/codegen_test
-
-# =============================================================================
-
-#############################################
-# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer
-
-build test/lexer/all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/lexer_test
+build test/codegen/all: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/codegen_test
 
 # =============================================================================
 
 #############################################
-# Folder: /home/yiming/llvmcompiler/02-expr-compiler/build/test/parser
+# Folder: /home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer
 
-build test/parser/all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/parser_test
+build test/lexer/all: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/lexer_test
+
+# =============================================================================
+
+#############################################
+# Folder: /home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser
+
+build test/parser/all: phony /home/yiming/llvmcompiler/llvm-C-compiler/bin/parser_test
 
 # =============================================================================
 # Built-in targets
@@ -600,14 +662,14 @@ build test/parser/all: phony /home/yiming/llvmcompiler/02-expr-compiler/bin/pars
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/codegen/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/lexer/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/parser/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /home/yiming/llvmcompiler/llvm-C-compiler/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/codegen/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/lexer/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/parser/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCCompiler.cmake.in /usr/share/cmake/Modules/CMakeCCompilerABI.c /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake/Modules/CMakeDetermineSystem.cmake /usr/share/cmake/Modules/CMakeFindBinUtils.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakeParseImplicitIncludeInfo.cmake /usr/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake/Modules/CMakeParseLibraryArchitecture.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystem.cmake.in /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CMakeTestCCompiler.cmake /usr/share/cmake/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/ARMClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/LCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/NVHPC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Tasking-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XLClang-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Internal/FeatureTesting.cmake /usr/share/cmake/Modules/Platform/Linux-Determine-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/yiming/llvmcompiler/02-expr-compiler/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/codegen/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/lexer/CMakeLists.txt /home/yiming/llvmcompiler/02-expr-compiler/test/parser/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake: phony
+build /home/yiming/llvmcompiler/llvm-C-compiler/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/codegen/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/lexer/CMakeLists.txt /home/yiming/llvmcompiler/llvm-C-compiler/test/parser/CMakeLists.txt /usr/lib64/cmake/GTest/GTestConfig.cmake /usr/lib64/cmake/GTest/GTestConfigVersion.cmake /usr/lib64/cmake/GTest/GTestTargets-noconfig.cmake /usr/lib64/cmake/GTest/GTestTargets.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/AddLLVM.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/DetermineGCCCompatible.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindLibEdit.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/FindTerminfo.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/Findzstd.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVM-Config.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfig.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMConfigVersion.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMDistributionSupport.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports-release.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMExports.cmake /usr/local/llvm-18.1.8/lib/cmake/llvm/LLVMProcessSources.cmake /usr/share/cmake/Modules/AddFileDependencies.cmake /usr/share/cmake/Modules/CMakeCCompiler.cmake.in /usr/share/cmake/Modules/CMakeCCompilerABI.c /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXCompiler.cmake.in /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeCompilerIdDetection.cmake /usr/share/cmake/Modules/CMakeDetermineCCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCXXCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCompileFeatures.cmake /usr/share/cmake/Modules/CMakeDetermineCompiler.cmake /usr/share/cmake/Modules/CMakeDetermineCompilerABI.cmake /usr/share/cmake/Modules/CMakeDetermineCompilerId.cmake /usr/share/cmake/Modules/CMakeDetermineSystem.cmake /usr/share/cmake/Modules/CMakeFindBinUtils.cmake /usr/share/cmake/Modules/CMakeFindDependencyMacro.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeNinjaFindMake.cmake /usr/share/cmake/Modules/CMakeParseArguments.cmake /usr/share/cmake/Modules/CMakeParseImplicitIncludeInfo.cmake /usr/share/cmake/Modules/CMakeParseImplicitLinkInfo.cmake /usr/share/cmake/Modules/CMakeParseLibraryArchitecture.cmake /usr/share/cmake/Modules/CMakePushCheckState.cmake /usr/share/cmake/Modules/CMakeSystem.cmake.in /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/CMakeTestCCompiler.cmake /usr/share/cmake/Modules/CMakeTestCXXCompiler.cmake /usr/share/cmake/Modules/CMakeTestCompilerCommon.cmake /usr/share/cmake/Modules/CheckCSourceCompiles.cmake /usr/share/cmake/Modules/CheckIncludeFile.cmake /usr/share/cmake/Modules/CheckLibraryExists.cmake /usr/share/cmake/Modules/Compiler/ADSP-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/ARMCC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/ARMClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/AppleClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Borland-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Bruce-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/Clang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Clang-DetermineCompilerInternal.cmake /usr/share/cmake/Modules/Compiler/Comeau-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Compaq-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Compaq-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Cray-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Embarcadero-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Fujitsu-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GHS-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU-FindBinUtils.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/Compiler/HP-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/HP-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IAR-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake /usr/share/cmake/Modules/Compiler/IBMCPP-CXX-DetermineVersionInternal.cmake /usr/share/cmake/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IBMClang-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Intel-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/LCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/LCC-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/MSVC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/NVHPC-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/NVIDIA-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/PGI-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/PathScale-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SCO-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SDCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SunPro-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/SunPro-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/TI-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Tasking-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/VisualAge-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/Watcom-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XL-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XL-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XLClang-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/XLClang-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/zOS-C-DetermineCompiler.cmake /usr/share/cmake/Modules/Compiler/zOS-CXX-DetermineCompiler.cmake /usr/share/cmake/Modules/FindGTest.cmake /usr/share/cmake/Modules/FindLibXml2.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/FindPkgConfig.cmake /usr/share/cmake/Modules/FindThreads.cmake /usr/share/cmake/Modules/FindZLIB.cmake /usr/share/cmake/Modules/GNUInstallDirs.cmake /usr/share/cmake/Modules/GoogleTest.cmake /usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake /usr/share/cmake/Modules/Internal/FeatureTesting.cmake /usr/share/cmake/Modules/Platform/Linux-Determine-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/Modules/SelectLibraryConfigurations.cmake CMakeCache.txt CMakeFiles/3.26.5/CMakeCCompiler.cmake CMakeFiles/3.26.5/CMakeCXXCompiler.cmake CMakeFiles/3.26.5/CMakeSystem.cmake: phony
 
 
 #############################################

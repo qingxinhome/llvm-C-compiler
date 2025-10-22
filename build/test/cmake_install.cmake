@@ -1,4 +1,4 @@
-# Install script for directory: /home/yiming/llvmcompiler/02-expr-compiler/test
+# Install script for directory: /home/yiming/llvmcompiler/llvm-C-compiler/test
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,16 +44,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/yiming/llvmcompiler/02-expr-compiler/build/test/lexer/cmake_install.cmake")
+  include("/home/yiming/llvmcompiler/llvm-C-compiler/build/test/lexer/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/yiming/llvmcompiler/02-expr-compiler/build/test/parser/cmake_install.cmake")
+  include("/home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/yiming/llvmcompiler/02-expr-compiler/build/test/codegen/cmake_install.cmake")
+  include("/home/yiming/llvmcompiler/llvm-C-compiler/build/test/codegen/cmake_install.cmake")
 endif()
 

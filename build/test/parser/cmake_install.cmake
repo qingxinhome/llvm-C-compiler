@@ -1,4 +1,4 @@
-# Install script for directory: /home/yiming/llvmcompiler/02-expr-compiler/test/parser
+# Install script for directory: /home/yiming/llvmcompiler/llvm-C-compiler/test/parser
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

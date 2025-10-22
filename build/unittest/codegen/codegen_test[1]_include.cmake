@@ -1,5 +1,0 @@
-if(EXISTS "/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/codegen/codegen_test[1]_tests.cmake")
-  include("/home/yiming/llvmcompiler/02-expr-compiler/build/unittest/codegen/codegen_test[1]_tests.cmake")
-else()
-  add_test(codegen_test_NOT_BUILT codegen_test_NOT_BUILT)
-endif()
