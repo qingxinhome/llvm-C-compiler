@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(expr)
+project(subc)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -23,10 +23,10 @@ endif()
 
 
 # 指定要链接的 LLVM 组件：Support（基础工具类）和 Core（核心 IR 数据结构）。
-set(LLVM_LINK_COMPONENTS Support Core)
+set(LLVM_LINK_COMPONENTS Support Core ExecutionEngine MC MCJIT OrcJit native)
 
 # 使用 LLVM 的 add_llvm_executable 宏创建可执行文件，名称为 llvm_test（来自 project(llvm_test)），基于源文件 main.cc。
 add_llvm_executable(${PROJECT_NAME} main.cc lexer.cc parser.cc printVisitor.cc type.cc scope.cc sema.cc diag_engine.cc codegen.cc)
 
 # 添加子目录
-add_subdirectory(unittest)
+add_subdirectory(test)

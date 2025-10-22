@@ -21,6 +21,7 @@ class UnaryExpr;
 class SizeOfExpr;
 class PostDecExpr;
 class PostIncExpr;
+class PostSubscript;
 class NumberExpr;
 
 // 抽象访问者基类
@@ -42,6 +43,7 @@ public:
     virtual llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) = 0;
     virtual llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) = 0;
     virtual llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) = 0;
+    virtual llvm::Value* VisitPostSubscript(PostSubscript *expr) = 0;
     virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
 };
 
@@ -64,6 +66,7 @@ public:
         Node_SizeOfExpr,
         Node_PostIncExpr,
         Node_PostDecExpr,
+        Node_PostSubscript,
         Node_NumberExor,
         Node_VariableAccessExpr
     };
@@ -184,11 +187,23 @@ public:
     }
 };
 
-
+/// 变量声明节点
 class VariableDecl : public AstNode {
 public:
-    // 变量声明的初始值表达式，有可能为空
-    std::shared_ptr<AstNode> init;  
+    // 数组初始值：数组元素的槽位(地址)和对应元素的关联关系
+    struct InitValue {
+        std::shared_ptr<CType> decType;     /* 数组元素类型 */
+        std::shared_ptr<AstNode> value;     /* 数组元素值表达式 */
+        // int a[3][4] = {{1,2,3,4}, {5,6,7,8}, {9, 10, 11, 12}}
+        // 那么元素 10 的 offset位置为：{2, 1}
+        std::vector<int> offsetList;
+    };
+
+    // 变量声明的初始值表达式,可以是单值，也可以是列表；有可能为空
+    std::vector<std::shared_ptr<InitValue>> initValues;
+
+    // // 变量声明的初始值表达式，有可能为空
+    // std::shared_ptr<AstNode> init;
 
     VariableDecl() : AstNode(Node_VariableDecl) {}
     llvm::Value* Accept(Visitor *v) {
@@ -342,6 +357,24 @@ public:
     }
 };
 
+// 数组访问下标表达式(后缀表达式的一种). 如：
+// a[5]
+// a -> left
+// [5] -> node
+class PostSubscript : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;    // 存放基址
+    std::shared_ptr<AstNode> node;    // 存放偏移量
+
+    PostSubscript() : AstNode(Node_PostSubscript){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostSubscript(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostSubscript;
+    }
+};
 
 
 // 因子表达式
