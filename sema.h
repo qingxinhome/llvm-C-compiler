@@ -18,7 +18,9 @@ public:
     std::shared_ptr<SizeOfExpr> semaSizeOfExprNode(std::shared_ptr<AstNode> unary, std::shared_ptr<CType> type);
     std::shared_ptr<PostIncExpr> semaPostIncExprNode(std::shared_ptr<AstNode> left, Token token);
     std::shared_ptr<PostDecExpr> semaPostDecExprNode(std::shared_ptr<AstNode> left, Token token);
- 
+    std::shared_ptr<PostSubscript> semaPostSubscriptNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> node, Token curtoken);
+    std::shared_ptr<VariableDecl::InitValue> semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token);
+
     std::shared_ptr<IfStmt> semaIfStmtNode(std::shared_ptr<AstNode> condNode, std::shared_ptr<AstNode> thenNode, std::shared_ptr<AstNode> elseNode);
     void EnterScope();
     void ExitScope();

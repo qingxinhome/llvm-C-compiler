@@ -54,7 +54,7 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
 
     verifyFunction(*mFunc);
 
-    // 注：verifyModule函数： 如果检查module有错误则返回true。 检查module正确则返回false
+    // 注：verifyModule函数：如果检查module有错误则返回true。 检查module正确则返回false
     if (verifyModule(*module, &llvm::outs())) {
         module->print(outs(), nullptr);
     }
@@ -680,6 +680,24 @@ llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
     return irBuilder.getInt32(numberExpr->token.value);
 }
 
+
+// 数组元素访问表达式的codegen本质上就是对数组元素地址的计算
+// a[5] = 10;
+llvm::Value* CodeGen::VisitPostSubscript(PostSubscript *expr) {
+    llvm::Type * ty = expr->type->Accept(this);
+    llvm::Value *left = expr->left->Accept(this);    /* 数组基地址*/
+    llvm::Value *offset = expr->node->Accept(this);  /* 偏移地址*/
+
+    /* 
+    left对应的是load指令(被取值了)，load指令是对地址被解引用后的值， 可以通过LoadInst.getPointerrOperand()获取原始地址
+    CreateInBoundsGEP(llvm::Type *Ty, llvm::Value *Ptr, llvm::ArrayRef<llvm::Value *> IdxList)
+    如： int *p；ty就是int，   Ptr就是p（指针）
+    */
+    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, llvm::dyn_cast<LoadInst>(left)->getPointerOperand(), {offset});
+    return irBuilder.CreateLoad(ty, addr);
+}
+
+
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = decl->type->Accept(this);
 
@@ -687,14 +705,36 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);
     varAddrTypeMap.insert({varName, {value, ty}});
 
-    if (decl->init != nullptr) {
-        llvm::Value *initValue = decl->init->Accept(this);
-        irBuilder.CreateStore(initValue, value);
+    if (decl->initValues.size() > 0) {
+        if (decl->initValues.size() == 1) {
+            llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
+            irBuilder.CreateStore(initValue, value);
+        } else {
+            if (llvm::ArrayType *arrType = llvm::dyn_cast<llvm::ArrayType>(ty)) {
+                for (const auto &initValue : decl->initValues) {
+                    llvm::SmallVector<llvm::Value*> vec;
+                    for (auto &offset : initValue->offsetList) {
+                        vec.push_back(irBuilder.getInt32(offset));
+                    }
+                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(arrType->getElementType(), value, vec);
+                    llvm::Value *val = initValue->value->Accept(this);
+                    irBuilder.CreateStore(val, addr);
+                }
+            } else {
+                assert(0);
+            }
+        }
     }
     return value;
+
+    // if (decl->init != nullptr) {
+    //     llvm::Value *initValue = decl->init->Accept(this);
+    //     irBuilder.CreateStore(initValue, varValue);
+    // }
+    // return value;
 }
 
-// 变量访问返回的应该是一个右值
+// '变量访问' 返回的应该是一个右值
 // CreateLoad返回的是一个右值
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
     llvm::StringRef varName(expr->token.ptr, expr->token.len);
@@ -720,10 +760,14 @@ llvm::Type* CodeGen::VisitPointType(CPointType *type) {
     return llvm::PointerType::getUnqual(baseType);
 }
 
+llvm::Type* CodeGen::VisitArrayType(CArrayType *type) {
+    llvm::Type *elemType = type->GetElementType()->Accept(this);
+    return llvm::ArrayType::get(elemType, type->GetElementCount());
+}
 
 
 /*
 注：
 1. 在llvm IR中一切指令都是值llvm::Value
-2. 
+2. 在llvm中类型的基类是 llvm::Type
 */

@@ -23,12 +23,23 @@ public:
     std::shared_ptr<Program> ParseProgram();
 private:
     std::shared_ptr<AstNode> ParseStmt();
+
     // 一个声明语句可以声明多个变量
     std::shared_ptr<AstNode> ParseDeclareStmt();
     // decl-spec  ::= "int"
     std::shared_ptr<CType> ParseDeclSpec();
-    // init-declarator-list ::= declarator (= assign)? ("," declarator (= assign)?)*
+    // declarator ::= "*"* direct-declarator
     std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType);
+    // direct-declarator ::= identifier | direct-declarator "[" assign "]"
+    std::shared_ptr<AstNode> DirectDeclarator(std::shared_ptr<CType> baseType);
+    // 解析数组类型声明的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
+    std::shared_ptr<CType> DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType);
+    // initializer ::= assign | "{" initializer ("," initializer)*  "}"
+    bool ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
+        std::shared_ptr<CType> declType, 
+        std::vector<int> &offsetList,
+        bool hasLBrace
+    );
 
     std::shared_ptr<AstNode> ParseIfStmt();
     std::shared_ptr<AstNode> ParseForStmt();

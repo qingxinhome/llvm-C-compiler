@@ -171,6 +171,44 @@ std::shared_ptr<PostDecExpr> Sema::semaPostDecExprNode(std::shared_ptr<AstNode> 
     return node;
 }
 
+// eg: a[3]
+// a[3]; -> *(a + offset(3 * elementSize))
+std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> node, Token curtoken) {
+    if (left->type->GetKind() != CType::TY_Array && left->type->GetKind() != CType::TY_Point) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(curtoken.ptr), diag::err_expected_type, "array or point");
+    }
+
+    auto postSubscriptNode = std::make_shared<PostSubscript>();
+    postSubscriptNode->left = left;
+    postSubscriptNode->node = node;
+
+    if (left->type->GetKind() == CType::TY_Array) {
+        // 如果 a[3]中a是数组类型，那么数组访问表达式的类型就是数组元素类型
+        CArrayType *arrayType = llvm::dyn_cast<CArrayType>(left->type.get());
+        postSubscriptNode->type = arrayType->GetElementType();
+    } else if (left->type->GetKind() == CType::TY_Point) {
+        // 如果 p[3]中p是指针类型，如 int *p，那么数组访问表达式的类型就是指针的基类型
+        CPointType *pointType = llvm::dyn_cast<CPointType>(left->type.get());
+        postSubscriptNode->type = pointType->GetBaseType();
+    }
+    return postSubscriptNode;
+}
+
+
+std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token) {
+    // 检查声明的类型和初始化值的类型是否匹配
+    if (declType->GetKind() != value->type->GetKind()) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_miss, "same type");
+    }
+    
+    auto initValue = std::make_shared<VariableDecl::InitValue>();
+    initValue->decType = declType;
+    initValue->value = value;
+    initValue->offsetList = offsetList;
+    return initValue;
+}
+
+
 
 std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, std::shared_ptr<CType> type) {
     std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();

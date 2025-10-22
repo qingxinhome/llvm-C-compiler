@@ -19,5 +19,7 @@ DIAG(err_type, Error, "typename expected")
 DIAG(err_same_type, Error, "expected same type")
 DIAG(err_expected_type, Error, "expected {0}")
 DIAG(err_expected_lvalue, Error, "expected lvalue")
+DIAG(err_expected_ex, Error, "expected {0}")
+DIAG(err_miss, Error, "miss {0}")
 
 #undef DIAG

@@ -6,6 +6,7 @@
 
 class CPrimaryType;
 class CPointType;
+class CArrayType;
 
 // 类型访问者基类
 class TypeVisitor {
@@ -13,6 +14,7 @@ public:
     virtual ~TypeVisitor() {};
     virtual llvm::Type* VisitPrimaryType(CPrimaryType *type) = 0;
     virtual llvm::Type* VisitPointType(CPointType *type) = 0;
+    virtual llvm::Type* VisitArrayType(CArrayType *type) = 0;
 };
 
 
@@ -20,20 +22,29 @@ public:
 class CType {
 public:
     enum Kind {
-        TY_Int,     // 基础类型
-        TY_Point    // 指针类型
+        TY_Int,      // 基础类型
+        TY_Point,    // 指针类型
+        TY_Array     // 数组类型
     };
 public:
     CType(Kind kind, int size, int align): kind(kind), size(size), align(align) {};
     virtual ~CType(){}  // 虚析构函数
+    
     const Kind GetKind() const {
         return kind;
+    }
+
+    const int GetSize() const {
+        return size;
+    }
+
+    const int GetAlign() {
+        return align;
     }
 
     virtual llvm::Type* Accept(TypeVisitor *v) {
         return nullptr;
     }
-
 public:
     // 使用静态成员变量来枚举Int类型
     static std::shared_ptr<CType> IntType;  // 静态成员变量必须在类内声明，在类外初始化
@@ -75,4 +86,32 @@ public:
     static bool classof(const CType *ty) {
         return ty->GetKind() == Kind::TY_Point;
     }
+};
+
+
+class CArrayType : public CType {
+private:
+    std::shared_ptr<CType> elementType;      /* 数组元素类型*/
+    int elementCount;                        /* 数组元素个数*/
+public:
+    CArrayType(std::shared_ptr<CType> elemType, int elemCount) : \
+        CType(Kind::TY_Array, elemCount*elemType->GetSize(), elemType->GetAlign()), \
+        elementType(elemType), elementCount(elemCount) {};
+    
+    std::shared_ptr<CType> GetElementType() {
+        return elementType;
+    }
+
+    int GetElementCount() {
+        return elementCount;
+    }
+
+    llvm::Type* Accept(TypeVisitor *v) override{
+        return v->VisitArrayType(this);
+    }
+
+    static bool classof(const CType *ty) {
+        return ty->GetKind() == Kind::TY_Array;
+    }
+
 };

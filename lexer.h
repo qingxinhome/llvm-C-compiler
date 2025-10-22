@@ -58,6 +58,8 @@ enum class TokenType {
     pipe_equal,      // |=
     question,        // ?
     colon,           // :
+    l_bracket,       // [
+    r_bracket,       // ]
     eof   // end
 };
 

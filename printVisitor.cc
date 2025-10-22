@@ -87,15 +87,23 @@ llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::StringRef text(decl->token.ptr, decl->token.len);
     *out << text;
 
-    if (decl->init != nullptr) {
+    if (decl->initValues.size() > 0) {
         *out << " = ";
-        decl->init->Accept(this);
+        int i = 0;
+        int size = decl->initValues.size();
+        for (auto &initVal : decl->initValues) {
+            initVal->value->Accept(this);
+            if (i < size -1) {
+                *out << ",";
+            }
+            i++;
+        }
     }
     return nullptr;
 
-    // if (decl->type == CType::IntType) {
-    //     llvm::StringRef text(decl->token.ptr, decl->token.len);
-    //     *out << "int " << text << ";";
+    // if (decl->init != nullptr) {
+    //     *out << " = ";
+    //     decl->init->Accept(this);
     // }
     // return nullptr;
 }
@@ -299,6 +307,14 @@ llvm::Value* PrintVisitor::VisitPostDecExpr(PostDecExpr *postDecExpr) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitPostSubscript(PostSubscript *expr) {
+    expr->left->Accept(this);
+    *out << "[";
+    expr->node->Accept(this);
+    *out << "]";
+    return nullptr;
+}
+
 
 llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
@@ -311,5 +327,13 @@ llvm::Type* PrintVisitor::VisitPointType(CPointType *type) {
     /// 逆序输出
     type->GetBaseType()->Accept(this);
     *out << "*";
+    return nullptr;
+}
+
+// int a[3][4]
+llvm::Type* PrintVisitor::VisitArrayType(CArrayType *type) {
+    *out << "[" << type->GetElementCount() << "]";
+    type->GetElementType()->Accept(this);
+    
     return nullptr;
 }

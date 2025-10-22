@@ -132,6 +132,10 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return  "?";
     case TokenType::colon:
         return ":";
+    case TokenType::l_bracket:
+        return "[";
+    case TokenType::r_bracket:
+        return "]";
     case TokenType::identifier:
         return "identifier";
     default:
@@ -158,7 +162,7 @@ bool Lexer::StartWith(const char* p) {
 }
 
 void Lexer::NextToken(Token &token) {
-    // 1. 过滤空格和换行
+    // 1. 过滤空格和换行, 以及注释
     while(IsWhiteSpace(*CurBufPtr) || StartWith("//") || StartWith("/*")) {
         // 过滤单行注释
         if (StartWith("//")) {
@@ -495,6 +499,18 @@ void Lexer::NextToken(Token &token) {
             break;
         case ':':
             token.tokenType = TokenType::colon;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case '[':
+            token.tokenType = TokenType::l_bracket;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case ']':
+            token.tokenType = TokenType::r_bracket;
             token.ptr = startPtr;
             token.len = 1;
             CurBufPtr++;
