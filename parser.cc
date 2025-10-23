@@ -83,7 +83,22 @@ std::shared_ptr<CType> Parser::ParseDeclSpec() {
     return nullptr;
 }
 
+/*
+解析类型声明符后缀；如:
+int a[2][3][4] 数组类型中的[2][3][4]
+int a(int，float) 函数类型中的(int，float) 
+*/
+std::shared_ptr<CType> Parser::DirectDeclaratorSuffix(std::shared_ptr<CType> baseType) {
+    if (token.tokenType == TokenType::l_bracket) {
+        // 数组声明
+        return DirectDeclaratorArraySuffix(baseType);
+    }
+    // 函数声明
+    return baseType;
+}
+
 /* 
+解析数组类型声明的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
 direct-declarator ::= identifier | "(" declarator ")" | direct-declarator "[" assign "]"
 eg: int a[3][4];
     baseType -> int
@@ -104,35 +119,51 @@ std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType
 // declarator ::= "*"* direct-declarator
 // direct-declarator ::= identifier | "(" declarator ")" | direct-declarator "[" assign "]"
 std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseType) {
-    if (this->token.tokenType == TokenType::l_brace) {
+    std::shared_ptr<AstNode> varDeclNode;
+    if (this->token.tokenType == TokenType::l_parent) {
         // 处理数组指针的语法： 如：int (*p)[5] p是一个指向int [5]数组的指针
-        Consume(TokenType::l_brace);
-        auto node = Declarator(baseType);
-        Consume(TokenType::r_brace);
-        return node;
-    }
-    
-    if(token.tokenType != TokenType::identifier) {
+        Token curToken = token;
+
+        //--------------------------------------------------------------------
+        lexer.SaveState();              /* 保存当前状态 */
+        sema.SetMode(Sema::Mode::Skip);
+
+        Consume(TokenType::l_parent);
+        Declarator(CType::IntType);     /* CType::IntType只是临时占位类型，没有实际意义 */
+        Consume(TokenType::r_parent);
+
+        // 解析类型声明符后缀， 获取完整类型
+        baseType = DirectDeclaratorSuffix(baseType);
+        lexer.RestoreState();           /* 恢复当前状态 */
+        sema.SetMode(Sema::Mode::Normal);
+        //--------------------------------------------------------------------
+
+        token = curToken;
+        Consume(TokenType::l_parent);
+        varDeclNode = Declarator(baseType);
+        Consume(TokenType::r_parent);
+
+        /* CType::IntType是临时占位类型，没有实际意义，调用DirectDeclaratorSuffix是为了让token走到 = 符号 */
+        DirectDeclaratorSuffix(CType::IntType);
+    } else if (token.tokenType == TokenType::identifier){
+        Token ident = token;                 /* 记录变量名 */
+        Consume(TokenType::identifier);
+
+        // 解析类型声明符后缀, 如： a[2][3][4][5]， 或 a(int, char)
+        baseType = DirectDeclaratorSuffix(baseType);
+        varDeclNode = sema.semaVariableDeclNode(ident, baseType);
+    } else {
         GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_ex, "identifer or '('");
     }
-
-    Expect(TokenType::identifier);
-    Token ident = token;                /* 记录变量名 */
-    Consume(TokenType::identifier);
-    // a[2][3][4][5]
-    if (token.tokenType == TokenType::l_bracket) {
-        // 解析数组类型后缀，如[2][3][4][5]
-        baseType = DirectDeclaratorArraySuffix(baseType);
-    } 
-    std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(ident, baseType);
-
+    
     if (token.tokenType == TokenType::equal) {
         NextToken();
         // variableDecl->init = ParseAssignExpr();
         std::vector<int> offsetList;
-        ParseInitializer(variableDecl->initValues, baseType, offsetList, false);
+        VariableDecl *variableDecl = llvm::dyn_cast<VariableDecl>(varDeclNode.get());
+        ParseInitializer(variableDecl->initValues, variableDecl->type, offsetList, false);
     }
-    return variableDecl;
+    return varDeclNode;
 }
 
 /*
