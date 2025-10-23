@@ -219,10 +219,10 @@ TEST(CodeGenTest, array_init2) {
     ASSERT_EQ(res, true);
 }
 
-// TEST(CodeGenTest, array_init3) {
-//     bool res = TestProgramUseJit("{int a[3][4] = {{1,101},{2,6}}; int (*p)[3][4] = &a; (*p)[1][1];}", 6);
-//     ASSERT_EQ(res, true);
-// }
+TEST(CodeGenTest, array_init3) {
+    bool res = TestProgramUseJit("{int a[3][4] = {{1,101},{2,6}}; int (*p)[3][4] = &a; (*p)[1][1];}", 6);
+    ASSERT_EQ(res, true);
+}
 
 // TEST(CodeGenTest, unary_dec_dref) {
 //     bool res = TestProgramUseJit("{int a = 10, b = 20, *p = &a; *--p;}", 20);

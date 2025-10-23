@@ -6,6 +6,12 @@
 // Semantic 语义分析模块
 class Sema {
 public:
+    /* Semantic check mode*/
+    enum class Mode {
+        Normal,      /* 正常模式 */
+        Skip         /* 跳过模式，用于提前初探 */
+    };
+public:
     Sema(DiagEngine &diagEngine) : diagEngine(diagEngine) {}
     // 对变量声明节点进行语义检查
     std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type);
@@ -22,9 +28,13 @@ public:
     std::shared_ptr<VariableDecl::InitValue> semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token);
 
     std::shared_ptr<IfStmt> semaIfStmtNode(std::shared_ptr<AstNode> condNode, std::shared_ptr<AstNode> thenNode, std::shared_ptr<AstNode> elseNode);
+    
     void EnterScope();
     void ExitScope();
+
+    void SetMode(Mode mode);
 private:
     Scope scope;
+    Mode mode{Mode::Normal};         /* 语义检查模式 */
     DiagEngine &diagEngine;
 };

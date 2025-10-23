@@ -32,8 +32,10 @@ private:
     std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType);
     // direct-declarator ::= identifier | direct-declarator "[" assign "]"
     std::shared_ptr<AstNode> DirectDeclarator(std::shared_ptr<CType> baseType);
-    // 解析数组类型声明的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
+    
+    std::shared_ptr<CType> DirectDeclaratorSuffix(std::shared_ptr<CType> baseType);
     std::shared_ptr<CType> DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType);
+    
     // initializer ::= assign | "{" initializer ("," initializer)*  "}"
     bool ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
         std::shared_ptr<CType> declType, 

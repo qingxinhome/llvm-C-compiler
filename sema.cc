@@ -10,8 +10,11 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
         // llvm::errs() << "re define variable name " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
     }
-    // 2. 添加到符号表中
-    scope.AddSymbol(SymbolKind::LocalVariable, type, text);
+
+    if (this->mode == Mode::Normal) {
+        // 2. 添加到符号表中
+        scope.AddSymbol(SymbolKind::LocalVariable, type, text);
+    }
 
     std::shared_ptr<VariableDecl> variableDecl = std::make_shared<VariableDecl>();
     variableDecl->token = token;
@@ -26,7 +29,7 @@ std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
     // 从符号表栈的所有符号表中检查符号是否存在
     llvm::StringRef text(token.ptr, token.len);
     std::shared_ptr<Symbol> symbol = scope.FindSymbol(text);
-    if(symbol == nullptr) {
+    if(symbol == nullptr && (this->mode == Mode::Normal)) {
         // llvm::errs() << "use undefined symbol " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
     }
@@ -76,7 +79,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::bitwise_not:
     {
         // 一元加，一元减，逻辑非，按位取反都只能针对数值类型,因此当前节点的类型就是子节点的类型
-        if (unary->type->GetKind() != CType::TY_Int) {
+        if (unary->type->GetKind() != CType::TY_Int && (this->mode == Mode::Normal)) {
             // 一元加，一元减，逻辑非，按位取反 只能针对基本类型
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_type, "int type");
         }
@@ -86,7 +89,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::addr:
     {
         // int a;  int *p = &a;
-        if (!unary->isLValue) {
+        if (!unary->isLValue && (this->mode == Mode::Normal)) {
             // 要求只能针对左值进行取地址
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
         }
@@ -97,7 +100,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     {
         // int *p = a;  *p = 100;
         // 解引用只能针对指针类型， 需要进行语义检查
-        if (unary->type->GetKind() != CType::TY_Point) {
+        if (unary->type->GetKind() != CType::TY_Point && (this->mode == Mode::Normal)) {
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_type, "pointer type");
         }
         // if (!unary->isLValue) {
@@ -113,7 +116,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::inc:
     case UnaryOp::dec:
     {
-        if (!unary->isLValue) {
+        if (!unary->isLValue && (this->mode == Mode::Normal)) {
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
         }
         // 指针和变量都可以 ++、--
@@ -132,7 +135,7 @@ std::shared_ptr<ThreeExpr> Sema::semaThreeExprNode(std::shared_ptr<AstNode> cond
     threeExpr->then = then;
     threeExpr->els = els;
 
-    if (then->type->GetKind() != els->type->GetKind()) {
+    if (then->type->GetKind() != els->type->GetKind() && (this->mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_same_type);
     }
 
@@ -151,7 +154,7 @@ std::shared_ptr<SizeOfExpr> Sema::semaSizeOfExprNode(std::shared_ptr<AstNode> un
 
 // eg: a++
 std::shared_ptr<PostIncExpr> Sema::semaPostIncExprNode(std::shared_ptr<AstNode> left, Token token) {
-    if (!left->isLValue) {
+    if (!left->isLValue && (this->mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
     }
     auto node = std::make_shared<PostIncExpr>();
@@ -162,7 +165,7 @@ std::shared_ptr<PostIncExpr> Sema::semaPostIncExprNode(std::shared_ptr<AstNode> 
 
 // eg: a--
 std::shared_ptr<PostDecExpr> Sema::semaPostDecExprNode(std::shared_ptr<AstNode> left, Token token) {
-    if (!left->isLValue) {
+    if (!left->isLValue && (this->mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
     }
     auto node = std::make_shared<PostDecExpr>();
@@ -174,7 +177,7 @@ std::shared_ptr<PostDecExpr> Sema::semaPostDecExprNode(std::shared_ptr<AstNode> 
 // eg: a[3]
 // a[3]; -> *(a + offset(3 * elementSize))
 std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> node, Token curtoken) {
-    if (left->type->GetKind() != CType::TY_Array && left->type->GetKind() != CType::TY_Point) {
+    if (left->type->GetKind() != CType::TY_Array && left->type->GetKind() != CType::TY_Point && (this->mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(curtoken.ptr), diag::err_expected_type, "array or point");
     }
 
@@ -197,7 +200,7 @@ std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNo
 
 std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token) {
     // 检查声明的类型和初始化值的类型是否匹配
-    if (declType->GetKind() != value->type->GetKind()) {
+    if (declType->GetKind() != value->type->GetKind() && (this->mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_miss, "same type");
     }
     
@@ -234,4 +237,8 @@ void Sema::EnterScope() {
 
 void Sema::ExitScope() {
     scope.ExitScope();
+}
+
+void Sema::SetMode(Mode mode) {
+    this->mode = mode;
 }
