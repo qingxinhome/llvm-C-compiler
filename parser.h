@@ -26,8 +26,9 @@ private:
 
     // 一个声明语句可以声明多个变量
     std::shared_ptr<AstNode> ParseDeclareStmt();
-    // decl-spec  ::= "int"
+    // decl-spec  ::= "int" | struct-or-union-specifier
     std::shared_ptr<CType> ParseDeclSpec();
+    std::shared_ptr<CType> ParseStructOrUnionSpec();
     // declarator ::= "*"* direct-declarator
     std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType);
     // direct-declarator ::= identifier | direct-declarator "[" assign "]"

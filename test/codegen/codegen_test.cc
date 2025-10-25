@@ -224,6 +224,12 @@ TEST(CodeGenTest, array_init3) {
     ASSERT_EQ(res, true);
 }
 
+TEST(CodeGenTest, struct_1) {
+    bool res = TestProgramUseJit("{struct A{int a, b; int *p;}; struct A a; 1;}", 1);
+    ASSERT_EQ(res, true);
+}
+
+
 // TEST(CodeGenTest, unary_dec_dref) {
 //     bool res = TestProgramUseJit("{int a = 10, b = 20, *p = &a; *--p;}", 20);
 //     ASSERT_EQ(res, true);

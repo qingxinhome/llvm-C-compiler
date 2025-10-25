@@ -766,6 +766,24 @@ llvm::Type* CodeGen::VisitArrayType(CArrayType *type) {
 }
 
 
+llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
+    // llvm::StructType *structType = llvm::StructType::get(context);
+    // structType->setName(type->GetName());
+    llvm::StructType *structType = llvm::StructType::create(context, type->GetName());
+
+    TagKind tagKind = type->GetTagKind();
+    if (tagKind == TagKind::KStruct) {
+        llvm::SmallVector<llvm::Type*> vec;
+        for (auto &mbr : type->GetMembers()) {
+            vec.push_back(mbr.ty->Accept(this));
+        }
+        structType->setBody(vec);
+    }
+
+    return structType;
+}
+
+
 /*
 注：
 1. 在llvm IR中一切指令都是值llvm::Value

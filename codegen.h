@@ -42,6 +42,7 @@ private:
     llvm::Type* VisitPrimaryType(CPrimaryType *type) override;
     llvm::Type* VisitPointType(CPointType *type) override;
     llvm::Type* VisitArrayType(CArrayType *type) override;
+    llvm::Type* VisitRecordType(CRecordType *type) override;
 
 private:
     llvm::LLVMContext context;

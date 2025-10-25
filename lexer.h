@@ -17,6 +17,8 @@ enum class TokenType {
     kw_break, // break
     kw_continue, // continue
     kw_sizeof,   // sizeof
+    kw_struct,   // struct
+    kw_union,    // union
     minus, // -
     plus,  // +
     star,  // *

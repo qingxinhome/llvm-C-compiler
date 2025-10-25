@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
 
     auto &module = codegen.GetModule();
     assert(!llvm::verifyModule(*module));
+    module->print(llvm::outs(), nullptr);
 #ifdef JIT_TEST
     {   
         // 创建llvm::EngineBuilder 对象,用于配置和构建 llvm::ExecutionEngine

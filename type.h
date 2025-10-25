@@ -1,12 +1,14 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include <llvm/IR/Type.h>
 
 
 class CPrimaryType;
 class CPointType;
 class CArrayType;
+class CRecordType;
 
 // 类型访问者基类
 class TypeVisitor {
@@ -15,6 +17,7 @@ public:
     virtual llvm::Type* VisitPrimaryType(CPrimaryType *type) = 0;
     virtual llvm::Type* VisitPointType(CPointType *type) = 0;
     virtual llvm::Type* VisitArrayType(CArrayType *type) = 0;
+    virtual llvm::Type* VisitRecordType(CRecordType *type) = 0;
 };
 
 
@@ -24,7 +27,8 @@ public:
     enum Kind {
         TY_Int,      // 基础类型
         TY_Point,    // 指针类型
-        TY_Array     // 数组类型
+        TY_Array,     // 数组类型
+        TY_Record     // 聚合类型（struct or union）
     };
 public:
     CType(Kind kind, int size, int align): kind(kind), size(size), align(align) {};
@@ -114,4 +118,49 @@ public:
         return ty->GetKind() == Kind::TY_Array;
     }
 
+};
+
+
+
+// Member表示聚合类型的成员
+struct Member {
+    std::shared_ptr<CType> ty;       // 成员的类型
+    llvm::StringRef name;            // 成员的名字
+};
+
+// TagKind用于标识聚合类型的类别
+enum class TagKind {
+    KStruct,
+    KUnion
+};
+
+class CRecordType : public CType {
+private:
+    llvm::StringRef name;          // 聚合类型的名字，如结构体名
+    std::vector<Member> members;
+    TagKind tagKind;               // 聚合类型的类别(struct or union)
+public:
+    CRecordType(llvm::StringRef name, const std::vector<Member> &members, TagKind tagKind);
+    
+    // 函数返回类型是const llvm::StringRef，
+    // 这表示返回的llvm::StringRef对象是只读的，调用者无法通过返回值修改name
+    const llvm::StringRef GetName() {
+        return name;
+    }
+
+    const std::vector<Member>& GetMembers() {
+        return members;
+    }
+
+    TagKind GetTagKind() {
+        return tagKind;
+    }
+
+    llvm::Type* Accept(TypeVisitor *v) override{
+        return v->VisitRecordType(this);
+    }
+
+    static bool classof(const CType *ty) {
+        return ty->GetKind() == Kind::TY_Record;
+    }
 };

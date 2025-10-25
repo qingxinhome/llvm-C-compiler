@@ -3,10 +3,15 @@
 /*
     number,
     identifier,
-    kw_int, // int type
+    kw_int,  // int type
     kw_if,   // if
     kw_else, // else
     kw_for,  // for
+    kw_break, // break
+    kw_continue, // continue
+    kw_sizeof,   // sizeof
+    kw_struct,   // struct
+    kw_union,    // union
     minus, // -
     plus,  // +
     star,  // *
@@ -31,7 +36,26 @@
     caret,      // ^
     percent,    // %
     less_less,  // <<
-    greater_greater // >>
+    greater_greater, // >>
+    plus_plus,      // ++
+    minus_minus,    // --
+    tilde,          // ~
+    exclaim,        // !
+    plus_equal,     // +=
+    minus_equal,    // -=
+    star_equal,     // *=
+    slash_equal,    // /=
+    percent_equal,  // %=
+    less_less_equal, // <<=
+    greater_greater_equal, // >>=
+    amp_equal,       // &=
+    caret_equal,     // ^=
+    pipe_equal,      // |=
+    question,        // ?
+    colon,           // :
+    l_bracket,       // [
+    r_bracket,       // ]
+    eof   // end
 */
 llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
     switch (tokenType)
@@ -50,6 +74,10 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "continue";
     case TokenType::kw_sizeof:
         return "sizeof";
+    case TokenType::kw_struct:
+        return "struct";
+    case TokenType::kw_union:
+        return "union";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -245,6 +273,10 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_continue;
         } else if (content == "sizeof") {
             token.tokenType = TokenType::kw_sizeof;
+        } else if (content == "struct") {
+            token.tokenType = TokenType::kw_struct;
+        } else if (content == "union") {
+            token.tokenType == TokenType::kw_union;
         }
     } else {
         switch (*CurBufPtr)
