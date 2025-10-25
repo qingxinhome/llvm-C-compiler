@@ -7,7 +7,8 @@
 
 // 符号类别
 enum SymbolKind {
-    LocalVariable
+    obj,      // variable, function
+    tag       // struct or union type name
 };
 
 // 符号
@@ -18,14 +19,21 @@ private:
     llvm::StringRef name;
 public:
     Symbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name) : symKind(kind), type(type), name(name) {}
-    std::shared_ptr<CType> GetType(){return type;}
+    std::shared_ptr<CType> GetType(){
+        return type;
+    }
 };
 
 
 // Env对应一个作用域， 其实就是符号表
 class Env {
 public:
-    llvm::StringMap<std::shared_ptr<Symbol>> variableSymbolTable;
+    /*
+        在c语言中，struct和union有单独的命名空间管理. 也就是说struct和uinon的名字
+        可以和变量的名字相同；因此变量 和 结构体/union 的符号表需要分开管理
+    */
+    llvm::StringMap<std::shared_ptr<Symbol>> objSymbolTable;     // object符号表用于存放变量名/函数名符号
+    llvm::StringMap<std::shared_ptr<Symbol>> tagSymbolTable;     // tag符号表用于存放struct或union类型名符号
 };
 
 
@@ -37,7 +45,12 @@ public:
     Scope();
     void EnterScope();
     void ExitScope();
-    std::shared_ptr<Symbol> FindSymbol(llvm::StringRef name);
-    std::shared_ptr<Symbol> FindSymbolInCurScope(llvm::StringRef name);
-    void AddSymbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name);
+    std::shared_ptr<Symbol> FindObjSymbol(llvm::StringRef name);
+    std::shared_ptr<Symbol> FindObjSymbolInCurScope(llvm::StringRef name);
+    void AddObjSymbol(std::shared_ptr<CType> type, llvm::StringRef name);
+
+
+    std::shared_ptr<Symbol> FindTagSymbol(llvm::StringRef name);
+    std::shared_ptr<Symbol> FindTagSymbolInCurScope(llvm::StringRef name);
+    void AddTagSymbol(std::shared_ptr<CType> type, llvm::StringRef name);
 };

@@ -44,7 +44,7 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
         return nullptr;
     }
     // declare statment
-    else if (token.tokenType == TokenType::kw_int) {
+    else if (IsTypeName(token.tokenType)) {
         return ParseDeclareStmt();
     }
     // if statement
@@ -78,8 +78,61 @@ std::shared_ptr<CType> Parser::ParseDeclSpec() {
     if (token.tokenType == TokenType::kw_int) {
         Consume(TokenType::kw_int);
         return CType::IntType;
+    } else if (token.tokenType == TokenType::kw_struct 
+        || token.tokenType == TokenType::kw_union) {
+        return ParseStructOrUnionSpec();
     }
     GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_type);
+    return nullptr;
+}
+
+/*
+decl-spec  ::= "int" | struct-or-union-specifier
+struct-or-union-specifier ::= struct-or-union identifier "{" (decl-spec declarator(, declarator)* ";")+ "}"
+														  struct-or-union identifier
+struct-or-union := "struct" | "union"
+*/
+std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
+    TagKind tagkind;
+    if (token.tokenType == TokenType::kw_struct) {
+        tagkind = TagKind::KStruct;
+    } else if (token.tokenType == TokenType::kw_union) {
+        tagkind = TagKind::KUnion;
+    } else {
+        assert(0);
+    }
+    NextToken();
+
+    Expect(TokenType::identifier);
+    Token tag = token;
+    Consume(TokenType::identifier);
+    /*
+        struct A {int a,b; int *p}  // 定义结构体
+        struct A           // 使用一个结构体， 如 struct A[20];
+    */
+    if (token.tokenType == TokenType::l_brace) {
+        Consume(TokenType::l_brace);
+        // 结构体定义{...}也是一个新的作用域
+        sema.EnterScope();
+
+        std::vector<Member> members;
+        while(token.tokenType != TokenType::r_brace) {
+            auto node = ParseDeclareStmt();
+            DeclareStmt *declstmt = llvm::dyn_cast<DeclareStmt>(node.get());
+            for (auto &n : declstmt->nodeVec) {
+                Member mbr;
+                mbr.ty = n->type;
+                mbr.name = llvm::StringRef(n->token.ptr, n->token.len);
+                members.push_back(mbr);
+            }
+        }
+        sema.ExitScope();
+        Consume(TokenType::r_brace);
+        return sema.semaTagDeclare(tag, members, tagkind);
+    } else {
+        return sema.semaTagAccess(tag);
+    }
+
     return nullptr;
 }
 
@@ -235,16 +288,6 @@ std::shared_ptr<AstNode> Parser::Declarator(std::shared_ptr<CType> baseType) {
         baseType = std::make_shared<CPointType>(baseType);
     }
     return DirectDeclarator(baseType);
-
-
-    // Expect(TokenType::identifier);
-    // std::shared_ptr<VariableDecl> variableDecl = sema.semaVariableDeclNode(token, baseType);
-    // Consume(TokenType::identifier);
-    // if (token.tokenType == TokenType::equal) {
-    //     NextToken();
-    //     variableDecl->init = ParseAssignExpr();
-    // }
-    // return variableDecl;
 }
 
 
@@ -330,7 +373,10 @@ std::shared_ptr<AstNode> Parser::ParseBlockStmt() {
 
     auto blockStmt = std::make_shared<BlockStmt>();
     while(token.tokenType != TokenType::r_brace) {
-        blockStmt->nodeVec.push_back(ParseStmt());
+        auto stmt = ParseStmt();
+        if (stmt != nullptr) {
+            blockStmt->nodeVec.push_back(stmt);
+        } 
     }
     
     Consume(TokenType::r_brace);
@@ -843,6 +889,8 @@ void Parser::NextToken() {
 
 bool Parser::IsTypeName(TokenType tokenType) {
     if (tokenType == TokenType::kw_int) {
+        return true;
+    } else if (tokenType == TokenType::kw_struct || tokenType == TokenType::kw_union) {
         return true;
     }
     return false;

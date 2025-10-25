@@ -5,7 +5,7 @@
 std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::shared_ptr<CType> type) {
     // 1. 检查在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
-    auto symbol = scope.FindSymbolInCurScope(text);
+    auto symbol = scope.FindObjSymbolInCurScope(text);
     if (symbol) {
         // llvm::errs() << "re define variable name " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
@@ -13,7 +13,7 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
 
     if (this->mode == Mode::Normal) {
         // 2. 添加到符号表中
-        scope.AddSymbol(SymbolKind::LocalVariable, type, text);
+        scope.AddObjSymbol(type, text);
     }
 
     std::shared_ptr<VariableDecl> variableDecl = std::make_shared<VariableDecl>();
@@ -28,7 +28,7 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
 std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
     // 从符号表栈的所有符号表中检查符号是否存在
     llvm::StringRef text(token.ptr, token.len);
-    std::shared_ptr<Symbol> symbol = scope.FindSymbol(text);
+    std::shared_ptr<Symbol> symbol = scope.FindObjSymbol(text);
     if(symbol == nullptr && (this->mode == Mode::Normal)) {
         // llvm::errs() << "use undefined symbol " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
@@ -241,4 +241,33 @@ void Sema::ExitScope() {
 
 void Sema::SetMode(Mode mode) {
     this->mode = mode;
+}
+
+
+
+
+std::shared_ptr<CType> Sema::semaTagAccess(Token token) {
+    // 从符号表栈的所有符号表中检查符号是否存在
+    llvm::StringRef text(token.ptr, token.len);
+    std::shared_ptr<Symbol> symbol = scope.FindTagSymbol(text);
+    if(symbol == nullptr && (this->mode == Mode::Normal)) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
+    }
+    return symbol->GetType();
+}
+
+std::shared_ptr<CType> Sema::semaTagDeclare(Token token, const std::vector<Member> &members, TagKind tagKind) {
+    // 1. 检查在当前作用域内是否存在重名
+    llvm::StringRef text(token.ptr, token.len);
+    auto symbol = scope.FindTagSymbolInCurScope(text);
+    if (symbol != nullptr) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+    }
+
+    auto recordType = std::make_shared<CRecordType>(text, members, tagKind);
+    if (this->mode == Mode::Normal) {
+        // 2. 添加到符号表中
+        scope.AddTagSymbol(recordType, text);
+    }
+    return recordType;
 }

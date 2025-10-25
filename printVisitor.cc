@@ -337,3 +337,21 @@ llvm::Type* PrintVisitor::VisitArrayType(CArrayType *type) {
     
     return nullptr;
 }
+
+
+llvm::Type* PrintVisitor::VisitRecordType(CRecordType *type) {
+    TagKind tagkind = type->GetTagKind();
+    if (tagkind == TagKind::KStruct) {
+        *out << "struct ";
+    } else {
+        *out << "union ";
+    }
+
+    *out << type->GetName() << "{";
+    for (auto &mbr : type->GetMembers()) {
+        mbr.ty->Accept(this);
+        *out << mbr.name << ";";
+    }
+    *out << "}";
+    return nullptr;
+}
