@@ -52,7 +52,7 @@ public:
 public:
     // 使用静态成员变量来枚举Int类型
     static std::shared_ptr<CType> IntType;  // 静态成员变量必须在类内声明，在类外初始化
-private:
+protected:
     Kind kind;
     int size;      // 类型占用空间大小(字节)
     int align;     // 对齐数， 通常内置类型的对齐数和类型的大小相同
@@ -126,6 +126,8 @@ public:
 struct Member {
     std::shared_ptr<CType> ty;       // 成员的类型
     llvm::StringRef name;            // 成员的名字
+    int offset;                      // 成员地址偏移
+    int elemIdx;                     // 元素的位置
 };
 
 // TagKind用于标识聚合类型的类别
@@ -138,6 +140,7 @@ class CRecordType : public CType {
 private:
     llvm::StringRef name;          // 聚合类型的名字，如结构体名
     std::vector<Member> members;
+    int maxElementIdx;         // 占用空间最大的元素位置
     TagKind tagKind;               // 聚合类型的类别(struct or union)
 public:
     CRecordType(llvm::StringRef name, const std::vector<Member> &members, TagKind tagKind);
@@ -152,8 +155,12 @@ public:
         return members;
     }
 
-    TagKind GetTagKind() {
+    const TagKind GetTagKind() {
         return tagKind;
+    }
+
+    int GetMaxElementIdx() {
+        return maxElementIdx;
     }
 
     llvm::Type* Accept(TypeVisitor *v) override{
@@ -163,4 +170,7 @@ public:
     static bool classof(const CType *ty) {
         return ty->GetKind() == Kind::TY_Record;
     }
+private:
+    void UpdateStructOffset();
+    void UpdateUnionOffset();
 };

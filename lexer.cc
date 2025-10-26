@@ -276,7 +276,7 @@ void Lexer::NextToken(Token &token) {
         } else if (content == "struct") {
             token.tokenType = TokenType::kw_struct;
         } else if (content == "union") {
-            token.tokenType == TokenType::kw_union;
+            token.tokenType = TokenType::kw_union;
         }
     } else {
         switch (*CurBufPtr)
