@@ -1,5 +1,0 @@
-if(EXISTS "/home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser/parser_test[1]_tests.cmake")
-  include("/home/yiming/llvmcompiler/llvm-C-compiler/build/test/parser/parser_test[1]_tests.cmake")
-else()
-  add_test(parser_test_NOT_BUILT parser_test_NOT_BUILT)
-endif()
