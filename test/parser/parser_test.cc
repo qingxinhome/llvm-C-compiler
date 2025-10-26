@@ -257,6 +257,6 @@ TEST(ParserTest, arr_init1) {
 }
 
 TEST(ParserTest, struct_1) {
-    bool res = TestParserWithContent("{struct A{int a, b; int *p;}; struct A a; 1;}", "{struct A{int a;int b;int *p;}a;1;}");
+    bool res = TestParserWithContent("{struct A{int a, b; int *p;}; struct A a; 1;}", "{struct A{int a;int b;int *p;} a;1;}");
     ASSERT_EQ(res, true);
 }

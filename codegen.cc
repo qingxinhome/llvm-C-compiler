@@ -778,8 +778,14 @@ llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
             vec.push_back(mbr.ty->Accept(this));
         }
         structType->setBody(vec);
-    }
+    } else {
+        llvm::SmallVector<llvm::Type*> vec;
+        const auto &memebers = type->GetMembers();
+        int idx = type->GetMaxElementIdx();
 
+        vec.push_back(memebers[idx].ty->Accept(this));
+        structType->setBody(vec);
+    }
     return structType;
 }
 

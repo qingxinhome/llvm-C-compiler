@@ -352,6 +352,6 @@ llvm::Type* PrintVisitor::VisitRecordType(CRecordType *type) {
         mbr.ty->Accept(this);
         *out << mbr.name << ";";
     }
-    *out << "}";
+    *out << "} ";
     return nullptr;
 }
