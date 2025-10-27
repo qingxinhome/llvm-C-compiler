@@ -62,6 +62,8 @@ enum class TokenType {
     colon,           // :
     l_bracket,       // [
     r_bracket,       // ]
+    dot,             // .
+    arrow,           // ->
     eof   // end
 };
 

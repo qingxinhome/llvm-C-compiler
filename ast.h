@@ -22,6 +22,8 @@ class SizeOfExpr;
 class PostDecExpr;
 class PostIncExpr;
 class PostSubscript;
+class PostMemberDotExpr;
+class PostMemberArrowExpr;
 class NumberExpr;
 
 // 抽象访问者基类
@@ -44,6 +46,8 @@ public:
     virtual llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) = 0;
     virtual llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) = 0;
     virtual llvm::Value* VisitPostSubscript(PostSubscript *expr) = 0;
+    virtual llvm::Value* VisitPostMemberDotExpr(PostMemberDotExpr *expr) = 0;
+    virtual llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) = 0;
     virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
 };
 
@@ -67,6 +71,8 @@ public:
         Node_PostIncExpr,
         Node_PostDecExpr,
         Node_PostSubscript,
+        Node_PostMemberDotExpr,
+        Node_PostMemberArrowExpr,
         Node_NumberExor,
         Node_VariableAccessExpr
     };
@@ -76,8 +82,9 @@ public:
     AstNode(Kind kind) : kind(kind) {}
     virtual ~AstNode(){}
 
-    std::shared_ptr<CType> type;
-    Token token;
+    std::shared_ptr<CType> type;         /* 语句或者表达式的类型*/
+    Token token;                         /* 语句或者表达式的当前token*/
+
     // 是否为左值
     bool isLValue{false}; 
 
@@ -375,6 +382,38 @@ public:
         return node->GetKind() == Node_PostSubscript;
     }
 };
+
+
+class PostMemberDotExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;    // 存放基址
+    Member member;                    // 存放结构体成员
+
+    PostMemberDotExpr() : AstNode(Node_PostMemberDotExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostMemberDotExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostMemberDotExpr;
+    }
+};
+
+class PostMemberArrowExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;    // 存放基址
+    Member member;                    // 存放结构体成员
+
+    PostMemberArrowExpr() : AstNode(Node_PostMemberArrowExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostMemberArrowExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostMemberArrowExpr;
+    }
+};
+
 
 
 // 因子表达式

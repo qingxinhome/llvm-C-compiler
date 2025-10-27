@@ -778,16 +778,42 @@ std::shared_ptr<AstNode> Parser::ParsePostfixExpr() {
             left = sema.semaPostIncExprNode(left, this->token);
             Consume(TokenType::plus_plus);
             continue;
-        } else if (this->token.tokenType == TokenType::minus_minus) {
+        } 
+        
+        // a--
+        if (this->token.tokenType == TokenType::minus_minus) {
             left = sema.semaPostDecExprNode(left, this->token);
             Consume(TokenType::minus_minus);
             continue;
-        } else if (this->token.tokenType == TokenType::l_bracket) {
+        } 
+        
+        // arr[2][3]
+        if (this->token.tokenType == TokenType::l_bracket) {
             Token tmp = token;
             Consume(TokenType::l_bracket);
             auto node = ParseExpr();
             Consume(TokenType::r_bracket);
             left = sema.semaPostSubscriptNode(left, node, tmp);
+            continue;
+        } 
+        
+        // stu.name 结构体成员访问
+        if (this->token.tokenType == TokenType::dot) {
+            Token dottoken = token;
+            Consume(TokenType::dot);
+            Token tmpToken = token;
+            Consume(TokenType::identifier);
+            left = sema.semaPostMemberDotNode(left, tmpToken, dottoken);
+            continue;
+        }
+
+        // stu->name 结构体成员访问
+        if (this->token.tokenType == TokenType::arrow) {
+            Token arrowtoken = token;
+            Consume(TokenType::arrow);
+            Token tmpToken = token;
+            Consume(TokenType::identifier);
+            left = sema.semaPostMemberArrowNode(left, tmpToken, arrowtoken);
             continue;
         }
         break;

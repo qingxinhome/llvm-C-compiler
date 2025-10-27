@@ -239,3 +239,34 @@ TEST(CodeGenTest, struct_1) {
 //     bool res = TestProgramUseJit("{int a = 10, b = 20, *p = &b; *++p;}", 10);
 //     ASSERT_EQ(res, true);
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+TEST(CodeGenTest, my_struct_1) {
+    bool res = TestProgramUseJit("{struct A{int a, b; int *p;} b; struct A a; b.a = 11; a.a= 100; a.a += b.a; a.a;}", 111);
+    ASSERT_EQ(res, true);
+}
+
+TEST(CodeGenTest, my_struct_2) {
+    bool res = TestProgramUseJit("{struct A{int a, b; int *p;} b; struct A *a = &b; b.a = 11; a->a;}", 11);
+    ASSERT_EQ(res, true);
+}
+
+TEST(CodeGenTest, my_union_1) {
+    bool res = TestProgramUseJit("{union A{int a, b; int *p;} b; union A *a = &b; a->a = 10; a->b;}", 10);
+    ASSERT_EQ(res, true);
+}
+
+TEST(CodeGenTest, my_union_2) {
+    bool res = TestProgramUseJit("{union A{int a, b; int *p;} b; union A *a = &b; a->a = 10; a->a;}", 10);
+    ASSERT_EQ(res, true);
+}

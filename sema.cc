@@ -197,6 +197,68 @@ std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNo
     return postSubscriptNode;
 }
 
+std::shared_ptr<PostMemberDotExpr> Sema::semaPostMemberDotNode(std::shared_ptr<AstNode> left, Token identoken, Token dotToekn) {
+    if (left->type->GetKind() != CType::TY_Record) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(dotToekn.ptr), diag::err_expected_type, "struct or union type");
+    }
+
+    CRecordType *recordType = llvm::dyn_cast<CRecordType>(left->type.get());
+    
+    bool found = false;
+    Member curMember;
+    for(const auto &member : recordType->GetMembers()) {
+        if (member.name == llvm::StringRef(identoken.ptr, identoken.len)) {
+            found = true;
+            curMember = member;
+            break;
+        }
+    }
+    
+    if (!found) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(identoken.ptr), diag::err_miss, "struct or union miss field");
+    }
+
+    auto node = std::make_shared<PostMemberDotExpr>();
+    node->token = dotToekn;
+    node->type = curMember.ty;
+    node->left = left;
+    node->member = curMember;
+    return node;
+}
+
+std::shared_ptr<PostMemberArrowExpr> Sema::semaPostMemberArrowNode(std::shared_ptr<AstNode> left, Token identoken, Token arrowToken) {
+    if (left->type->GetKind() != CType::TY_Point) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(arrowToken.ptr), diag::err_expected_type, "pointer type");
+    }
+    CPointType *pointerType = llvm::dyn_cast<CPointType>(left->type.get());
+
+    auto baseType = pointerType->GetBaseType();
+    if (baseType->GetKind() != CType::TY_Record) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(arrowToken.ptr), diag::err_expected_type, "struct or union pointer type");
+    }
+    CRecordType *recordType = llvm::dyn_cast<CRecordType>(baseType.get());
+    
+    bool found = false;
+    Member curMember;
+    for(const auto &member : recordType->GetMembers()) {
+        if (member.name == llvm::StringRef(identoken.ptr, identoken.len)) {
+            found = true;
+            curMember = member;
+            break;
+        }
+    }
+    
+    if (!found) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(identoken.ptr), diag::err_miss, "struct or union miss field");
+    }
+
+    auto node = std::make_shared<PostMemberArrowExpr>();
+    node->token = arrowToken;
+    node->type = curMember.ty;
+    node->left = left;
+    node->member = curMember;
+    return node;
+}
 
 std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token) {
     // 检查声明的类型和初始化值的类型是否匹配
