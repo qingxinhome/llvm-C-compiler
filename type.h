@@ -140,7 +140,7 @@ class CRecordType : public CType {
 private:
     llvm::StringRef name;          // 聚合类型的名字，如结构体名
     std::vector<Member> members;
-    int maxElementIdx;         // 占用空间最大的元素位置
+    int maxElementIdx;             // 占用空间最大的元素位置
     TagKind tagKind;               // 聚合类型的类别(struct or union)
 public:
     CRecordType(llvm::StringRef name, const std::vector<Member> &members, TagKind tagKind);

@@ -41,8 +41,8 @@ int main(int argc, char* argv[]) {
     Parser parser(lexer, sema);
     auto program = parser.ParseProgram();
     // PrintVisitor printVisitor(program);
+    
     CodeGen codegen(program);    /*将AST转换为LLVM IR*/
-
     auto &module = codegen.GetModule();
     assert(!llvm::verifyModule(*module));
     module->print(llvm::outs(), nullptr);
@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
         // 创建llvm::EngineBuilder 对象,用于配置和构建 llvm::ExecutionEngine
         llvm::EngineBuilder builder(std::move(module));  /* std::move(module) 将之前生成的llvm::Module的所有权转移给EngineBuilder */
         std::string error;
-        /* SectionMemoryManager 管理内存分配和符号解析*/
+        /* SectionMemoryManager 内存管理器 -> 管理内存分配和符号解析*/
         auto ptr = std::make_unique<llvm::SectionMemoryManager>();
         auto ref = ptr.get();
         std::unique_ptr<llvm::ExecutionEngine> ee(

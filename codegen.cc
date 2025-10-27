@@ -697,6 +697,70 @@ llvm::Value* CodeGen::VisitPostSubscript(PostSubscript *expr) {
     return irBuilder.CreateLoad(ty, addr);
 }
 
+// 其实就是求结构体成员的地址
+// a.b , a -> T (a 类型就是T)
+llvm::Value* CodeGen::VisitPostMemberDotExpr(PostMemberDotExpr *expr) {
+    // leftValue就是结构体变量本身，注意：它不是结构体变量的地址， 因为它是被load出来的，相当于做了解引用， T *a -> T
+    llvm::Value *leftValue = expr->left->Accept(this); 
+    llvm::Type *leftType = expr->left->type->Accept(this);  // 结构体的类型
+    
+    // 获取结构体的C语言类型
+    CRecordType *cRecordType = llvm::dyn_cast<CRecordType>(expr->left->type.get());
+    TagKind tagKind = cRecordType->GetTagKind();
+    
+    // 计算结构体元素的类型
+    llvm::Type* memType = expr->member.ty->Accept(this);
+    if (tagKind == TagKind::KStruct) {
+        llvm::Value *val0 = irBuilder.getInt32(0);
+        llvm::Value *next = irBuilder.getInt32(expr->member.elemIdx);
+
+        // llvm::Value *CreateInBoundsGEP(llvm::Type *Ty, llvm::Value *Ptr, ...)
+        // CreateInBoundsGEP的ty参数是结构体的类型， Ptr是结构体变量的指针
+        llvm::Value* memAddr = irBuilder.CreateInBoundsGEP(leftType, llvm::dyn_cast<LoadInst>(leftValue)->getPointerOperand(), {val0, next}); 
+        return irBuilder.CreateLoad(memType, memAddr);
+    } else {
+        llvm::Value *val0 = irBuilder.getInt32(0);
+        llvm::Value* memAddr = irBuilder.CreateInBoundsGEP(leftType, llvm::dyn_cast<LoadInst>(leftValue)->getPointerOperand(), {val0, val0}); 
+        
+        // BitCast的作用是：将一个值的类型由源类型转换为另一个类型，而不改变数据的二进制表示，只改变编译器对该数据值的类型解释。
+        llvm::Value *cast = irBuilder.CreateBitCast(memAddr, llvm::PointerType::getUnqual(memType));
+        return irBuilder.CreateLoad(memType, cast);
+    }
+}
+
+// a->b
+// ptr* -> ptr
+llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
+    // 由于是指针选择选择运算符(->), 因此leftValue就是结构体变量的地址
+    llvm::Value *leftValue = expr->left->Accept(this); 
+
+    CPointType *cRecordTypePtr = llvm::dyn_cast<CPointType>(expr->left->type.get());
+    llvm::Type *leftType = cRecordTypePtr->GetBaseType()->Accept(this);  // 由结构体指针获取结构体的类型
+    
+    // 获取结构体的C语言类型
+    CRecordType *cRecordType = llvm::dyn_cast<CRecordType>(cRecordTypePtr->GetBaseType().get());
+    TagKind tagKind = cRecordType->GetTagKind();
+    
+    // 计算结构体元素的类型
+    llvm::Type* memType = expr->member.ty->Accept(this);
+    if (tagKind == TagKind::KStruct) {
+        llvm::Value *val0 = irBuilder.getInt32(0);
+        llvm::Value *next = irBuilder.getInt32(expr->member.elemIdx);
+
+        // llvm::Value *CreateInBoundsGEP(llvm::Type *Ty, llvm::Value *Ptr, ...)
+        // CreateInBoundsGEP的ty参数是结构体的类型， Ptr是结构体变量的指针
+        llvm::Value* memAddr = irBuilder.CreateInBoundsGEP(leftType, leftValue, {val0, next}); 
+        return irBuilder.CreateLoad(memType, memAddr);
+    } else {
+        llvm::Value *val0 = irBuilder.getInt32(0);
+        llvm::Value* memAddr = irBuilder.CreateInBoundsGEP(leftType, leftValue, {val0, val0}); 
+        
+        // BitCast的作用是：将一个值的类型由源类型转换为另一个类型，而不改变数据的二进制表示，只改变编译器对该数据值的类型解释。
+        llvm::Value *cast = irBuilder.CreateBitCast(memAddr, llvm::PointerType::getUnqual(memType));
+        return irBuilder.CreateLoad(memType, cast);
+    }
+}
+
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = decl->type->Accept(this);
@@ -736,6 +800,9 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
 
 // '变量访问' 返回的应该是一个右值
 // CreateLoad返回的是一个右值
+// 变量访问节点，就是通过变量的指针解引用，获取变量的值，所以返回的结果不是变量的指针，而是变量的值本身
+// alloc T -> T *
+// load T* -> T
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
     llvm::StringRef varName(expr->token.ptr, expr->token.len);
     std::pair pair = varAddrTypeMap[varName];

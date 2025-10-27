@@ -31,6 +31,8 @@ public:
     llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) override;
     llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) override;
     llvm::Value* VisitPostSubscript(PostSubscript *expr) override;
+    llvm::Value* VisitPostMemberDotExpr(PostMemberDotExpr *expr) override;
+    llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) override;
     llvm::Value* VisitNumberExpr(NumberExpr *numberExpr) override;
 
     llvm::Type* VisitPrimaryType(CPrimaryType *type) override;

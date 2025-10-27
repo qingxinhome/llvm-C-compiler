@@ -55,6 +55,8 @@
     colon,           // :
     l_bracket,       // [
     r_bracket,       // ]
+    dot,             // .
+    arrow,           // ->
     eof   // end
 */
 llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
@@ -164,6 +166,10 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "[";
     case TokenType::r_bracket:
         return "]";
+    case TokenType::dot:
+        return ".";
+    case TokenType::arrow:
+        return "->";
     case TokenType::identifier:
         return "identifier";
     default:
@@ -194,19 +200,14 @@ void Lexer::NextToken(Token &token) {
     while(IsWhiteSpace(*CurBufPtr) || StartWith("//") || StartWith("/*")) {
         // 过滤单行注释
         if (StartWith("//")) {
-            while (*CurBufPtr != '\n') {
+            while (*CurBufPtr != '\n' && (CurBufPtr < BufEnd)) {
                 CurBufPtr++;
             }
-            if (*CurBufPtr == '\n' ) {
-                row++;
-                LineHeadPtr = CurBufPtr + 1;
-            }
-            CurBufPtr++;
         }
 
         // 过滤多行注释
         if (StartWith("/*")) {
-            while (CurBufPtr[0] != '*' || CurBufPtr[1] != '/') {
+            while ((CurBufPtr[0] != '*' || CurBufPtr[1] != '/') && (CurBufPtr < BufEnd) ) {
                 if (*CurBufPtr == '\n' ) {
                     row++;
                     LineHeadPtr = CurBufPtr + 1;
@@ -214,6 +215,10 @@ void Lexer::NextToken(Token &token) {
                 CurBufPtr++;
             }
             CurBufPtr += 2;
+        }
+        if (CurBufPtr >= BufEnd) {
+            token.tokenType = TokenType::eof;
+            return;
         }
 
         if (*CurBufPtr == '\n' ) {
@@ -310,6 +315,11 @@ void Lexer::NextToken(Token &token) {
                 token.ptr = startPtr;
                 token.len = 2;
                 CurBufPtr+=2;
+            } else if (CurBufPtr[1] == '>') {
+                token.tokenType = TokenType::arrow;
+                token.ptr = startPtr;
+                token.len = 2;
+                CurBufPtr +=2;
             } else {
                 token.tokenType = TokenType::minus;
                 token.ptr = startPtr;
@@ -543,6 +553,12 @@ void Lexer::NextToken(Token &token) {
             break;
         case ']':
             token.tokenType = TokenType::r_bracket;
+            token.ptr = startPtr;
+            token.len = 1;
+            CurBufPtr++;
+            break;
+        case '.':
+            token.tokenType = TokenType::dot;
             token.ptr = startPtr;
             token.len = 1;
             CurBufPtr++;

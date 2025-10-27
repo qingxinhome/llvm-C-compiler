@@ -315,6 +315,20 @@ llvm::Value* PrintVisitor::VisitPostSubscript(PostSubscript *expr) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitPostMemberDotExpr(PostMemberDotExpr *expr) {
+    expr->left->Accept(this);
+    *out << ".";
+    *out << expr->member.name;
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
+    expr->left->Accept(this);
+    *out << "->";
+    *out << expr->member.name;
+    return nullptr;
+}
+
 
 llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
