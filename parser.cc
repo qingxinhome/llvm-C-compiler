@@ -103,9 +103,17 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
     }
     NextToken();
 
-    Expect(TokenType::identifier);
-    Token tag = token;
-    Consume(TokenType::identifier);
+    bool anony = false;
+    Token tag;
+    if (token.tokenType == TokenType::l_brace) {
+        anony = true;
+    } else {
+        Expect(TokenType::identifier);
+        /* 记录结构体类型名.如 struct A {...} 中的A */
+        tag = token;                 
+        Consume(TokenType::identifier);
+    }
+
     /*
         struct A {int a,b; int *p}  // 定义结构体
         struct A           // 使用一个结构体， 如 struct A[20];
@@ -128,7 +136,11 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
         }
         sema.ExitScope();
         Consume(TokenType::r_brace);
-        return sema.semaTagDeclare(tag, members, tagkind);
+        if (anony) {
+            return sema.semaAnonyTagDeclare(members, tagkind);
+        } else {
+            return sema.semaTagDeclare(tag, members, tagkind);
+        }
     } else {
         return sema.semaTagAccess(tag);
     }

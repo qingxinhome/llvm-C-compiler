@@ -20,7 +20,11 @@ public:
     virtual llvm::Type* VisitRecordType(CRecordType *type) = 0;
 };
 
-
+// TagKind用于标识聚合类型的类别
+enum class TagKind {
+    KStruct,
+    KUnion
+};
 
 class CType {
 public:
@@ -52,6 +56,9 @@ public:
 public:
     // 使用静态成员变量来枚举Int类型
     static std::shared_ptr<CType> IntType;  // 静态成员变量必须在类内声明，在类外初始化
+
+    // GenAnonyRecordName 用于为匿名结构体或者union生成一个名字
+    static llvm::StringRef GenAnonyRecordName(TagKind tagKind);
 protected:
     Kind kind;
     int size;      // 类型占用空间大小(字节)
@@ -130,16 +137,11 @@ struct Member {
     int elemIdx;                     // 元素的位置
 };
 
-// TagKind用于标识聚合类型的类别
-enum class TagKind {
-    KStruct,
-    KUnion
-};
 
 class CRecordType : public CType {
 private:
     llvm::StringRef name;          // 聚合类型的名字，如结构体名
-    std::vector<Member> members;
+    std::vector<Member> members;   // 聚合类型的成员
     int maxElementIdx;             // 占用空间最大的元素位置
     TagKind tagKind;               // 聚合类型的类别(struct or union)
 public:
