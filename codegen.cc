@@ -774,7 +774,8 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     // curFunc->getEntryBlock().begin() 函数的入口基本快的插入位置迭代器
     llvm::IRBuilder<> tmpIrBuilder(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
 
-    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);
+    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);    /* 为变量申请内存地址 */
+    // 存储变量的地址和类型的KV
     varAddrTypeMap.insert({varName, {value, ty}});
 
     if (decl->initValues.size() > 0) {
@@ -782,13 +783,43 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
             llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
             irBuilder.CreateStore(initValue, value);
         } else {
+            // 处理数组声明的初始化
             if (llvm::ArrayType *arrType = llvm::dyn_cast<llvm::ArrayType>(ty)) {
                 for (const auto &initValue : decl->initValues) {
                     llvm::SmallVector<llvm::Value*> vec;
                     for (auto &offset : initValue->offsetList) {
                         vec.push_back(irBuilder.getInt32(offset));
                     }
-                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(arrType->getElementType(), value, vec);
+                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
+                    llvm::Value *val = initValue->value->Accept(this);
+                    irBuilder.CreateStore(val, addr);
+                }
+            } 
+            // 处理struct/union声明的初始化
+            else if (llvm::StructType *structType = llvm::dyn_cast<StructType>(ty)) {
+                // 获取对应C语言类型信息
+                CRecordType *cStructType = llvm::dyn_cast<CRecordType>(decl->type.get());
+                TagKind tagKind = cStructType->GetTagKind();
+                if (tagKind == TagKind::KStruct) {
+                    for (const auto &initValue : decl->initValues) {
+                        llvm::SmallVector<llvm::Value*> vec;
+                        for (auto &offset : initValue->offsetList) {
+                            vec.push_back(irBuilder.getInt32(offset));
+                        }
+                        llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
+                        llvm::Value *val = initValue->value->Accept(this);
+                        irBuilder.CreateStore(val, addr);
+                    }
+                } else {
+                    // union
+                    assert(decl->initValues.size() == 1);
+
+                    llvm::SmallVector<llvm::Value*> vec;
+                    const auto& initValue = decl->initValues[0];
+                    for (auto &offset : initValue->offsetList) {
+                        vec.push_back(irBuilder.getInt32(offset));
+                    }
+                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
                     llvm::Value *val = initValue->value->Accept(this);
                     irBuilder.CreateStore(val, addr);
                 }

@@ -224,7 +224,7 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
     if (token.tokenType == TokenType::equal) {
         NextToken();
         // variableDecl->init = ParseAssignExpr();
-        std::vector<int> offsetList;
+        std::vector<int> offsetList{0};  // 0 表示访问首元素
         VariableDecl *variableDecl = llvm::dyn_cast<VariableDecl>(varDeclNode.get());
         ParseInitializer(variableDecl->initValues, variableDecl->type, offsetList, false);
     }
@@ -270,6 +270,38 @@ bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValu
                 offsetList.pop_back();
                 if (isEnd) {
                     break;
+                }
+            }
+        } else if (declType->GetKind() == CType::TY_Record) {
+            // 处理结构体/共用体类型变量的初始化
+            CRecordType *recordType = llvm::dyn_cast<CRecordType>(declType.get());
+
+            TagKind tagKind = recordType->GetTagKind();
+            const auto &members = recordType->GetMembers();
+
+            if (tagKind == TagKind::KStruct) {
+                int isEnd = false;
+                // struct A {int a; int b;} d = {10, 12};
+                for (int i = 0; i < members.size(); i++)
+                {
+                    if (i > 0 && token.tokenType == TokenType::comma) {
+                        Consume( TokenType::comma);
+                    }
+                    // 这里使用offsetList做回溯
+                    offsetList.push_back(i);
+                    isEnd = ParseInitializer(arr, members[i].ty, offsetList, true);
+                    offsetList.pop_back();
+                    if (isEnd) {
+                        break;
+                    }
+                }
+            } else {
+                // union 赋初值
+                if (members.size() > 0) {
+                    // union 赋初值默认只会给第一个成员赋值
+                    offsetList.push_back(0);
+                    ParseInitializer(arr, members[0].ty, offsetList, true);
+                    offsetList.pop_back();
                 }
             }
         }
