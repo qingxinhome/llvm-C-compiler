@@ -333,3 +333,14 @@ std::shared_ptr<CType> Sema::semaTagDeclare(Token token, const std::vector<Membe
     }
     return recordType;
 }
+
+
+std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &members, TagKind tagKind) {
+    llvm::StringRef text = CType::GenAnonyRecordName(tagKind);
+    auto recordType = std::make_shared<CRecordType>(text, members, tagKind);
+    if (this->mode == Mode::Normal) {
+        // 2. 添加到符号表中
+        scope.AddTagSymbol(recordType, text);
+    }
+    return recordType;
+}

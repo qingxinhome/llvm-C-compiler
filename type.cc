@@ -8,6 +8,23 @@
 // 静态成员变量必须在类内声明，在类外初始化
 std::shared_ptr<CType> CType::IntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4);
 
+llvm::StringRef CType::GenAnonyRecordName(TagKind tagKind) {
+    // 定义静态局部变量
+    static long long idx = 0;
+    std::string name;
+    if (tagKind == TagKind::KStruct) {
+        name = "_1anony_struct_" + std::to_string(idx++) + "_";
+    } else {
+        name = "_1anony_union_" + std::to_string(idx++) + "_";
+    }
+
+    // 申请一块持久化的内存（在编译器退出的时候，才会释放）
+    char *buf = (char *)malloc(name.size()+1);
+    memset(buf, 0, sizeof(buf));
+    strcpy(buf, name.data());
+    // 保证返回一个持久化的名字
+    return llvm::StringRef(buf, strlen(buf));
+}
 
 
 // roundup地址对齐算法, 参数：x: 地址, align: 对齐方式

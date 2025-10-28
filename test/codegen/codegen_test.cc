@@ -261,6 +261,18 @@ TEST(CodeGenTest, my_struct_2) {
     ASSERT_EQ(res, true);
 }
 
+
+TEST(CodeGenTest, my_anony_struct_1) {
+    bool res = TestProgramUseJit("{struct A{int a, b; int *p; struct {int a; int c;} d;} b; struct A *a = &b; b.a = 11; a->a;}", 11);
+    ASSERT_EQ(res, true);
+}
+
+TEST(CodeGenTest, my_anony_struct_2) {
+    bool res = TestProgramUseJit("{struct A{int a, b; int *p; struct {int a; int c;} d;} b; struct A *a = &b; b.d.a = 11; a->d.a;}", 11);
+    ASSERT_EQ(res, true);
+}
+
+
 TEST(CodeGenTest, my_union_1) {
     bool res = TestProgramUseJit("{union A{int a, b; int *p;} b; union A *a = &b; a->a = 10; a->b;}", 10);
     ASSERT_EQ(res, true);

@@ -764,8 +764,16 @@ llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = decl->type->Accept(this);
-
     llvm::StringRef varName(decl->token.ptr, decl->token.len);
+
+    /* 
+       在LLVM IR中，alloca指令必须放在函数的 entry basic block（入口基本块）中 
+    */
+    // 创建一个临时irBuilder, 
+    // curFunc->getEntryBlock() 获取函数的入口基本快
+    // curFunc->getEntryBlock().begin() 函数的入口基本快的插入位置迭代器
+    llvm::IRBuilder<> tmpIrBuilder(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
+
     llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);
     varAddrTypeMap.insert({varName, {value, ty}});
 
@@ -834,9 +842,12 @@ llvm::Type* CodeGen::VisitArrayType(CArrayType *type) {
 
 
 llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
-    // llvm::StructType *structType = llvm::StructType::get(context);
-    // structType->setName(type->GetName());
-    llvm::StructType *structType = llvm::StructType::create(context, type->GetName());
+    // 判断llvm IR 的结构体类型是在其符号表中否已经存在
+    llvm::StructType *structType = llvm::StructType::getTypeByName(context, type->GetName());
+    if (structType != nullptr) {
+        return structType;
+    }
+    structType = llvm::StructType::create(context, type->GetName());
 
     TagKind tagKind = type->GetTagKind();
     if (tagKind == TagKind::KStruct) {
@@ -853,6 +864,9 @@ llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
         vec.push_back(memebers[idx].ty->Accept(this));
         structType->setBody(vec);
     }
+
+    // 打印类型
+    // structType->print(llvm::outs());
     return structType;
 }
 
@@ -860,5 +874,8 @@ llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
 /*
 注：
 1. 在llvm IR中一切指令都是值llvm::Value
-2. 在llvm中类型的基类是 llvm::Type
+2. 在llvm中类型的基类是 llvm::Type, llvm::Type中有一个print函数，可用于打印当前类型的ir
+3. 在 LLVM IR 中，alloca 指令必须放在函数的 entry basic block（入口基本块）中。这是 LLVM 语言
+   规范（Language Reference）明确规定的规则，不能违反，否则 IR 将被视为 ill-formed（格式错误），后续的 opt、llc 或 clang 等工
+   具可能会报错或产生未定义行为。
 */

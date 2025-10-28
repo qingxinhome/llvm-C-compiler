@@ -35,6 +35,7 @@ public:
     /* 把结构体和union类型名称之为一个tag */
     std::shared_ptr<CType> semaTagAccess(Token token);
     std::shared_ptr<CType> semaTagDeclare(Token token, const std::vector<Member> &members, TagKind tagKind);
+    std::shared_ptr<CType> semaAnonyTagDeclare(const std::vector<Member> &members, TagKind tagKind);
 
     void EnterScope();
     void ExitScope();
