@@ -12,6 +12,7 @@
     kw_sizeof,   // sizeof
     kw_struct,   // struct
     kw_union,    // union
+    kw_return,   // return
     minus, // -
     plus,  // +
     star,  // *
@@ -80,6 +81,8 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "struct";
     case TokenType::kw_union:
         return "union";
+    case TokenType::kw_return:
+        return "return";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -282,6 +285,8 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_struct;
         } else if (content == "union") {
             token.tokenType = TokenType::kw_union;
+        } else if (content == "return") {
+            token.tokenType = TokenType::kw_return;
         }
     } else {
         switch (*CurBufPtr)

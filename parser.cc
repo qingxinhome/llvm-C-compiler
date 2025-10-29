@@ -16,26 +16,37 @@ primary-expr : identifier | number | "(" expr ")"
 number: ([0-9])+ 
 identifier : (a-zA-Z_)(a-zA-Z0-9_)*
 */
-std::shared_ptr<Program> Parser::ParseProgram(){
-    // while (true) .... exit ?
-    // token -> eof
-    // std::vector<std::shared_ptr<AstNode>> nodeVec;
-    // while(token.tokenType != TokenType::eof) {
-    //     auto stmt = ParseStmt();
-    //     if (stmt == nullptr) {
-    //         continue;
-    //     }
-    //     nodeVec.push_back(stmt);
-    // }
-
+std::shared_ptr<Program> Parser::ParseProgram() {
     auto program = std::make_shared<Program>();
-    if (token.tokenType != TokenType::eof) {
-        auto stmt = ParseBlockStmt();
-        program->node = stmt;
+    while (token.tokenType != TokenType::eof) {
+        if (IsFunctionDecl()) {
+            /* 函数声明 */
+            program->externalDecls.push_back(ParseFunctionDecl());
+        } else {
+            /* 全局变量的声明 */                         
+            program->externalDecls.push_back(ParseDeclareStmt(true));
+        }
     }
+
     Expect(TokenType::eof);
     return program;
 }
+
+std::shared_ptr<AstNode> Parser::ParseFunctionDecl() {
+    std::shared_ptr<CType> baseType = ParseDeclSpec();          // 解析声明说明符
+    std::shared_ptr<AstNode> node = Declarator(baseType, true); // 解析声明符
+
+    // 遇到 ；号，说明是C语言函数的声明
+    if (token.tokenType == TokenType::semi) {
+        // 处理C语言函数的声明
+        return sema.semaFunctionDecl(node->token, node->type, nullptr);
+    } else {
+        // 处理C语言函数的定义
+        return sema.semaFunctionDecl(node->token, node->type, ParseBlockStmt());
+    }
+}
+
+
 
 std::shared_ptr<AstNode> Parser::ParseStmt() {
     // null statement
@@ -66,6 +77,10 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
     // continue statement
     else if (token.tokenType == TokenType::kw_continue) {
         return ParseContinueStmt();
+    } 
+    // return statement
+    else if (token.tokenType == TokenType::kw_return) {
+        return ParseReturnStmt();
     }
     // expr statement
     else {
@@ -153,22 +168,25 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
 int a[2][3][4] 数组类型中的[2][3][4]
 int a(int，float) 函数类型中的(int，float) 
 */
-std::shared_ptr<CType> Parser::DirectDeclaratorSuffix(std::shared_ptr<CType> baseType) {
+std::shared_ptr<CType> Parser::DirectDeclaratorSuffix(Token ident, std::shared_ptr<CType> baseType, bool isGloabl) {
     if (token.tokenType == TokenType::l_bracket) {
         // 数组声明
-        return DirectDeclaratorArraySuffix(baseType);
+        return DirectDeclaratorArraySuffix(baseType, isGloabl);
+    } else if (token.tokenType == TokenType::l_parent) {
+        // 函数声明
+        return DirectDeclaratorFuncSuffix(ident, baseType, isGloabl);
     }
-    // 函数声明
     return baseType;
 }
 
 /* 
 解析数组类型声明的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
-direct-declarator ::= identifier | "(" declarator ")" | direct-declarator "[" assign "]"
+direct-declarator ::= identifier | direct-declarator "[" assign "]" 
+					| direct-declarator "(" parameter-type-list? ")"
 eg: int a[3][4];
     baseType -> int
 */
-std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType) {
+std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType, bool isGloabl) {
     if (token.tokenType != TokenType::l_bracket) { /* 递归退出条件 */
         return baseType;
     }
@@ -178,12 +196,42 @@ std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType
     int elemCount = token.value;
     Consume(TokenType::number);
     Consume(TokenType::r_bracket);
-    return std::make_shared<CArrayType>(DirectDeclaratorArraySuffix(baseType), elemCount);
+    return std::make_shared<CArrayType>(DirectDeclaratorArraySuffix(baseType, isGloabl), elemCount);
 }
+
+/*
+解析函数类型声明的数组后缀： 如： int fun(int a); 中的fun(
+direct-declarator ::= identifier | direct-declarator "[" assign "]" 
+					| direct-declarator "(" parameter-type-list? ")"
+*/
+std::shared_ptr<CType> Parser::DirectDeclaratorFuncSuffix(Token ident, std::shared_ptr<CType> baseType, bool isGloabl) {
+    Consume(TokenType::l_parent);
+
+    std::vector<Parameter> params;
+    int i = 0;
+    while(token.tokenType != TokenType::r_parent) {
+        if (i > 0 && token.tokenType == TokenType::comma) {
+            Consume(TokenType::comma);
+        }
+        // 解析函数参数
+        auto ty = ParseDeclSpec();
+        auto node = Declarator(ty, isGloabl);
+
+        Parameter parameter;
+        parameter.name = llvm::StringRef(node->token.ptr, node->token.len);
+        parameter.type = node->type;
+        params.push_back(parameter);
+        i++;
+    }
+
+    Consume(TokenType::r_parent);
+    return std::make_shared<CFuncType>(baseType, params, llvm::StringRef(ident.ptr, ident.len));
+}
+
 
 // declarator ::= "*"* direct-declarator
 // direct-declarator ::= identifier | "(" declarator ")" | direct-declarator "[" assign "]"
-std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseType) {
+std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseType, bool isGloabl) {
     std::shared_ptr<AstNode> varDeclNode;
     if (this->token.tokenType == TokenType::l_parent) {
         // 处理数组指针的语法： 如：int (*p)[5] p是一个指向int [5]数组的指针
@@ -194,29 +242,29 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
         sema.SetMode(Sema::Mode::Skip);
 
         Consume(TokenType::l_parent);
-        Declarator(CType::IntType);     /* CType::IntType只是临时占位类型，没有实际意义 */
+        Declarator(CType::IntType, isGloabl);     /* CType::IntType只是临时占位类型，没有实际意义 */
         Consume(TokenType::r_parent);
 
         // 解析类型声明符后缀， 获取完整类型
-        baseType = DirectDeclaratorSuffix(baseType);
+        baseType = DirectDeclaratorSuffix(token, baseType, isGloabl);
         lexer.RestoreState();           /* 恢复当前状态 */
         sema.SetMode(Sema::Mode::Normal);
         //--------------------------------------------------------------------
 
         token = curToken;
         Consume(TokenType::l_parent);
-        varDeclNode = Declarator(baseType);
+        varDeclNode = Declarator(baseType, isGloabl);
         Consume(TokenType::r_parent);
 
         /* CType::IntType是临时占位类型，没有实际意义，调用DirectDeclaratorSuffix是为了让token走到 = 符号 */
-        DirectDeclaratorSuffix(CType::IntType);
+        DirectDeclaratorSuffix(token, CType::IntType, isGloabl);
     } else if (token.tokenType == TokenType::identifier){
         Token ident = token;                 /* 记录变量名 */
         Consume(TokenType::identifier);
 
         // 解析类型声明符后缀, 如： a[2][3][4][5]， 或 a(int, char)
-        baseType = DirectDeclaratorSuffix(baseType);
-        varDeclNode = sema.semaVariableDeclNode(ident, baseType);
+        baseType = DirectDeclaratorSuffix(ident, baseType, isGloabl);
+        varDeclNode = sema.semaVariableDeclNode(ident, baseType, isGloabl);
     } else {
         GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_ex, "identifer or '('");
     }
@@ -321,23 +369,23 @@ bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValu
 
 /*
 declarator ::= "*"* direct-declarator
-direct-declarator ::= identifier | direct-declarator "[" assign "]"
+direct-declarator ::= identifier | direct-declarator "[" assign "]" 
+					| direct-declarator "(" parameter-type-list? ")"
 */
-// declarator (= expr)
-std::shared_ptr<AstNode> Parser::Declarator(std::shared_ptr<CType> baseType) {
+std::shared_ptr<AstNode> Parser::Declarator(std::shared_ptr<CType> baseType, bool isGloabl) {
     // 处理指针符号 *
     while(token.tokenType == TokenType::star) {
         Consume(TokenType::star);
         // PointType
         baseType = std::make_shared<CPointType>(baseType);
     }
-    return DirectDeclarator(baseType);
+    return DirectDeclarator(baseType, isGloabl);
 }
 
 
 
 // 解析变量声明语句
-std::shared_ptr<AstNode> Parser::ParseDeclareStmt() {
+std::shared_ptr<AstNode> Parser::ParseDeclareStmt(bool isGlobal) {
     // 获取基础类型
     std::shared_ptr<CType> baseTy = ParseDeclSpec();
 
@@ -357,7 +405,7 @@ std::shared_ptr<AstNode> Parser::ParseDeclareStmt() {
         if (i++ > 0) {
             Consume(TokenType::comma);
         }
-        auto variableDecl = Declarator(baseTy);
+        auto variableDecl = Declarator(baseTy, isGlobal);
         declareStmt->nodeVec.push_back(variableDecl);
         /*
         assert(token.tokenType == TokenType::identifier);
@@ -503,6 +551,17 @@ std::shared_ptr<AstNode> Parser::ParseContinueStmt() {
 
     Consume(TokenType::semi);
     return continueStmt;
+}
+
+
+std::shared_ptr<AstNode> Parser::ParseReturnStmt() {
+    Consume(TokenType::kw_return);
+    auto returnStmt = std::make_shared<ReturnStmt>();
+    if (token.tokenType != TokenType::semi) {
+        returnStmt->expr = ParseExpr();
+    }
+    Consume(TokenType::semi);
+    return returnStmt;
 }
 
 
@@ -860,6 +919,28 @@ std::shared_ptr<AstNode> Parser::ParsePostfixExpr() {
             left = sema.semaPostMemberArrowNode(left, tmpToken, arrowtoken);
             continue;
         }
+
+        // 函数调用
+        if (this->token.tokenType == TokenType::l_parent) {
+            Consume(TokenType::l_parent);
+            /*
+                注意：函数的实参是一个赋值表达式：
+                arg-expr-list := assign ("," assign)*
+            */ 
+            std::vector<std::shared_ptr<AstNode>> args;
+            int i = 0;
+            // 这里应该是一个新的作用域
+            while(token.tokenType != TokenType::r_parent) {
+                if (i > 0 && token.tokenType ==TokenType::comma) {
+                    Consume(TokenType::comma);
+                }
+                args.push_back(ParseAssignExpr());
+            }
+            Consume(TokenType::r_parent);
+            left = sema.semaFuncCallExprNode(left, args);
+            continue;
+        }
+
         break;
     }
     return left;
@@ -921,7 +1002,7 @@ std::shared_ptr<CType> Parser::ParseType() {
     }
 
     if (token.tokenType == TokenType::l_bracket) {
-       baseType = DirectDeclaratorArraySuffix(baseType);
+       baseType = DirectDeclaratorArraySuffix(baseType, false);
     }
 
     return baseType;
@@ -964,6 +1045,26 @@ bool Parser::IsTypeName(TokenType tokenType) {
         return true;
     }
     return false;
+}
+
+bool Parser::IsFunctionDecl() {
+    bool isFuncDecl = false;
+    Token begin = token;
+
+    sema.SetMode(Sema::Mode::Skip);
+    lexer.SaveState();
+
+    std::shared_ptr<CType> baseType = ParseDeclSpec();   // 解析声明说明符
+    auto node = Declarator(baseType, true);              // 解析声明符
+    if (node->type->GetKind() == CType::Kind::TY_Func) {
+        isFuncDecl = true;
+    }
+
+    lexer.RestoreState();
+    sema.SetMode(Sema::Mode::Normal);
+    token = begin;
+
+    return isFuncDecl;
 }
 
 

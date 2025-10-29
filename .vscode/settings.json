@@ -88,7 +88,8 @@
         "__availability": "cpp",
         "any": "cpp",
         "__tree": "cpp",
-        "format": "cpp"
+        "format": "cpp",
+        "__split_buffer": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

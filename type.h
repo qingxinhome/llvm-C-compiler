@@ -9,6 +9,7 @@ class CPrimaryType;
 class CPointType;
 class CArrayType;
 class CRecordType;
+class CFuncType;
 
 // 类型访问者基类
 class TypeVisitor {
@@ -18,6 +19,7 @@ public:
     virtual llvm::Type* VisitPointType(CPointType *type) = 0;
     virtual llvm::Type* VisitArrayType(CArrayType *type) = 0;
     virtual llvm::Type* VisitRecordType(CRecordType *type) = 0;
+    virtual llvm::Type* VisitFuncType(CFuncType *type) = 0;
 };
 
 // TagKind用于标识聚合类型的类别
@@ -29,10 +31,11 @@ enum class TagKind {
 class CType {
 public:
     enum Kind {
-        TY_Int,      // 基础类型
-        TY_Point,    // 指针类型
-        TY_Array,     // 数组类型
-        TY_Record     // 聚合类型（struct or union）
+        TY_Int,        // 基础类型
+        TY_Point,      // 指针类型
+        TY_Array,      // 数组类型
+        TY_Record,     // 聚合类型（struct or union
+        TY_Func        // 函数类型
     };
 public:
     CType(Kind kind, int size, int align): kind(kind), size(size), align(align) {};
@@ -175,4 +178,38 @@ public:
 private:
     void UpdateStructOffset();
     void UpdateUnionOffset();
+};
+
+struct Parameter {
+    std::shared_ptr<CType> type;
+    llvm::StringRef name;
+};
+
+class CFuncType : public CType {
+private:
+    std::shared_ptr<CType> retType;     // 函数返回值类型
+    std::vector<Parameter> params;      // 函数参数列表
+    llvm::StringRef name;               // 函数名字
+public:
+    CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name);
+
+    const llvm::StringRef GetName() {
+        return name;
+    }
+
+    const std::vector<Parameter>& GetParams() {
+        return params;
+    }
+
+    const std::shared_ptr<CType> GetRetType() {
+        return retType;
+    }
+
+    llvm::Type* Accept(TypeVisitor *v) override{
+        return v->VisitFuncType(this);
+    }
+
+    static bool classof(const CType *ty) {
+        return ty->GetKind() == Kind::TY_Func;
+    }
 };

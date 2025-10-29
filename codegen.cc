@@ -23,6 +23,17 @@ entry:
 }
 */
 
+llvm::Value* CodeGen::VisitProgram(Program *program) {
+    for (const auto &decl : program->externalDecls)
+    {
+        decl->Accept(this);
+    }
+    return nullptr;
+}
+    
+
+
+#if 0
 llvm::Value* CodeGen::VisitProgram(Program *program){
     // 声明printf函数: int printf(const char *format, ...);
     FunctionType *printfType = FunctionType::get(irBuilder.getInt32Ty(), {irBuilder.getPtrTy()}, true);
@@ -59,7 +70,7 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
         module->print(outs(), nullptr);
     }
     
-#if 0
+
     if (lastValue != nullptr) {
         irBuilder.CreateCall(printf, {irBuilder.CreateGlobalStringPtr("expr value: [%d]\n"), lastValue});
     } else {
@@ -73,10 +84,9 @@ llvm::Value* CodeGen::VisitProgram(Program *program){
 
     verifyFunction(*mFunc);
     module->print(outs(), nullptr);
-#endif
-
     return ret;
 }
+#endif
 
 llvm::Value* CodeGen::VisitDeclareStmt(DeclareStmt *declstmt) {
     llvm::Value* lastValue;
@@ -201,6 +211,12 @@ llvm::Value* CodeGen::VisitContinueStmt(ContinueStmt *continuestmt) {
     irBuilder.SetInsertPoint(out);
     return nullptr;
 }
+
+
+llvm::Value* CodeGen::VisitReturnStmt(ReturnStmt *stmt) {
+    return nullptr;
+}
+
 
 llvm::Value* CodeGen::VisitBreakStmt(BreakStmt *breakstmt) {
     /// jump lastBB;
@@ -761,6 +777,10 @@ llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
     }
 }
 
+ llvm::Value* CodeGen::VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) {
+    return nullptr;
+ }
+
 
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = decl->type->Accept(this);
@@ -837,6 +857,26 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     // return value;
 }
 
+llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
+    FunctionType *mFuncType = FunctionType::get(irBuilder.getInt32Ty(), false);
+    // ExternalLinkage 外部链接属性可以被连接器找到
+    Function *mFunc = Function::Create(mFuncType, GlobalValue::LinkageTypes::ExternalLinkage, "main", module.get());
+
+    BasicBlock *entryBB = BasicBlock::Create(context, "entry", mFunc);
+    irBuilder.SetInsertPoint(entryBB);
+    // 记录当前的Function函数
+    curFunc = mFunc;
+
+    decl->blockStmt->Accept(this);
+
+    verifyFunction(*mFunc);
+    // 注：verifyModule函数：如果检查module有错误则返回true。 检查module正确则返回false
+    if (verifyModule(*module, &llvm::outs())) {
+        module->print(outs(), nullptr);
+    }
+    return nullptr;
+}
+
 // '变量访问' 返回的应该是一个右值
 // CreateLoad返回的是一个右值
 // 变量访问节点，就是通过变量的指针解引用，获取变量的值，所以返回的结果不是变量的指针，而是变量的值本身
@@ -901,6 +941,10 @@ llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
     return structType;
 }
 
+
+llvm::Type* CodeGen::VisitFuncType(CFuncType *type) {
+    return nullptr;
+}
 
 /*
 注：

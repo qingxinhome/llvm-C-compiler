@@ -2,7 +2,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Casting.h"
 
-std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::shared_ptr<CType> type) {
+std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::shared_ptr<CType> type, bool isGloabl) {
     // 1. 检查在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
     auto symbol = scope.FindObjSymbolInCurScope(text);
@@ -21,6 +21,7 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
     variableDecl->type = type;
     // 指针和普通类型的变量都是左值
     variableDecl->isLValue = true;
+    variableDecl->isGlobal = isGloabl;
     return variableDecl;
 }
 
@@ -343,4 +344,34 @@ std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &memb
         scope.AddTagSymbol(recordType, text);
     }
     return recordType;
+}
+
+
+std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_ptr<CType> type, std::shared_ptr<AstNode> blockStmt) {
+    std::shared_ptr<FunctionDecl> funcDecl = std::make_shared<FunctionDecl>();
+    funcDecl->token = token;    // 记录函数名对应的token
+    funcDecl->blockStmt = blockStmt;
+    funcDecl->type = type;
+    return funcDecl;
+}
+
+
+std::shared_ptr<PostFunctionCallExpr> Sema::semaFuncCallExprNode(std::shared_ptr<AstNode> left, std::vector<std::shared_ptr<AstNode>> &args) {
+    Token ident = left->token;
+    if (left->type->GetKind() != CType::TY_Func) {
+        // 符号不是函数类型
+        diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_expected, "function type");
+    }
+
+    CFuncType *funcType = llvm::dyn_cast<CFuncType>(left->type.get());
+    if (funcType->GetParams().size() != args.size()) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_miss, "argument count not match");
+    }
+
+    auto funcCall = std::make_shared<PostFunctionCallExpr>();
+    funcCall->type = funcType->GetRetType();
+    funcCall->left = left;
+    funcCall->args = args;
+    funcCall->token = left->token;
+    return funcCall;
 }
