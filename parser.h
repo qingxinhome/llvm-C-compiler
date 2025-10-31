@@ -22,20 +22,22 @@ public:
 
     std::shared_ptr<Program> ParseProgram();
 private:
+    std::shared_ptr<AstNode> ParseFunctionDecl();
     std::shared_ptr<AstNode> ParseStmt();
 
     // 一个声明语句可以声明多个变量
-    std::shared_ptr<AstNode> ParseDeclareStmt();
+    std::shared_ptr<AstNode> ParseDeclareStmt(bool isGloabl = false);
     // decl-spec  ::= "int" | struct-or-union-specifier
     std::shared_ptr<CType> ParseDeclSpec();
     std::shared_ptr<CType> ParseStructOrUnionSpec();
     // declarator ::= "*"* direct-declarator
-    std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType);
+    std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType, bool isGloabl);
     // direct-declarator ::= identifier | direct-declarator "[" assign "]"
-    std::shared_ptr<AstNode> DirectDeclarator(std::shared_ptr<CType> baseType);
+    std::shared_ptr<AstNode> DirectDeclarator(std::shared_ptr<CType> baseType, bool isGloabl);
     
-    std::shared_ptr<CType> DirectDeclaratorSuffix(std::shared_ptr<CType> baseType);
-    std::shared_ptr<CType> DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType);
+    std::shared_ptr<CType> DirectDeclaratorSuffix(Token ident, std::shared_ptr<CType> baseType, bool isGloabl);
+    std::shared_ptr<CType> DirectDeclaratorArraySuffix(std::shared_ptr<CType> baseType, bool isGloabl); 
+    std::shared_ptr<CType> DirectDeclaratorFuncSuffix(Token ident, std::shared_ptr<CType> baseType, bool isGloabl); // 解析标识符后面加()的后缀形式， 就是函数声明
     
     // initializer ::= assign | "{" initializer ("," initializer)*  "}"
     bool ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
@@ -48,6 +50,7 @@ private:
     std::shared_ptr<AstNode> ParseForStmt();
     std::shared_ptr<AstNode> ParseBreakStmt();
     std::shared_ptr<AstNode> ParseContinueStmt();
+    std::shared_ptr<AstNode> ParseReturnStmt();
     std::shared_ptr<AstNode> ParseBlockStmt();
     std::shared_ptr<AstNode> ParseExprStmt();
 
@@ -84,6 +87,9 @@ private:
 
     // 判断当前token是否为是类型声明关键字
     bool IsTypeName(TokenType tokenType);
+
+    // 判断是函数声明 or 全局变量声明
+    bool IsFunctionDecl();
 
     // 判断是否为赋值系列运算符
     bool IsAssignOperator();

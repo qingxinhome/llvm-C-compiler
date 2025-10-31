@@ -12,7 +12,7 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/TargetSelect.h>
 
-#define JIT_TEST
+// #define JIT_TEST
 
 int main(int argc, char* argv[]) {
 #ifdef JIT_TEST
@@ -40,12 +40,12 @@ int main(int argc, char* argv[]) {
     Sema sema(diagEngine);
     Parser parser(lexer, sema);
     auto program = parser.ParseProgram();
-    // PrintVisitor printVisitor(program);
+    PrintVisitor printVisitor(program);
     
-    CodeGen codegen(program);    /*将AST转换为LLVM IR*/
-    auto &module = codegen.GetModule();
-    assert(!llvm::verifyModule(*module));
-    module->print(llvm::outs(), nullptr);
+    // CodeGen codegen(program);    /*将AST转换为LLVM IR*/
+    // auto &module = codegen.GetModule();
+    // assert(!llvm::verifyModule(*module));
+    // module->print(llvm::outs(), nullptr);
 #ifdef JIT_TEST
     {   
         // 创建llvm::EngineBuilder 对象,用于配置和构建 llvm::ExecutionEngine

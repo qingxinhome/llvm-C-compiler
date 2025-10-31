@@ -14,7 +14,7 @@ public:
 public:
     Sema(DiagEngine &diagEngine) : diagEngine(diagEngine) {}
     // 对变量声明节点进行语义检查
-    std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type);
+    std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type, bool isGloabl);
     std::shared_ptr<VariableAccessExpr> semaVariableAccessNode(Token token);
     std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, std::shared_ptr<CType> type);
 
@@ -36,6 +36,9 @@ public:
     std::shared_ptr<CType> semaTagAccess(Token token);
     std::shared_ptr<CType> semaTagDeclare(Token token, const std::vector<Member> &members, TagKind tagKind);
     std::shared_ptr<CType> semaAnonyTagDeclare(const std::vector<Member> &members, TagKind tagKind);
+
+    std::shared_ptr<FunctionDecl> semaFunctionDecl(Token token, std::shared_ptr<CType> type, std::shared_ptr<AstNode> blockStmt);
+    std::shared_ptr<PostFunctionCallExpr> semaFuncCallExprNode(std::shared_ptr<AstNode> left, std::vector<std::shared_ptr<AstNode>> &args);
 
     void EnterScope();
     void ExitScope();

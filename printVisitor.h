@@ -21,8 +21,10 @@ public:
     llvm::Value* VisitForStmt(ForStmt *ifstmt) override;
     llvm::Value* VisitBreakStmt(BreakStmt *breakstmt) override;
     llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) override;
+    llvm::Value* VisitReturnStmt(ReturnStmt *stmt) override;
     llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
+    llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
     llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) override;
     llvm::Value* VisitThreeExpr(ThreeExpr *threeExpr) override;
@@ -33,10 +35,12 @@ public:
     llvm::Value* VisitPostSubscript(PostSubscript *expr) override;
     llvm::Value* VisitPostMemberDotExpr(PostMemberDotExpr *expr) override;
     llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) override;
+    llvm::Value* VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) override;
     llvm::Value* VisitNumberExpr(NumberExpr *numberExpr) override;
 
     llvm::Type* VisitPrimaryType(CPrimaryType *type) override;
     llvm::Type* VisitPointType(CPointType *type) override;
     llvm::Type* VisitArrayType(CArrayType *type) override;
     llvm::Type* VisitRecordType(CRecordType *type) override;
+    llvm::Type* VisitFuncType(CFuncType *type) override;
 };

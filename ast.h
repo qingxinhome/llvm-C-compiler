@@ -12,8 +12,10 @@ class IfStmt;
 class ForStmt;
 class ContinueStmt;
 class BreakStmt;
+class ReturnStmt;
 class BlockStmt;
 class VariableDecl;
+class FunctionDecl;
 class VariableAccessExpr;
 class BinaryExpr;
 class ThreeExpr;
@@ -24,6 +26,7 @@ class PostIncExpr;
 class PostSubscript;
 class PostMemberDotExpr;
 class PostMemberArrowExpr;
+class PostFunctionCallExpr;
 class NumberExpr;
 
 // 抽象访问者基类
@@ -36,8 +39,10 @@ public:
     virtual llvm::Value* VisitForStmt(ForStmt *ifstmt) = 0;
     virtual llvm::Value* VisitBreakStmt(BreakStmt *breakstmt) = 0;
     virtual llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) = 0;
+    virtual llvm::Value* VisitReturnStmt(ReturnStmt *stmt) = 0;
     virtual llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
+    virtual llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
     virtual llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) = 0;
     virtual llvm::Value* VisitThreeExpr(ThreeExpr *threeExpr) = 0;
@@ -48,6 +53,7 @@ public:
     virtual llvm::Value* VisitPostSubscript(PostSubscript *expr) = 0;
     virtual llvm::Value* VisitPostMemberDotExpr(PostMemberDotExpr *expr) = 0;
     virtual llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) = 0;
+    virtual llvm::Value* VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) = 0;
     virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
 };
 
@@ -58,12 +64,14 @@ class AstNode {
 public:
     enum Kind{
         Node_IfStmt,
+        Node_ReturnStmt,
         Node_ForStmt,
         Node_BreakStmt,
         Node_ContinueStmt,
         Node_BlockStmt,
         Node_DeclareStmt,
         Node_VariableDecl,
+        Node_FunctionDecl,
         Node_BinaryExpr,
         Node_ThreeExpr,
         Node_UnaryExpr,
@@ -73,6 +81,7 @@ public:
         Node_PostSubscript,
         Node_PostMemberDotExpr,
         Node_PostMemberArrowExpr,
+        Node_PostFunctionCallExpr,
         Node_NumberExor,
         Node_VariableAccessExpr
     };
@@ -194,7 +203,39 @@ public:
     }
 };
 
-/// 变量声明节点
+class ReturnStmt : public AstNode {
+public:
+    // ruturn 语句返回一个表达式， 也有可能是空
+    std::shared_ptr<AstNode> expr{nullptr};
+public:
+    ReturnStmt() : AstNode(Node_ReturnStmt) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitReturnStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_ReturnStmt;
+    }
+};
+
+
+class FunctionDecl : public AstNode {
+public:
+    // 函数声明语句，有可能是一个函数声明，也有可能是一个包含block语句的函数定义
+    // 函数的参数和返回值信息会作为函数的类型CFuncType进行存储
+    std::shared_ptr<AstNode> blockStmt{nullptr};
+public:
+    FunctionDecl() : AstNode(Node_FunctionDecl) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitFunctionDeclExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_FunctionDecl;
+    }
+};
+
+/// VariableDecl变量声明节点， 可以针对局部变量的声明，也可以针对于全局变量的声明
 class VariableDecl : public AstNode {
 public:
     // 数组初始值：数组元素的槽位(地址)和对应元素的关联关系
@@ -209,8 +250,8 @@ public:
     // 变量声明的初始值表达式,可以是单值，也可以是列表；有可能为空
     std::vector<std::shared_ptr<InitValue>> initValues;
 
-    // // 变量声明的初始值表达式，有可能为空
-    // std::shared_ptr<AstNode> init;
+    // isGlobal属性标识是否为全局变量
+    bool isGlobal{false};
 
     VariableDecl() : AstNode(Node_VariableDecl) {}
     llvm::Value* Accept(Visitor *v) {
@@ -293,13 +334,13 @@ public:
 
 // 一元操作符枚举
 enum class UnaryOp {
-    positive, // 正号
-    negative, // 负号
-    deref,   // 指针解引用
-    addr,    // 取地址
-    inc,     // ++
-    dec,     // --
-    logic_not, // 逻辑取反，就是逻辑非：！
+    positive,    // 正号
+    negative,    // 负号
+    deref,       // 指针解引用
+    addr,        // 取地址
+    inc,         // ++
+    dec,         // --
+    logic_not,   // 逻辑取反，就是逻辑非：！
     bitwise_not  // 按位取反， 就是按位非：~
 };
 
@@ -383,7 +424,7 @@ public:
     }
 };
 
-
+// 后缀表达式-- 成员选择（对象）
 class PostMemberDotExpr : public AstNode {
 public:
     std::shared_ptr<AstNode> left;    // 存放基址
@@ -399,6 +440,7 @@ public:
     }
 };
 
+// 后缀表达式-- 成员选择（指针）
 class PostMemberArrowExpr : public AstNode {
 public:
     std::shared_ptr<AstNode> left;    // 存放基址
@@ -414,6 +456,22 @@ public:
     }
 };
 
+// 函数调用表达式也是后缀表达式的一种
+// add(1,2);
+class PostFunctionCallExpr : public AstNode {
+public:
+    std::shared_ptr<AstNode> left;               // 函数名
+    std::vector<std::shared_ptr<AstNode>> args;  // 函数实参列表
+
+    PostFunctionCallExpr() : AstNode(Node_PostFunctionCallExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitPostFunctionCallExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_PostFunctionCallExpr;
+    }
+};
 
 
 // 因子表达式
@@ -448,6 +506,8 @@ public:
 // 语法树根节点类型
 class Program {
 public:
-    // std::vector<std::shared_ptr<AstNode>> stmtNodeVec;
-    std::shared_ptr<AstNode> node;
+    // 程序是由一个或多个全局变量或者函数组成, 即：
+    // prog          ::= (external-decl)+
+    // external-decl ::= func-def | decl-stmt
+    std::vector<std::shared_ptr<AstNode>> externalDecls;
 };

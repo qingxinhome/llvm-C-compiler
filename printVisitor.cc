@@ -7,11 +7,9 @@ PrintVisitor::PrintVisitor(std::shared_ptr<Program> program, llvm::raw_ostream* 
 }
 
 llvm::Value* PrintVisitor::VisitProgram(Program *program) {
-    // for (const auto &stmtNode : program->stmtNodeVec) {
-    //     stmtNode->Accept(this);
-    //     llvm::outs() << "\n";
-    // }
-    program->node->Accept(this);
+    for (const auto &decl : program->externalDecls) {
+        decl->Accept(this);
+    }
     return nullptr;
 }
 
@@ -80,6 +78,13 @@ llvm::Value* PrintVisitor::VisitContinueStmt(ContinueStmt *continuestmt) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitReturnStmt(ReturnStmt *stmt) {
+    *out << "return ";
+    if (stmt->expr != nullptr) {
+        stmt->expr->Accept(this);
+    }
+    return nullptr;
+}
 
 llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
     decl->type->Accept(this);
@@ -106,6 +111,16 @@ llvm::Value* PrintVisitor::VisitVariableDeclExpr(VariableDecl *decl) {
     //     decl->init->Accept(this);
     // }
     // return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitFunctionDeclExpr(FunctionDecl *decl) {
+    decl->type->Accept(this);
+    if (decl->blockStmt != nullptr) {
+        decl->blockStmt->Accept(this);
+    } else {
+        *out << ";";
+    }
+    return nullptr;
 }
 
 
@@ -330,6 +345,23 @@ llvm::Value* PrintVisitor::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
 }
 
 
+llvm::Value* PrintVisitor::VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) {
+    expr->left->Accept(this);
+    *out << "(";
+    int i = 0;
+    int size = expr->args.size();
+    for (const auto &arg : expr->args) {
+        arg->Accept(this);
+        if (i < size - 1) {
+            *out << ",";
+        }
+        i++;
+    }
+    *out << ")";
+    return nullptr;
+}
+
+
 llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
         *out << "int ";
@@ -367,5 +399,22 @@ llvm::Type* PrintVisitor::VisitRecordType(CRecordType *type) {
         *out << mbr.name << ";";
     }
     *out << "} ";
+    return nullptr;
+}
+
+llvm::Type* PrintVisitor::VisitFuncType(CFuncType *type) {
+    type->GetRetType()->Accept(this);
+    *out << type->GetName() << "(";
+    int i = 0;
+    int size = type->GetParams().size();
+    for (const auto &p : type->GetParams()) {
+        p.type->Accept(this);
+        *out << " " << p.name;
+        if (i < size - 1) {
+            *out << ",";
+        }
+        i++;
+    }
+    *out << ")";
     return nullptr;
 }
