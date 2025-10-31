@@ -18,6 +18,8 @@ identifier : (a-zA-Z_)(a-zA-Z0-9_)*
 */
 std::shared_ptr<Program> Parser::ParseProgram() {
     auto program = std::make_shared<Program>();
+    program->fileName = lexer.GetFileName();
+
     while (token.tokenType != TokenType::eof) {
         if (IsFunctionDecl()) {
             /* 函数声明 */
@@ -34,16 +36,19 @@ std::shared_ptr<Program> Parser::ParseProgram() {
 
 std::shared_ptr<AstNode> Parser::ParseFunctionDecl() {
     std::shared_ptr<CType> baseType = ParseDeclSpec();          // 解析声明说明符
+
+    sema.EnterScope();
     std::shared_ptr<AstNode> node = Declarator(baseType, true); // 解析声明符
 
+    std::shared_ptr<AstNode> blockStmt = nullptr;
     // 遇到 ；号，说明是C语言函数的声明
-    if (token.tokenType == TokenType::semi) {
-        // 处理C语言函数的声明
-        return sema.semaFunctionDecl(node->token, node->type, nullptr);
+    if (token.tokenType != TokenType::semi) {
+        blockStmt = ParseBlockStmt();
     } else {
-        // 处理C语言函数的定义
-        return sema.semaFunctionDecl(node->token, node->type, ParseBlockStmt());
+        Consume(TokenType::semi);
     }
+    sema.ExitScope();
+    return sema.semaFunctionDecl(node->token, node->type, blockStmt);
 }
 
 
@@ -150,6 +155,7 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
             }
         }
         sema.ExitScope();
+
         Consume(TokenType::r_brace);
         if (anony) {
             return sema.semaAnonyTagDeclare(members, tagkind);
@@ -1001,10 +1007,7 @@ std::shared_ptr<CType> Parser::ParseType() {
         Consume(TokenType::star);
     }
 
-    if (token.tokenType == TokenType::l_bracket) {
-       baseType = DirectDeclaratorArraySuffix(baseType, false);
-    }
-
+    baseType = DirectDeclaratorSuffix(token, baseType, false);
     return baseType;
 }
 

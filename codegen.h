@@ -2,6 +2,7 @@
 
 #include "ast.h"
 #include <memory>
+#include <functional>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/IRBuilder.h>
@@ -11,7 +12,7 @@ class CodeGen : public Visitor, public TypeVisitor {
 public:
     // 构造函数
     CodeGen(std::shared_ptr<Program> program) {
-        module = std::make_unique<llvm::Module>("expr", context);
+        module = std::make_unique<llvm::Module>(program->fileName, context);
         VisitProgram(program.get());
     }
 
@@ -29,6 +30,7 @@ private:
     llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) override;
     llvm::Value* VisitReturnStmt(ReturnStmt *stmt) override;
     llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
+
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
@@ -52,16 +54,37 @@ private:
 
 private:
     llvm::LLVMContext context;
+    /*
+      Module是IR的顶级容器，存储函数、全局变量、元数据等，类似一个编译单元（.c 文件）。
+      添加函数（getOrInsertFunction）、全局变量（getOrInsertGlobal），并作为 IR 输出或编译的入口
+    */
     std::unique_ptr<llvm::Module> module;
     // 当前Function, 注：一个Module模块里是可以有很多Function的，需要记录当前Function
     llvm::Function *curFunc{nullptr};
     llvm::IRBuilder<> irBuilder{context}; // // C++11+初始化
 
-    // StringMap存储变量的地址和类型
-    llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>> varAddrTypeMap;
-
-    // 存储在CodeGen过程中， 执行break后需要跳转到的block块
+    // 用于存储，在CodeGen过程中， 执行break后需要跳转到的block块
     llvm::DenseMap<AstNode*, llvm::BasicBlock*> breakBBs;
-    // 存储在CodeGen过程中， 执行continue后需要跳转到的block块
+    // 用于存储，在CodeGen过程中， 执行continue后需要跳转到的block块
     llvm::DenseMap<AstNode*, llvm::BasicBlock*> continueBBs;
+
+private:
+    /*
+        llvm的ir也有变量/函数符号的作用域问题
+    */
+    // 局部变量（函数内部的变量） 地址和类型 作用域符号存储
+    llvm::SmallVector<llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>>>  localVarMap;
+    // 全局变量/函数的 <地址，类型> 的存储， 对于函数而言就是， 函数的入口地址和函数的类型
+    llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>> globalVarMap;
+
+    
+private:
+    /* llvm IR 作用域的管理 */
+    void AddLocalVarToMap(llvm::Value* addr, llvm::Type* ty, llvm::StringRef name);
+    void AddGlobalVarToMap(llvm::Value* addr, llvm::Type* ty, llvm::StringRef name);
+    std::pair<llvm::Value*, llvm::Type*> GetVarByName(llvm::StringRef name);
+
+    void PushScope();
+    void PopScope();
+    void ClearVarScope();
 };

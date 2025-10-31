@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/subc",
             "args": [
-                "demo/e2.c"
+                "demo/e1.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

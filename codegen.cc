@@ -151,52 +151,60 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     return nullptr;
 }
 
-llvm::Value* CodeGen::VisitForStmt(ForStmt *forstmt) {
+llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
     llvm::BasicBlock *initBB = llvm::BasicBlock::Create(context, "for.init", curFunc);
-    llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "for.cond", curFunc);
-    llvm::BasicBlock *incBB = llvm::BasicBlock::Create(context, "for.inc", curFunc);
-    llvm::BasicBlock *bodyBB = llvm::BasicBlock::Create(context, "for.body", curFunc);
-    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "for.last", curFunc);
+    llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "for.cond");
+    llvm::BasicBlock *incBB = llvm::BasicBlock::Create(context, "for.inc");
+    llvm::BasicBlock *bodyBB = llvm::BasicBlock::Create(context, "for.body");
+    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "for.last");
 
     // 将for循环语句中可以被break跳转到的block块记录在breakBBs Map中
-    breakBBs.insert({forstmt, lastBB});
+    breakBBs.insert({forStmt, lastBB});
     // 将for循环语句中可以被continue跳转到的block块记录在breakBBs Map中
-    continueBBs.insert({forstmt, incBB});
+    continueBBs.insert({forStmt, incBB});
 
     // 1. 先无条件跳转到init块中
     irBuilder.CreateBr(initBB);
     irBuilder.SetInsertPoint(initBB);
-    if (forstmt->initNode != nullptr) {
-        forstmt->initNode->Accept(this);
+    if (forStmt->initNode != nullptr) {
+        forStmt->initNode->Accept(this);
     }
-    // 由初始快无条件跳转至条件块
+    // 由初始块无条件跳转至条件块
     irBuilder.CreateBr(condBB);
 
+    // 将block块插入到当前函数
+    condBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(condBB);
-    if (forstmt->condNode != nullptr) {
-        llvm::Value *val = forstmt->condNode->Accept(this);
+    if (forStmt->condNode != nullptr) {
+        llvm::Value *val = forStmt->condNode->Accept(this);
         llvm::Value *condVal = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
         irBuilder.CreateCondBr(condVal, bodyBB, lastBB);
     } else {
          irBuilder.CreateBr(bodyBB);
     }
 
+
+    bodyBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(bodyBB);
-    if (forstmt->bodyNode != nullptr) {
-        forstmt->bodyNode->Accept(this);
+    if (forStmt->bodyNode != nullptr) {
+        forStmt->bodyNode->Accept(this);
     }
     irBuilder.CreateBr(incBB);
 
+
+    incBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(incBB);
-    if (forstmt->incNode != nullptr) {
-        forstmt->incNode->Accept(this);
+    if (forStmt->incNode != nullptr) {
+        forStmt->incNode->Accept(this);
     }
     irBuilder.CreateBr(condBB);
 
+
+    lastBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(lastBB);
 
-    breakBBs.erase(forstmt);
-    continueBBs.erase(forstmt);
+    breakBBs.erase(forStmt);
+    continueBBs.erase(forStmt);
 
     return nullptr;
 }
@@ -214,7 +222,14 @@ llvm::Value* CodeGen::VisitContinueStmt(ContinueStmt *continuestmt) {
 
 
 llvm::Value* CodeGen::VisitReturnStmt(ReturnStmt *stmt) {
-    return nullptr;
+    // return语句就是产生一条IR的return 指令
+    if (stmt->expr != nullptr) {
+        llvm::Value *val= stmt->expr->Accept(this);
+        return irBuilder.CreateRet(val);
+    } else {
+        //如果没有返回值表达式， 返回一个空的return指令
+        return irBuilder.CreateRetVoid();
+    }
 }
 
 
@@ -778,78 +793,196 @@ llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
 }
 
  llvm::Value* CodeGen::VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) {
-    return nullptr;
+    // 计算函数表达式， 求出函数的地址
+    llvm::Value *funcAddr = expr->left->Accept(this);
+
+    // 获取函数类型
+    llvm::FunctionType *funcTy = llvm::dyn_cast<llvm::FunctionType>(expr->left->type->Accept(this));
+
+    // 对函数调用表达式的实参做Codegen
+    llvm::SmallVector<llvm::Value*> args;
+    for (auto &arg : expr->args) {
+        args.push_back(arg->Accept(this));
+    }
+    return irBuilder.CreateCall(funcTy, funcAddr, args);
  }
 
-
+// 变量的声明要区分全局变量和局部变量
 llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::Type* ty = decl->type->Accept(this);
     llvm::StringRef varName(decl->token.ptr, decl->token.len);
 
-    /* 
-       在LLVM IR中，alloca指令必须放在函数的 entry basic block（入口基本块）中 
-    */
-    // 创建一个临时irBuilder, 
-    // curFunc->getEntryBlock() 获取函数的入口基本快
-    // curFunc->getEntryBlock().begin() 函数的入口基本快的插入位置迭代器
-    llvm::IRBuilder<> tmpIrBuilder(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
-
-    llvm::Value* value = irBuilder.CreateAlloca(ty, nullptr, varName);    /* 为变量申请内存地址 */
-    // 存储变量的地址和类型的KV
-    varAddrTypeMap.insert({varName, {value, ty}});
-
-    if (decl->initValues.size() > 0) {
-        if (decl->initValues.size() == 1) {
-            llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
-            irBuilder.CreateStore(initValue, value);
-        } else {
-            // 处理数组声明的初始化
-            if (llvm::ArrayType *arrType = llvm::dyn_cast<llvm::ArrayType>(ty)) {
-                for (const auto &initValue : decl->initValues) {
-                    llvm::SmallVector<llvm::Value*> vec;
-                    for (auto &offset : initValue->offsetList) {
-                        vec.push_back(irBuilder.getInt32(offset));
-                    }
-                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
-                    llvm::Value *val = initValue->value->Accept(this);
-                    irBuilder.CreateStore(val, addr);
+    if (decl->isGlobal) {
+        // 定义一个lambda表达式， 用于获取全局变量定义时 给的初始值
+        auto GetInitValueByOffset = [&](std::vector<int> &offset) -> std::shared_ptr<VariableDecl::InitValue>{
+            const auto &initVals = decl->initValues;
+            for (auto &n : initVals) {
+                if (n->offsetList.size() != offset.size()) {
+                    continue;
                 }
-            } 
-            // 处理struct/union声明的初始化
-            else if (llvm::StructType *structType = llvm::dyn_cast<StructType>(ty)) {
-                // 获取对应C语言类型信息
-                CRecordType *cStructType = llvm::dyn_cast<CRecordType>(decl->type.get());
-                TagKind tagKind = cStructType->GetTagKind();
-                if (tagKind == TagKind::KStruct) {
+
+                bool find = true;
+                for (int i = 0; i < offset.size(); i++) {
+                    if (offset[i] != n->offsetList[i]) {
+                        find = false;
+                        break;
+                    }
+                }
+
+                if (find) {
+                    return n;
+                }
+            }
+            return nullptr;
+        };
+
+        
+        // 定义一个lambda表达式(相当于一个递归函数), 用于计算全局变量的初始值（初始值都是常量），采用递归回溯法
+        auto GetInitialValue = [&](llvm::Type* ty, auto &&initFunc, std::vector<int> offset)->llvm::Constant * {
+            if (ty->isIntegerTy()) {
+                // 全局变量为整数类型(递归)
+
+                // 如果初始值不为空，则返回初始值的常量
+                std::shared_ptr<VariableDecl::InitValue> initVal = GetInitValueByOffset(offset);
+                if (initVal != nullptr) {
+                    return llvm::dyn_cast<llvm::Constant>(initVal->value->Accept(this));
+                }
+                // 如果没有初始值，则它的默认初始值为0
+                return irBuilder.getInt32(0);
+            } else if (ty->isPointerTy()) {
+                // 全局变量为指针类型，则它的默认初始值为空的常量指针（全局指针变量的初始值只能是空值）
+                return llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(ty));
+            } else if (ty->isStructTy()) {
+                // 全局变量为结构体类型(递归)， 
+                llvm::StructType *structTy = llvm::dyn_cast<llvm::StructType>(ty);
+
+                // elemsConstantValue 用于存储结构体成员的常量初始值
+                llvm::SmallVector<llvm::Constant *> elemsConstantVal;  
+                int size = structTy->getStructNumElements();     /* 通过llvm::StructType获取结构体元素个数 */
+                for (int i = 0; i < size; i++)
+                {
+                    offset.push_back(i);
+                    // 对结构体成员进行递归初始化
+                    auto elemConstVal = initFunc(structTy->getStructElementType(i), initFunc, offset);
+                    elemsConstantVal.push_back(elemConstVal);
+                    offset.pop_back();
+                }
+                
+                // 结构体的初始值， 是一个llvm结构体常量llvm::ConstantStruct
+                return llvm::ConstantStruct::get(structTy, elemsConstantVal);
+            } else if (ty->isArrayTy()) {
+                // 全局变量为数组类型(递归)
+                llvm::ArrayType *arrayTy = llvm::dyn_cast<llvm::ArrayType>(ty);
+
+                llvm::SmallVector<llvm::Constant*> elemsConstantVal;
+                int size = arrayTy->getArrayNumElements();    /* 获取数组类型的元素个数 */
+                for (int i = 0; i < size; i++)
+                {
+                    offset.push_back(i);
+                    // 对数组元素进行递归初始化
+                    auto elemConstVal = initFunc(arrayTy->getArrayElementType(), initFunc, offset);
+                    elemsConstantVal.push_back(elemConstVal);
+                    offset.pop_back();
+                }
+
+                // 数组的初始值， 是一个llvm数组常量llvm::ConstantStruct
+                return llvm::ConstantArray::get(arrayTy, elemsConstantVal);
+            } else {
+                // TODO: 不支持的类型， 如果未来类型扩展在此处补充
+            }
+        };
+
+
+        // 在llvm api中全局变量是由单独的指令去创建， new GlobalVariable(...), 原型如下：
+        // GlobalVariable(Module &M,    全局变量所属的module
+        //         Type *Ty,            全局变量的类型
+        //         bool isConstant,     是否为常量
+        //         LinkageTypes Linkage,  链接属性， 可以设置为外部链接属性
+        //         Constant *Initializer, const Twine &Name = "",  全局变量的初始值和名字
+        //         GlobalVariable *InsertBefore = nullptr,      
+        //         ThreadLocalMode = NotThreadLocal,
+        //         std::optional<unsigned> AddressSpace = std::nullopt,
+        //         bool isExternallyInitialized = false);
+        llvm::GlobalVariable *globalVar = new llvm::GlobalVariable(*module, ty, false, llvm::GlobalValue::ExternalLinkage, nullptr);
+        globalVar->setAlignment(llvm::Align(decl->type->GetAlign()));          /* 设置变量内存对齐 */ 
+        globalVar->setInitializer(GetInitialValue(ty, GetInitialValue, {0}));  /* 设置全局变量初始值 */ 
+
+        AddGlobalVarToMap(globalVar, ty, varName);
+        return globalVar;
+    } else {
+        /* 
+        在LLVM IR中，alloca指令必须放在函数的entry block(入口基本块)中:
+        ┌─────────────────────────┐
+        │     entry block         │ ← 所有 alloca 必须在这里！
+        │  %x = alloca i32        │
+        │  %y = alloca [10 x i32] │
+        └─────────────────────────┘
+                ↓
+        其他基本块（不能 alloca）
+        */
+        // curFunc->getEntryBlock() 获取函数的入口基本快
+        // curFunc->getEntryBlock().begin() 函数的入口基本块的插入位置迭代器
+        // 创建一个临时irBuilder
+        llvm::IRBuilder<> tmpIrBuilder(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
+
+        llvm::AllocaInst* alloc = irBuilder.CreateAlloca(ty, nullptr, varName);    /* 为变量申请内存地址 */
+        alloc->setAlignment(llvm::Align(decl->type->GetAlign()));                  /* 设置变量内存对齐 */
+
+        // 存储变量的 '地址'-'类型' 的KV
+        AddLocalVarToMap(alloc, ty, varName);
+
+        if (decl->initValues.size() > 0) {
+            if (decl->initValues.size() == 1) {
+                llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
+                irBuilder.CreateStore(initValue, alloc);
+            } else {
+                // 处理数组声明的初始化
+                if (llvm::ArrayType *arrType = llvm::dyn_cast<llvm::ArrayType>(ty)) {
                     for (const auto &initValue : decl->initValues) {
                         llvm::SmallVector<llvm::Value*> vec;
                         for (auto &offset : initValue->offsetList) {
                             vec.push_back(irBuilder.getInt32(offset));
                         }
-                        llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
+                        llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
+                        llvm::Value *val = initValue->value->Accept(this);
+                        irBuilder.CreateStore(val, addr);
+                    }
+                } 
+                // 处理struct/union声明的初始化
+                else if (llvm::StructType *structType = llvm::dyn_cast<StructType>(ty)) {
+                    // 获取对应C语言类型信息
+                    CRecordType *cStructType = llvm::dyn_cast<CRecordType>(decl->type.get());
+                    TagKind tagKind = cStructType->GetTagKind();
+                    if (tagKind == TagKind::KStruct) {
+                        for (const auto &initValue : decl->initValues) {
+                            llvm::SmallVector<llvm::Value*> vec;
+                            for (auto &offset : initValue->offsetList) {
+                                vec.push_back(irBuilder.getInt32(offset));
+                            }
+                            llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
+                            llvm::Value *val = initValue->value->Accept(this);
+                            irBuilder.CreateStore(val, addr);
+                        }
+                    } else {
+                        // union
+                        assert(decl->initValues.size() == 1);
+
+                        llvm::SmallVector<llvm::Value*> vec;
+                        const auto& initValue = decl->initValues[0];
+                        for (auto &offset : initValue->offsetList) {
+                            vec.push_back(irBuilder.getInt32(offset));
+                        }
+                        llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                         llvm::Value *val = initValue->value->Accept(this);
                         irBuilder.CreateStore(val, addr);
                     }
                 } else {
-                    // union
-                    assert(decl->initValues.size() == 1);
-
-                    llvm::SmallVector<llvm::Value*> vec;
-                    const auto& initValue = decl->initValues[0];
-                    for (auto &offset : initValue->offsetList) {
-                        vec.push_back(irBuilder.getInt32(offset));
-                    }
-                    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, value, vec);
-                    llvm::Value *val = initValue->value->Accept(this);
-                    irBuilder.CreateStore(val, addr);
+                    assert(0);
                 }
-            } else {
-                assert(0);
             }
         }
+        return alloc;
     }
-    return value;
-
     // if (decl->init != nullptr) {
     //     llvm::Value *initValue = decl->init->Accept(this);
     //     irBuilder.CreateStore(initValue, varValue);
@@ -858,16 +991,56 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
 }
 
 llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
-    FunctionType *mFuncType = FunctionType::get(irBuilder.getInt32Ty(), false);
-    // ExternalLinkage 外部链接属性可以被连接器找到
-    Function *mFunc = Function::Create(mFuncType, GlobalValue::LinkageTypes::ExternalLinkage, "main", module.get());
+    ClearVarScope();  /* 初始化函数的局部变量作用域 */ 
 
+    // 获取函数的C语言语法树类型
+    CFuncType *cFuncTy = llvm::dyn_cast<CFuncType>(decl->type.get());
+
+    FunctionType *funcTy = llvm::dyn_cast<llvm::FunctionType>(decl->type->Accept(this));
+    // ExternalLinkage 外部链接属性可以被连接器找到
+    Function *mFunc = Function::Create(funcTy, GlobalValue::LinkageTypes::ExternalLinkage, cFuncTy->GetName(), module.get());
+    // 将函数的地址和类型添加到全局作用域中
+    AddGlobalVarToMap(mFunc, funcTy, cFuncTy->GetName());
+
+    const auto &params = cFuncTy->GetParams();
+    int i = 0;
+    // 设置 llvm::Function的参数名
+    for (auto &arg : mFunc->args()) {
+        arg.setName(params[i].name);
+        i++;
+    }
+
+    if (decl->blockStmt == nullptr) {
+        return nullptr;
+    }
+
+    // 创建函数的入口块
+    /* 函数的入口块entry要用于存放变量内存的分配 */
     BasicBlock *entryBB = BasicBlock::Create(context, "entry", mFunc);
     irBuilder.SetInsertPoint(entryBB);
+
     // 记录当前的Function函数
     curFunc = mFunc;
 
+    // >>>> 进入一个函数，就要开辟一个新的作用域
+    PushScope();
+
+    i = 0;
+    for (auto &arg : mFunc->args()) {
+        // 在入口块entry中为函数参数申请一个变量
+        auto* alloc = irBuilder.CreateAlloca(arg.getType(), nullptr, params[i].name);
+        alloc->setAlignment(llvm::Align(params[i].type->GetAlign()));
+        // 将函数的传入的参数存入到alloc变量中
+        irBuilder.CreateStore(&arg, alloc);
+
+        // 将参数存入局部变量作用域中
+        AddLocalVarToMap(alloc, arg.getType(), params[i].name);
+        i++;
+    }
+    // 函数体的codegen
     decl->blockStmt->Accept(this);
+    // <<<< 离开一个函数时，就要退出当前作用域
+    PopScope();
 
     verifyFunction(*mFunc);
     // 注：verifyModule函数：如果检查module有错误则返回true。 检查module正确则返回false
@@ -884,9 +1057,13 @@ llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
 // load T* -> T
 llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
     llvm::StringRef varName(expr->token.ptr, expr->token.len);
-    std::pair pair = varAddrTypeMap[varName];
-    llvm::Value* addr = pair.first;
-    llvm::Type* ty = pair.second;
+
+    const auto &[addr, ty] = GetVarByName(varName);
+    if (ty->isFunctionTy()) {
+        // 如果是函数类型，则直接返回函数地址
+        return addr;
+    }
+
     // 变量访问 对应一个load指令
     return irBuilder.CreateLoad(ty, addr, varName);
 }
@@ -943,8 +1120,55 @@ llvm::Type* CodeGen::VisitRecordType(CRecordType *type) {
 
 
 llvm::Type* CodeGen::VisitFuncType(CFuncType *type) {
-    return nullptr;
+    llvm::Type *retTy = type->GetRetType()->Accept(this);
+
+    llvm::SmallVector<llvm::Type*> paramsType;
+    for(const auto &param : type->GetParams()) {
+        paramsType.push_back(param.type->Accept(this));
+    }
+    // C函数类型就返回一个llvm的FunctionType
+    return llvm::FunctionType::get(retTy, paramsType, false);
 }
+
+
+
+void CodeGen::AddLocalVarToMap(llvm::Value* addr, llvm::Type* ty, llvm::StringRef name) {
+    localVarMap.back().insert(std::make_pair(name, std::make_pair(addr, ty)));
+}
+
+void CodeGen::AddGlobalVarToMap(llvm::Value* addr, llvm::Type* ty, llvm::StringRef name) {
+    globalVarMap.insert(std::make_pair(name, std::make_pair(addr, ty)));
+}
+
+std::pair<llvm::Value*, llvm::Type*> CodeGen::GetVarByName(llvm::StringRef name) {
+    // 先从局部变量作用域的栈底查找
+    for(auto it = localVarMap.rbegin(); it != localVarMap.rend(); it++) {
+        // if (it->find(name) != it->end()) {
+        //     return (*it)[name];
+        // }
+        auto ret = it->find(name);
+        if (ret != it->end()) {
+            return ret->second;
+        }
+    }
+    // 从全局变量作用域中查找
+    assert(globalVarMap.find(name) != globalVarMap.end());
+    return globalVarMap[name];
+}
+
+void CodeGen::PushScope() {
+    localVarMap.emplace_back();
+}
+
+void CodeGen::PopScope() {
+    localVarMap.pop_back();
+}
+
+void CodeGen::ClearVarScope() {
+    // 每次进入一个llvm IR Function， 都需要将作用域（localVarMap）清理一次
+    localVarMap.clear();
+}
+
 
 /*
 注：

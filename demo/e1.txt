@@ -1,2 +1,2 @@
 // {union A{int a, b; int *p;} b; union A *a = &b; a->a = 10; a->b;}
-{struct A{int a, b; int *p; struct {int a; int c;} d;} b; struct A *a = &b; b.d.a = 11; a->d.a;}
+int main() {struct A{int a, b; int *p; struct {int a; int c;} d;} b; struct A *a = &b; b.d.a = 11; return a->d.a;}
