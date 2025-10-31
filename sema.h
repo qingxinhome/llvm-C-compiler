@@ -45,7 +45,7 @@ public:
 
     void SetMode(Mode mode);
 private:
-    Scope scope;
+    Scope scope;                     /* 作用域管理器*/
     Mode mode{Mode::Normal};         /* 语义检查模式 */
     DiagEngine &diagEngine;
 };

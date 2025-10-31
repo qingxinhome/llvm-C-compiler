@@ -248,6 +248,7 @@ public:
     };
 
     // 变量声明的初始值表达式,可以是单值，也可以是列表；有可能为空
+    // 这里使用std::vector存放所有初始值，不是基于其原始结构， 而是展平存储在vector中
     std::vector<std::shared_ptr<InitValue>> initValues;
 
     // isGlobal属性标识是否为全局变量
@@ -506,6 +507,8 @@ public:
 // 语法树根节点类型
 class Program {
 public:
+    llvm::StringRef fileName;     // 程序的源文件名
+
     // 程序是由一个或多个全局变量或者函数组成, 即：
     // prog          ::= (external-decl)+
     // external-decl ::= func-def | decl-stmt

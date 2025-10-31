@@ -90,10 +90,10 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::addr:
     {
         // int a;  int *p = &a;
-        if (!unary->isLValue && (this->mode == Mode::Normal)) {
-            // 要求只能针对左值进行取地址
-            diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
-        }
+        // if (!unary->isLValue && (this->mode == Mode::Normal)) {
+        //     // 要求只能针对左值进行取地址
+        //     diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
+        // }
         unaryExpr->type = std::make_shared<CPointType>(unary->type);
         break;
     }
@@ -348,6 +348,17 @@ std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &memb
 
 
 std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_ptr<CType> type, std::shared_ptr<AstNode> blockStmt) {
+    // 检查函数是否出现冲定义
+    llvm::StringRef text(token.ptr, token.len);
+    std::shared_ptr<Symbol> symbol = scope.FindObjSymbolInCurScope(text);
+    if (symbol != nullptr && blockStmt != nullptr && mode == Mode::Normal) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+    }
+
+    if(symbol == nullptr && mode == Mode::Normal) {
+        scope.AddObjSymbol(type, text);
+    }
+    
     std::shared_ptr<FunctionDecl> funcDecl = std::make_shared<FunctionDecl>();
     funcDecl->token = token;    // 记录函数名对应的token
     funcDecl->blockStmt = blockStmt;
@@ -362,8 +373,9 @@ std::shared_ptr<PostFunctionCallExpr> Sema::semaFuncCallExprNode(std::shared_ptr
         // 符号不是函数类型
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_expected, "function type");
     }
-
     CFuncType *funcType = llvm::dyn_cast<CFuncType>(left->type.get());
+
+    // 检查函数实参数个数与形参个数是否匹配
     if (funcType->GetParams().size() != args.size()) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_miss, "argument count not match");
     }

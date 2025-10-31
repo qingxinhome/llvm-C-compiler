@@ -91,8 +91,9 @@ public:
 
 class Lexer {
 private:
-    llvm::SourceMgr &mgr;    // 用于存放源文件
-    DiagEngine &diagEngine;  // 诊断引擎
+    llvm::SourceMgr &mgr;     // 用于存放源文件
+    llvm::StringRef fileName; // 源文件名
+    DiagEngine &diagEngine;   // 诊断引擎
 public:
     Lexer(llvm::SourceMgr &mgr, DiagEngine &diagEngine) : mgr(mgr), diagEngine(diagEngine) {
         unsigned int id = mgr.getMainFileID();
@@ -101,7 +102,9 @@ public:
         LineHeadPtr = buf.begin();
         BufEnd = buf.end();
         row = 1;
+        fileName = mgr.getMemoryBuffer(id)->getBufferIdentifier();
     }
+
     void NextToken(Token &token);
 
     void SaveState();
@@ -109,6 +112,11 @@ public:
     DiagEngine& GetDiagEngine() const{
         return diagEngine;
     }
+
+    llvm::StringRef GetFileName() {
+        return fileName;
+    }
+
 private:
     bool StartWith(const char* p);
 private:

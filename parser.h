@@ -21,6 +21,7 @@ public:
     }
 
     std::shared_ptr<Program> ParseProgram();
+
 private:
     std::shared_ptr<AstNode> ParseFunctionDecl();
     std::shared_ptr<AstNode> ParseStmt();
