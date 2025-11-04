@@ -37,10 +37,11 @@ void Scope::AddObjSymbol(std::shared_ptr<CType> type, llvm::StringRef name){
     curTable.insert({name, symbol});
 }
 
-
+// 从作用域栈中反向查找类型符合表，查找目标类型的符号是否存在
 std::shared_ptr<Symbol> Scope::FindTagSymbol(llvm::StringRef name) {
     // 反向遍历(从栈顶开始查找)
     for(std::vector<std::shared_ptr<Env>>::reverse_iterator it = envs.rbegin(); it != envs.rend(); it++){
+        // 检查类型符合表，查找目标类型
         auto table = (*it)->tagSymbolTable;
         if (table.count(name) > 0) {
             return table[name];

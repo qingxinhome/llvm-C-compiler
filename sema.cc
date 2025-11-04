@@ -6,7 +6,7 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
     // 1. 检查在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
     auto symbol = scope.FindObjSymbolInCurScope(text);
-    if (symbol) {
+    if (symbol && (mode == Mode::Normal)) {
         // llvm::errs() << "re define variable name " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
     }
@@ -199,7 +199,7 @@ std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNo
 }
 
 std::shared_ptr<PostMemberDotExpr> Sema::semaPostMemberDotNode(std::shared_ptr<AstNode> left, Token identoken, Token dotToekn) {
-    if (left->type->GetKind() != CType::TY_Record) {
+    if (left->type->GetKind() != CType::TY_Record && (mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(dotToekn.ptr), diag::err_expected_type, "struct or union type");
     }
 
@@ -261,12 +261,16 @@ std::shared_ptr<PostMemberArrowExpr> Sema::semaPostMemberArrowNode(std::shared_p
     return node;
 }
 
+// semaDeclInitValue 对变量声明语句的初始值做语义检查，检查声明的类型和初始化值的类型是否匹配
 std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr<CType> declType, std::shared_ptr<AstNode> value, std::vector<int> &offsetList, Token token) {
-    // 检查声明的类型和初始化值的类型是否匹配
-    if (declType->GetKind() != value->type->GetKind() && (this->mode == Mode::Normal)) {
-        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_miss, "same type");
-    }
-    
+    /*
+    暂时注释掉类型检查，用于支持类型强转
+        // 检查声明的类型和初始化值的类型是否匹配
+        if (declType->GetKind() != value->type->GetKind() && (this->mode == Mode::Normal)) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_miss, "same type");
+        }
+    */
+      
     auto initValue = std::make_shared<VariableDecl::InitValue>();
     initValue->decType = declType;
     initValue->value = value;
@@ -309,18 +313,25 @@ void Sema::SetMode(Mode mode) {
 
 
 
+// 从类型符号表栈中查找 结构体名是否存在，如果存在就返回对应结构体类型
 std::shared_ptr<CType> Sema::semaTagAccess(Token token) {
     // 从符号表栈的所有符号表中检查符号是否存在
     llvm::StringRef text(token.ptr, token.len);
     std::shared_ptr<Symbol> symbol = scope.FindTagSymbol(text);
-    if(symbol == nullptr && (this->mode == Mode::Normal)) {
-        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
+    if (symbol != nullptr) {
+        return symbol->GetType();
+    } else {
+        return nullptr;
     }
-    return symbol->GetType();
+
+    // if(symbol == nullptr && (this->mode == Mode::Normal)) {
+    //     diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
+    // }
+    // return symbol->GetType();
 }
 
 std::shared_ptr<CType> Sema::semaTagDeclare(Token token, const std::vector<Member> &members, TagKind tagKind) {
-    // 1. 检查在当前作用域内是否存在重名
+    // 1. 检查类型名tag在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
     auto symbol = scope.FindTagSymbolInCurScope(text);
     if (symbol != nullptr) {
@@ -336,6 +347,22 @@ std::shared_ptr<CType> Sema::semaTagDeclare(Token token, const std::vector<Membe
 }
 
 
+std::shared_ptr<CType> Sema::semaTagDeclare(Token token, std::shared_ptr<CType> type) {
+    // 检查类型名tag在当前作用域内是否存在重名
+    llvm::StringRef text(token.ptr, token.len);
+    auto symbol = scope.FindTagSymbolInCurScope(text);
+    if (symbol != nullptr) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+    }
+
+    // 2. 添加到tag符号表中
+    if (this->mode == Mode::Normal) {
+        scope.AddTagSymbol(type, text);
+    }
+    return type;
+}
+
+
 std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &members, TagKind tagKind) {
     llvm::StringRef text = CType::GenAnonyRecordName(tagKind);
     auto recordType = std::make_shared<CRecordType>(text, members, tagKind);
@@ -348,19 +375,36 @@ std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &memb
 
 
 std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_ptr<CType> type, std::shared_ptr<AstNode> blockStmt) {
+    CFuncType *funcType = llvm::dyn_cast<CFuncType>(type.get());
+    funcType->hasBody = blockStmt ? true : false;
+    
     // 检查函数是否出现冲定义
     llvm::StringRef text(token.ptr, token.len);
     std::shared_ptr<Symbol> symbol = scope.FindObjSymbolInCurScope(text);
-    if (symbol != nullptr && blockStmt != nullptr && mode == Mode::Normal) {
-        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+
+    if (symbol != nullptr) {
+        auto symbolType = symbol->GetType();
+        if (symbolType->GetKind() != CType::TY_Func && mode == Mode::Normal) {
+            // 函数名和全局变量名重名，报错
+            diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+        }
+
+        // 函数可以重复声明， 但不能重复定义
+        if (symbolType->GetKind() == CType::TY_Func) {
+            auto symFuncType = llvm::dyn_cast<CFuncType>(symbolType.get());
+            if (symFuncType->hasBody && funcType->hasBody && mode == Mode::Normal) {
+                diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
+            }
+        }
     }
 
-    if(symbol == nullptr && mode == Mode::Normal) {
+    if((symbol == nullptr || funcType->hasBody) && mode == Mode::Normal) {
+        // 添加到符号表中
         scope.AddObjSymbol(type, text);
     }
     
     std::shared_ptr<FunctionDecl> funcDecl = std::make_shared<FunctionDecl>();
-    funcDecl->token = token;    // 记录函数名对应的token
+    funcDecl->token = token;     // 记录函数名对应的token
     funcDecl->blockStmt = blockStmt;
     funcDecl->type = type;
     return funcDecl;
@@ -369,14 +413,14 @@ std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_pt
 
 std::shared_ptr<PostFunctionCallExpr> Sema::semaFuncCallExprNode(std::shared_ptr<AstNode> left, std::vector<std::shared_ptr<AstNode>> &args) {
     Token ident = left->token;
-    if (left->type->GetKind() != CType::TY_Func) {
+    if (left->type->GetKind() != CType::TY_Func && (mode == Mode::Normal)) {
         // 符号不是函数类型
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_expected, "function type");
     }
     CFuncType *funcType = llvm::dyn_cast<CFuncType>(left->type.get());
 
     // 检查函数实参数个数与形参个数是否匹配
-    if (funcType->GetParams().size() != args.size()) {
+    if (funcType->GetParams().size() != args.size() && (mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_miss, "argument count not match");
     }
 

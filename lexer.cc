@@ -83,6 +83,8 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "union";
     case TokenType::kw_return:
         return "return";
+    case TokenType::kw_void:
+        return "void";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -287,6 +289,8 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_union;
         } else if (content == "return") {
             token.tokenType = TokenType::kw_return;
+        } else if (content == "void") {
+            token.tokenType = TokenType::kw_void;
         }
     } else {
         switch (*CurBufPtr)

@@ -21,13 +21,17 @@ std::shared_ptr<Program> Parser::ParseProgram() {
     program->fileName = lexer.GetFileName();
 
     while (token.tokenType != TokenType::eof) {
+        std::shared_ptr<AstNode> node;
         if (IsFunctionDecl()) {
             /* 函数声明 */
-            program->externalDecls.push_back(ParseFunctionDecl());
+            node = ParseFunctionDecl();
         } else {
             /* 全局变量的声明 */                         
-            program->externalDecls.push_back(ParseDeclareStmt(true));
+            node = ParseDeclareStmt(true);
         }
+        if (node != nullptr) {
+            program->externalDecls.push_back(node);
+        }   
     }
 
     Expect(TokenType::eof);
@@ -37,6 +41,7 @@ std::shared_ptr<Program> Parser::ParseProgram() {
 std::shared_ptr<AstNode> Parser::ParseFunctionDecl() {
     std::shared_ptr<CType> baseType = ParseDeclSpec();          // 解析声明说明符
 
+    // 从函数定义的参数列表开始就是函数的作用域
     sema.EnterScope();
     std::shared_ptr<AstNode> node = Declarator(baseType, true); // 解析声明符
 
@@ -48,6 +53,7 @@ std::shared_ptr<AstNode> Parser::ParseFunctionDecl() {
         Consume(TokenType::semi);
     }
     sema.ExitScope();
+    
     return sema.semaFunctionDecl(node->token, node->type, blockStmt);
 }
 
@@ -101,6 +107,9 @@ std::shared_ptr<CType> Parser::ParseDeclSpec() {
     } else if (token.tokenType == TokenType::kw_struct 
         || token.tokenType == TokenType::kw_union) {
         return ParseStructOrUnionSpec();
+    } else if (token.tokenType == TokenType::kw_void) {
+        Consume(TokenType::kw_void);
+        return CType::VoidType;
     }
     GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_type);
     return nullptr;
@@ -124,21 +133,47 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
     NextToken();
 
     bool anony = false;
-    Token tag;
-    if (token.tokenType == TokenType::l_brace) {
+    // 判断是否为匿名结构体
+    if (token.tokenType != TokenType::identifier) {
         anony = true;
-    } else {
-        Expect(TokenType::identifier);
-        /* 记录结构体类型名.如 struct A {...} 中的A */
-        tag = token;                 
+    }
+
+    // 获取结构体名
+    Token tag = token;
+    if (token.tokenType == TokenType::identifier) {
+        /* 
+         记录结构体类型名(即tag)，如:
+         struct A {...} 中的A,
+         struct A *ptr; 中的 A；
+        */
+        tag = token;
         Consume(TokenType::identifier);
+    }
+
+    std::shared_ptr<CType> recordType = nullptr;
+    if (!anony) {
+        // 从类型符号表中查找 结构体名是否存在，如果存在就返回对应结构体类型
+        recordType = sema.semaTagAccess(tag);
+    }
+
+    // 如果结构体类型名没有未定义
+    if (recordType == nullptr) {
+            llvm::StringRef text;
+        if (anony) {
+            // 如果是匿名结构体， 则为其生成一个名字
+            text = CType::GenAnonyRecordName(tagkind);
+        } else {
+            text = llvm::StringRef(tag.ptr, tag.len);
+        }
+        // 由于此时还没有解析到结构体的成员，因此构造CRecordType对象时，members成员属性设为空的vector, 
+        recordType = std::make_shared<CRecordType>(text, std::vector<Member>(), tagkind);
     }
 
     /*
         struct A {int a,b; int *p}  // 定义结构体
         struct A           // 使用一个结构体， 如 struct A[20];
     */
-    if (token.tokenType == TokenType::l_brace) {
+    if (token.tokenType == TokenType::l_brace) { 
         Consume(TokenType::l_brace);
         // 结构体定义{...}也是一个新的作用域
         sema.EnterScope();
@@ -155,15 +190,15 @@ std::shared_ptr<CType> Parser::ParseStructOrUnionSpec() {
             }
         }
         sema.ExitScope();
-
         Consume(TokenType::r_brace);
-        if (anony) {
-            return sema.semaAnonyTagDeclare(members, tagkind);
-        } else {
-            return sema.semaTagDeclare(tag, members, tagkind);
-        }
+
+        // 补充设置CRecordType类型的成员属性
+        CRecordType *ty = llvm::dyn_cast<CRecordType>(recordType.get());
+        ty->SetMembers(members);
+
+        return sema.semaTagDeclare(tag, recordType);
     } else {
-        return sema.semaTagAccess(tag);
+        return recordType;
     }
 
     return nullptr;
@@ -186,7 +221,7 @@ std::shared_ptr<CType> Parser::DirectDeclaratorSuffix(Token ident, std::shared_p
 }
 
 /* 
-解析数组类型声明的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
+解析数组类型声明时的数组后缀， 如：int a[2][3][4] 中的[2][3][4]
 direct-declarator ::= identifier | direct-declarator "[" assign "]" 
 					| direct-declarator "(" parameter-type-list? ")"
 eg: int a[3][4];
@@ -197,10 +232,15 @@ std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType
         return baseType;
     }
 
+    // 数组在声明的时候也可以不指定长度，如数组做函数参数：
+    // int combine(int arr1[], int arr1_length, int arr2[], int arr2_length)
+    int elemCount = -1;
     Consume(TokenType::l_bracket);
-    Expect(TokenType::number);
-    int elemCount = token.value;
-    Consume(TokenType::number);
+    if (token.tokenType != TokenType::r_bracket) {
+        Expect(TokenType::number);
+        elemCount = token.value;
+        Consume(TokenType::number);
+    }
     Consume(TokenType::r_bracket);
     return std::make_shared<CArrayType>(DirectDeclaratorArraySuffix(baseType, isGloabl), elemCount);
 }
@@ -219,13 +259,19 @@ std::shared_ptr<CType> Parser::DirectDeclaratorFuncSuffix(Token ident, std::shar
         if (i > 0 && token.tokenType == TokenType::comma) {
             Consume(TokenType::comma);
         }
-        // 解析函数参数
+        // 解析函数形参
         auto ty = ParseDeclSpec();
         auto node = Declarator(ty, isGloabl);
 
         Parameter parameter;
+        if (node->type->GetKind() == CType::TY_Array) {
+            // 在C语言语法中， 如果函数参数为数组类型，那么会将其转换为指向数组的指针
+            parameter.type = std::make_shared<CPointType>(node->type);
+        } else {
+            parameter.type = node->type;
+        }
         parameter.name = llvm::StringRef(node->token.ptr, node->token.len);
-        parameter.type = node->type;
+        
         params.push_back(parameter);
         i++;
     }
@@ -243,7 +289,7 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
         // 处理数组指针的语法： 如：int (*p)[5] p是一个指向int [5]数组的指针
         Token curToken = token;
 
-        //--------------------------------------------------------------------
+        //----------------------------------------------------------------------------
         lexer.SaveState();              /* 保存当前状态 */
         sema.SetMode(Sema::Mode::Skip);
 
@@ -255,7 +301,7 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
         baseType = DirectDeclaratorSuffix(token, baseType, isGloabl);
         lexer.RestoreState();           /* 恢复当前状态 */
         sema.SetMode(Sema::Mode::Normal);
-        //--------------------------------------------------------------------
+        //----------------------------------------------------------------------------
 
         token = curToken;
         Consume(TokenType::l_parent);
@@ -264,7 +310,7 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
 
         /* CType::IntType是临时占位类型，没有实际意义，调用DirectDeclaratorSuffix是为了让token走到 = 符号 */
         DirectDeclaratorSuffix(token, CType::IntType, isGloabl);
-    } else if (token.tokenType == TokenType::identifier){
+    } else if (token.tokenType == TokenType::identifier) {
         Token ident = token;                 /* 记录变量名 */
         Consume(TokenType::identifier);
 
@@ -287,9 +333,12 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
 
 /*
 initializer ::= assign | "{" initializer ("," initializer)*  "}"
-arr(引用参数)
-declType  代表在解析`{初始化列表}` 时， 当前这个初始化列表对应的数组类型 
-offsetList (引用参数): 元素索引列表
+解析表达式的初始值
+函数参数：
+  arr(引用参数)
+  declType  代表在解析`{初始化列表}` 时， 当前这个初始化列表对应的数组类型 
+  offsetList (引用参数): 元素索引列表
+  hasLBrace: 是否有左大括号
 返回值bool： 标识初始化列表是否结束
 */
 bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
@@ -312,9 +361,16 @@ bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValu
             CArrayType *arrType = llvm::dyn_cast<CArrayType>(declType.get());
             int size = arrType->GetElementCount();
 
+            /*
+              数组的声明加初始化形式：
+                int arr[10] = {1,2,3};
+                int arr[] = {1,2,3};
+              注：数组也可以在声明时不指定元素的数量， 有初始值的数量决定元素的数量，如：
+            */
             int isEnd = false;
-            // int arr[10] = {1,2,3};
-            for (int i = 0; i < size; i++) {
+            bool isFlex = size < 0? true : false;    /* 如果size < 0 说明数组在声明时没有指定元素个数 */
+            int i = 0;
+            for (; i < size || isFlex; i++) {
                 if (i > 0 && token.tokenType == TokenType::comma) {
                     Consume(TokenType::comma);
                 } 
@@ -325,6 +381,10 @@ bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValu
                 if (isEnd) {
                     break;
                 }
+            }
+            // 为数组类型设置元素个数（只是针对声明时没有指定元素个数的情况）
+            if (isFlex) {
+                arrType->SetElementCount(i);
             }
         } else if (declType->GetKind() == CType::TY_Record) {
             // 处理结构体/共用体类型变量的初始化
@@ -941,6 +1001,7 @@ std::shared_ptr<AstNode> Parser::ParsePostfixExpr() {
                     Consume(TokenType::comma);
                 }
                 args.push_back(ParseAssignExpr());
+                i++;
             }
             Consume(TokenType::r_parent);
             left = sema.semaFuncCallExprNode(left, args);
@@ -1046,6 +1107,8 @@ bool Parser::IsTypeName(TokenType tokenType) {
         return true;
     } else if (tokenType == TokenType::kw_struct || tokenType == TokenType::kw_union) {
         return true;
+    } else if (tokenType == TokenType::kw_void) {
+        return true;
     }
     return false;
 }
@@ -1058,9 +1121,19 @@ bool Parser::IsFunctionDecl() {
     lexer.SaveState();
 
     std::shared_ptr<CType> baseType = ParseDeclSpec();   // 解析声明说明符
-    auto node = Declarator(baseType, true);              // 解析声明符
-    if (node->type->GetKind() == CType::Kind::TY_Func) {
-        isFuncDecl = true;
+    if (token.tokenType == TokenType::semi) {
+        /*
+        如果是分号， 那么就是一个纯粹的类型定义，如：
+            struct A {
+                int x;
+            };
+        */
+        isFuncDecl = false;
+    } else {
+        auto node = Declarator(baseType, true);              // 解析声明符
+        if (node->type->GetKind() == CType::Kind::TY_Func) {
+            isFuncDecl = true;
+        }       
     }
 
     lexer.RestoreState();

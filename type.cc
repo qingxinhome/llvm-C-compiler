@@ -5,8 +5,11 @@
 //     return &intType;
 // }
 
-// 静态成员变量必须在类内声明，在类外初始化
+// CType类的静态成员变量的初始化: 必须在类内声明，在类外初始化
 std::shared_ptr<CType> CType::IntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4);
+// void 类型的大小和对齐 都是 0， 因为它是空类型
+std::shared_ptr<CType> CType::VoidType = std::make_shared<CPrimaryType>(Kind::TY_Void, 0, 0);
+
 
 llvm::StringRef CType::GenAnonyRecordName(TagKind tagKind) {
     // 定义静态局部变量
@@ -39,6 +42,16 @@ static int roundup(int x, int align) {
 
 CRecordType::CRecordType(llvm::StringRef name, const std::vector<Member> &members, TagKind tagKind) : 
     CType(Kind::TY_Record, 0, 0), name(name), members(members), tagKind(tagKind) {
+    // update size and align
+    if (tagKind == TagKind::KStruct) {
+        UpdateStructOffset();
+    } else {
+        UpdateUnionOffset();
+    }
+}
+
+void CRecordType::SetMembers(const std::vector<Member>& members) {
+    this->members = members;
     // update size and align
     if (tagKind == TagKind::KStruct) {
         UpdateStructOffset();

@@ -365,6 +365,8 @@ llvm::Value* PrintVisitor::VisitPostFunctionCallExpr(PostFunctionCallExpr *expr)
 llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
         *out << "int ";
+    } else if (type->GetKind() == CType::TY_Void) {
+        *out << "void ";
     }
     return nullptr;
 }
