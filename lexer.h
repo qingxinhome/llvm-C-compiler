@@ -10,16 +10,17 @@
 enum class TokenType {
     number,
     identifier,
-    kw_int,  // int type
-    kw_if,   // if
-    kw_else, // else
-    kw_for,  // for
-    kw_break, // break
+    kw_int,      // int type
+    kw_if,       // if
+    kw_else,     // else
+    kw_for,      // for
+    kw_break,    // break
     kw_continue, // continue
     kw_sizeof,   // sizeof
     kw_struct,   // struct
     kw_union,    // union
     kw_return,   // return
+    kw_void,     // void
     minus, // -
     plus,  // +
     star,  // *
@@ -32,8 +33,8 @@ enum class TokenType {
     equal, // =
     comma, // ,
     equal_equal, // ==
-    not_equal,  // !=
-    less,       // <
+    not_equal,   // !=
+    less,        // <
     less_equal,  // <=
     greater,     // >
     greater_equal, // >=

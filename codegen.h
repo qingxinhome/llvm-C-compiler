@@ -53,6 +53,10 @@ private:
     llvm::Type* VisitFuncType(CFuncType *type) override;
 
 private:
+    /* CastValue用于将Value转换为目标类型的Value值*/
+    void CastValue(llvm::Value *&val, llvm::Type *destTy);
+
+private:
     llvm::LLVMContext context;
     /*
       Module是IR的顶级容器，存储函数、全局变量、元数据等，类似一个编译单元（.c 文件）。
@@ -76,8 +80,6 @@ private:
     llvm::SmallVector<llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>>>  localVarMap;
     // 全局变量/函数的 <地址，类型> 的存储， 对于函数而言就是， 函数的入口地址和函数的类型
     llvm::StringMap<std::pair<llvm::Value*, llvm::Type*>> globalVarMap;
-
-    
 private:
     /* llvm IR 作用域的管理 */
     void AddLocalVarToMap(llvm::Value* addr, llvm::Type* ty, llvm::StringRef name);

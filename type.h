@@ -31,7 +31,8 @@ enum class TagKind {
 class CType {
 public:
     enum Kind {
-        TY_Int,        // 基础类型
+        TY_Int,        // 基础类型 int
+        TY_Void,       // 基础类型 void
         TY_Point,      // 指针类型
         TY_Array,      // 数组类型
         TY_Record,     // 聚合类型（struct or union
@@ -57,9 +58,12 @@ public:
         return nullptr;
     }
 public:
-    // 使用静态成员变量来枚举Int类型
-    static std::shared_ptr<CType> IntType;  // 静态成员变量必须在类内声明，在类外初始化
+    // 使用静态成员变量来枚举C语言中的基础类型：
+    // Note:静态成员变量必须在类内声明，在类外初始化
+    static std::shared_ptr<CType> IntType; 
+    static std::shared_ptr<CType> VoidType;
 
+public:
     // GenAnonyRecordName 用于为匿名结构体或者union生成一个名字
     static llvm::StringRef GenAnonyRecordName(TagKind tagKind);
 protected:
@@ -120,6 +124,12 @@ public:
         return elementCount;
     }
 
+    void SetElementCount(int count) {
+        this->elementCount = count;
+        // 同时要更新数组类型的大小
+        this->size = elementCount*elementType->GetSize();
+    }
+
     llvm::Type* Accept(TypeVisitor *v) override{
         return v->VisitArrayType(this);
     }
@@ -160,6 +170,8 @@ public:
         return members;
     }
 
+    void SetMembers(const std::vector<Member>& members);
+
     const TagKind GetTagKind() {
         return tagKind;
     }
@@ -190,6 +202,8 @@ private:
     std::shared_ptr<CType> retType;     // 函数返回值类型
     std::vector<Parameter> params;      // 函数参数列表
     llvm::StringRef name;               // 函数名字
+public:
+    bool hasBody{false};                //  是否有函数体， 如果没有函数体说明是函数声明
 public:
     CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name);
 

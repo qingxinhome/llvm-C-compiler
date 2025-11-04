@@ -108,19 +108,22 @@ llvm::Value* CodeGen::VisitBlockStmt(BlockStmt *blockstmt) {
 ///
 llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "cond", curFunc);
-    llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", curFunc);
+    llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then");
     llvm::BasicBlock *elseBB = nullptr;
     if (ifstmt->elseNode != nullptr) {
-        elseBB = llvm::BasicBlock::Create(context, "else", curFunc);
+        elseBB = llvm::BasicBlock::Create(context, "else");
     }
-    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "last", curFunc);
+    llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "last");
 
     // 将指令执行流无条件跳转至 if 条件块
     irBuilder.CreateBr(condBB);
 
-    // handl if condBB
+    // handle if condBB
     irBuilder.SetInsertPoint(condBB);
     llvm::Value* val = ifstmt->condNode->Accept(this);
+    // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
+    CastValue(val, irBuilder.getInt32Ty());
+
     // int32 类型的比较指令ne ：不等于
     llvm::Value* condval =irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
     
@@ -129,11 +132,13 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
         irBuilder.CreateCondBr(condval, thenBB, elseBB);
 
         // handle then block
+        thenBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(thenBB);
         ifstmt->thenNode->Accept(this);
         irBuilder.CreateBr(lastBB);// 无条件跳转
 
         // handle else block
+        elseBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(elseBB);
         ifstmt->elseNode->Accept(this);
         irBuilder.CreateBr(lastBB); // 无条件跳转
@@ -142,10 +147,14 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
         irBuilder.CreateCondBr(condval, thenBB, lastBB);
 
         // then block
+        thenBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(thenBB);
         ifstmt->thenNode->Accept(this);
         irBuilder.CreateBr(lastBB);// 无条件跳转
     }
+
+    // 设置插入插入点之前，先把block块插入到当前函数
+    lastBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(lastBB);
     //  因为if语句不是表达式，if 语句没有值，不需要返回具体的llvm:Value
     return nullptr;
@@ -177,6 +186,8 @@ llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
     irBuilder.SetInsertPoint(condBB);
     if (forStmt->condNode != nullptr) {
         llvm::Value *val = forStmt->condNode->Accept(this);
+        // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
+        CastValue(val, irBuilder.getInt32Ty());
         llvm::Value *condVal = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
         irBuilder.CreateCondBr(condVal, bodyBB, lastBB);
     } else {
@@ -331,6 +342,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB", curFunc);
 
         llvm::Value* left = binaryExpr->left->Accept(this);
+        CastValue(left, irBuilder.getInt32Ty());
         llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
         irBuilder.CreateCondBr(lval, nextBB, falseBB);
 
@@ -372,6 +384,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB", curFunc);
 
         llvm::Value* left = binaryExpr->left->Accept(this);
+        CastValue(left, irBuilder.getInt32Ty());
         llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
         irBuilder.CreateCondBr(lval, trueBB, nextBB);
 
@@ -540,6 +553,12 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
 }
 
 llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
+    /*
+        注意： 在llvm API codegen的过程中， 对于BasicBlock块的创建：
+        llvm::BasicBlock::Create()，应该在需要的时候将其插入到当前函数，
+        尽量不要一开始创建BasicBlock块时，就设置到当前函数中因为有可能该BasicBlock块最终不属于当前函数
+    */
+
     // 三目运算其实就是 if else 
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", curFunc);
     llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context, "els");
@@ -547,6 +566,8 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
 
     // 1. 计算条件表达式
     llvm::Value *val = expr->cond->Accept(this);
+    // 条件表达式有可能是一个指针判等，需要先将其转换为int32Type
+    CastValue(val, irBuilder.getInt32Ty());
     llvm::Value *cond = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
     irBuilder.CreateCondBr(cond, thenBB, elseBB);
 
@@ -644,21 +665,37 @@ llvm::Value* CodeGen::VisitUnaryExpr(UnaryExpr *unaryExpr) {
 }
 
 llvm::Value* CodeGen::VisitSizeOfExpr(SizeOfExpr *sizeofExpr) {
-    llvm::Type *ty = nullptr;
+    // 获取源语言（C语言）的类型
+    std::shared_ptr<CType> ty = nullptr;
     if (sizeofExpr->ty != nullptr) {
-        ty = sizeofExpr->ty->Accept(this);
+        ty = sizeofExpr->ty;
     } else {
         // sizeof expr； 需要获取表达式的类型
-        ty = sizeofExpr->node->type->Accept(this);
+        ty = sizeofExpr->node->type;
     }
-    if (ty->isPointerTy()) {
-        return irBuilder.getInt32(8);    /* 指针变量的长度为8 */
-    } else if (ty->isIntegerTy()) {
-        return irBuilder.getInt32(4);    /* 整形变量的长度为4 */
-    } else {
-        assert(0);
-        return nullptr;
-    }
+    return irBuilder.getInt32(ty->GetSize());
+
+    // 旧的实现：
+    // llvm::Type *ty = nullptr;
+    // if (sizeofExpr->ty != nullptr) {
+    //     ty = sizeofExpr->ty->Accept(this);
+    // } else {
+    //     // sizeof expr； 需要获取表达式的类型
+    //     ty = sizeofExpr->node->type->Accept(this);
+    // }
+
+    // if (ty->isPointerTy()) {
+    //     return irBuilder.getInt32(8);    /* 指针变量的长度为8 */
+    // } else if (ty->isIntegerTy()) {
+    //     return irBuilder.getInt32(4);    /* 整形变量的长度为4 */
+    // } else if (ty->isArrayTy()) {
+    //     CArrayType *cArrayTy = llvm::dyn_cast<CArrayType>(sizeofExpr->node->type.get());
+    //     return irBuilder.getInt32(cArrayTy->GetSize());
+    // }
+    //  else {
+    //     assert(0);
+    //     return nullptr;
+    // }
 }
 
 llvm::Value* CodeGen::VisitPostIncExpr(PostIncExpr *postIncExpr) {
@@ -712,19 +749,27 @@ llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
 }
 
 
-// 数组元素访问表达式的codegen本质上就是对数组元素地址的计算
+// 数组元素访问表达式的codegen，本质上就是对数组元素地址的计算
 // a[5] = 10;
 llvm::Value* CodeGen::VisitPostSubscript(PostSubscript *expr) {
     llvm::Type * ty = expr->type->Accept(this);
     llvm::Value *left = expr->left->Accept(this);    /* 数组基地址*/
     llvm::Value *offset = expr->node->Accept(this);  /* 偏移地址*/
 
-    /* 
-    left对应的是load指令(被取值了)，load指令是对地址被解引用后的值， 可以通过LoadInst.getPointerrOperand()获取原始地址
-    CreateInBoundsGEP(llvm::Type *Ty, llvm::Value *Ptr, llvm::ArrayRef<llvm::Value *> IdxList)
-    如： int *p；ty就是int，   Ptr就是p（指针）
-    */
-    llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, llvm::dyn_cast<LoadInst>(left)->getPointerOperand(), {offset});
+    llvm::Value *addr;
+    if (left->getType()->isPointerTy()) {
+        // 如果使用指针访问数组元素, 那么指针本身就是基地址，不用转换(在使用数组实参给指针形参传入参数时， 数组退化为指针)
+        addr = irBuilder.CreateInBoundsGEP(ty, left, {offset});
+    } else if (left->getType()->isArrayTy()){
+        /* 
+        left对应的是load指令(被取值了)，load指令是对地址被解引用后的值， 可以通过LoadInst.getPointerrOperand()获取原始地址
+            CreateInBoundsGEP(llvm::Type *Ty, llvm::Value *Ptr, llvm::ArrayRef<llvm::Value *> IdxList)
+            如： int *p；ty就是int，  Ptr就是p（指针）
+        */
+        addr = irBuilder.CreateInBoundsGEP(ty, llvm::dyn_cast<LoadInst>(left)->getPointerOperand(), {offset});
+    } else {
+        assert(0);
+    }
     return irBuilder.CreateLoad(ty, addr);
 }
 
@@ -799,10 +844,19 @@ llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
     // 获取函数类型
     llvm::FunctionType *funcTy = llvm::dyn_cast<llvm::FunctionType>(expr->left->type->Accept(this));
 
+    // 获取函数的C语言类型，用于获取函数形参类型
+    CFuncType *cFuncType = llvm::dyn_cast<CFuncType>(expr->left->type.get());
+    const auto &params = cFuncType->GetParams();
+
+    int i = 0;
     // 对函数调用表达式的实参做Codegen
     llvm::SmallVector<llvm::Value*> args;
     for (auto &arg : expr->args) {
-        args.push_back(arg->Accept(this));
+        // 将函数调用时的实参转换为形参声明类型， 保证类型一致
+        llvm::Value* val = arg->Accept(this);
+        CastValue(val, params[i].type->Accept(this));
+        args.push_back(val);
+        i++;
     }
     return irBuilder.CreateCall(funcTy, funcAddr, args);
  }
@@ -813,7 +867,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
     llvm::StringRef varName(decl->token.ptr, decl->token.len);
 
     if (decl->isGlobal) {
-        // 定义一个lambda表达式， 用于获取全局变量定义时 给的初始值
+        // 定义一个lambda表达式， 用于根据位置获取全局变量定义时 给的初始值
         auto GetInitValueByOffset = [&](std::vector<int> &offset) -> std::shared_ptr<VariableDecl::InitValue>{
             const auto &initVals = decl->initValues;
             for (auto &n : initVals) {
@@ -836,20 +890,26 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
             return nullptr;
         };
 
-        
         // 定义一个lambda表达式(相当于一个递归函数), 用于计算全局变量的初始值（初始值都是常量），采用递归回溯法
         auto GetInitialValue = [&](llvm::Type* ty, auto &&initFunc, std::vector<int> offset)->llvm::Constant * {
-            if (ty->isIntegerTy()) {
-                // 全局变量为整数类型(递归)
-
+            if (ty->isIntegerTy()) {              /* 全局变量为整数类型(递归)*/
                 // 如果初始值不为空，则返回初始值的常量
                 std::shared_ptr<VariableDecl::InitValue> initVal = GetInitValueByOffset(offset);
                 if (initVal != nullptr) {
-                    return llvm::dyn_cast<llvm::Constant>(initVal->value->Accept(this));
+                    auto *val = initVal->value->Accept(this);
+                    CastValue(val, ty);
+                    return llvm::dyn_cast<llvm::Constant>(val);
                 }
                 // 如果没有初始值，则它的默认初始值为0
                 return irBuilder.getInt32(0);
-            } else if (ty->isPointerTy()) {
+            } else if (ty->isPointerTy()) {       /* 全局变量为指针类型(递归)*/
+                std::shared_ptr<VariableDecl::InitValue> initVal = GetInitValueByOffset(offset);
+                if (initVal != nullptr) {
+                    auto *val = initVal->value->Accept(this);
+                    CastValue(val, ty);
+                    return llvm::dyn_cast<llvm::Constant>(val);
+                }
+
                 // 全局变量为指针类型，则它的默认初始值为空的常量指针（全局指针变量的初始值只能是空值）
                 return llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(ty));
             } else if (ty->isStructTy()) {
@@ -925,7 +985,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
         // 创建一个临时irBuilder
         llvm::IRBuilder<> tmpIrBuilder(&curFunc->getEntryBlock(), curFunc->getEntryBlock().begin());
 
-        llvm::AllocaInst* alloc = irBuilder.CreateAlloca(ty, nullptr, varName);    /* 为变量申请内存地址 */
+        llvm::AllocaInst* alloc = tmpIrBuilder.CreateAlloca(ty, nullptr, varName);    /* 为变量申请内存地址 */
         alloc->setAlignment(llvm::Align(decl->type->GetAlign()));                  /* 设置变量内存对齐 */
 
         // 存储变量的 '地址'-'类型' 的KV
@@ -934,6 +994,8 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
         if (decl->initValues.size() > 0) {
             if (decl->initValues.size() == 1) {
                 llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
+                // 根据类型对值做一次转换， 保证值和类型是一致的
+                CastValue(initValue,  decl->initValues[0]->decType->Accept(this));
                 irBuilder.CreateStore(initValue, alloc);
             } else {
                 // 处理数组声明的初始化
@@ -945,6 +1007,8 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                         }
                         llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                         llvm::Value *val = initValue->value->Accept(this);
+                        // 根据类型对值做一次转换， 保证值和类型是一致的
+                        CastValue(val, initValue->decType->Accept(this));
                         irBuilder.CreateStore(val, addr);
                     }
                 } 
@@ -961,6 +1025,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                             }
                             llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                             llvm::Value *val = initValue->value->Accept(this);
+                            CastValue(val, initValue->decType->Accept(this));
                             irBuilder.CreateStore(val, addr);
                         }
                     } else {
@@ -974,6 +1039,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                         }
                         llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                         llvm::Value *val = initValue->value->Accept(this);
+                        CastValue(val, initValue->decType->Accept(this));
                         irBuilder.CreateStore(val, addr);
                     }
                 } else {
@@ -995,19 +1061,28 @@ llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
 
     // 获取函数的C语言语法树类型
     CFuncType *cFuncTy = llvm::dyn_cast<CFuncType>(decl->type.get());
-
-    FunctionType *funcTy = llvm::dyn_cast<llvm::FunctionType>(decl->type->Accept(this));
-    // ExternalLinkage 外部链接属性可以被连接器找到
-    Function *mFunc = Function::Create(funcTy, GlobalValue::LinkageTypes::ExternalLinkage, cFuncTy->GetName(), module.get());
-    // 将函数的地址和类型添加到全局作用域中
-    AddGlobalVarToMap(mFunc, funcTy, cFuncTy->GetName());
-
     const auto &params = cFuncTy->GetParams();
-    int i = 0;
-    // 设置 llvm::Function的参数名
-    for (auto &arg : mFunc->args()) {
-        arg.setName(params[i].name);
-        i++;
+
+    // 先通过函数的名字在module查找函数
+    llvm::Function * func = module->getFunction(cFuncTy->GetName());
+    if (func == nullptr) {
+        FunctionType *funcTy = llvm::dyn_cast<llvm::FunctionType>(decl->type->Accept(this));
+        // ExternalLinkage 外部链接属性可以被连接器找到
+        func = Function::Create(funcTy, GlobalValue::LinkageTypes::ExternalLinkage, cFuncTy->GetName(), module.get());
+        
+        // 将函数的地址和类型添加到全局作用域中
+        AddGlobalVarToMap(func, funcTy, cFuncTy->GetName());
+
+        // 打印函数， 用于调试
+        // func->print(llvm::outs());
+        // llvm::outs() << "\n";
+
+        int i = 0;
+        // 设置 llvm::Function的参数名
+        for (auto &arg : func->args()) {
+            arg.setName(params[i].name);
+            i++;
+        }
     }
 
     if (decl->blockStmt == nullptr) {
@@ -1016,17 +1091,16 @@ llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
 
     // 创建函数的入口块
     /* 函数的入口块entry要用于存放变量内存的分配 */
-    BasicBlock *entryBB = BasicBlock::Create(context, "entry", mFunc);
+    BasicBlock *entryBB = BasicBlock::Create(context, "entry", func);
     irBuilder.SetInsertPoint(entryBB);
 
     // 记录当前的Function函数
-    curFunc = mFunc;
-
+    curFunc = func;
     // >>>> 进入一个函数，就要开辟一个新的作用域
     PushScope();
 
-    i = 0;
-    for (auto &arg : mFunc->args()) {
+    int i = 0;
+    for (auto &arg : func->args()) {
         // 在入口块entry中为函数参数申请一个变量
         auto* alloc = irBuilder.CreateAlloca(arg.getType(), nullptr, params[i].name);
         alloc->setAlignment(llvm::Align(params[i].type->GetAlign()));
@@ -1039,10 +1113,21 @@ llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
     }
     // 函数体的codegen
     decl->blockStmt->Accept(this);
+
+    // 获取当前函数的最后一个基本块 BasicBlock 
+    auto &block = curFunc->back();
+    if (block.empty() || !block.back().isTerminator()) {
+        // 判断最后一个基本块最后一条指令是否是ret指令， 如果没有则补充ret指令
+        if (cFuncTy->GetRetType()->GetKind() == CType::TY_Void) {
+            irBuilder.CreateRetVoid();
+        }else {
+            irBuilder.CreateRet(irBuilder.getInt32(0));
+        }
+    }
     // <<<< 离开一个函数时，就要退出当前作用域
     PopScope();
 
-    verifyFunction(*mFunc);
+    // verifyFunction(*mFunc);
     // 注：verifyModule函数：如果检查module有错误则返回true。 检查module正确则返回false
     if (verifyModule(*module, &llvm::outs())) {
         module->print(outs(), nullptr);
@@ -1072,6 +1157,9 @@ llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
 llvm::Type* CodeGen::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
         return irBuilder.getInt32Ty();
+    } else if (type->GetKind() == CType::TY_Void) {
+        // 返回llvm IR的void类型
+        return irBuilder.getVoidTy();
     }
     assert(0);
     return nullptr;
@@ -1167,6 +1255,33 @@ void CodeGen::PopScope() {
 void CodeGen::ClearVarScope() {
     // 每次进入一个llvm IR Function， 都需要将作用域（localVarMap）清理一次
     localVarMap.clear();
+}
+
+/*
+CastValue函数的参数：llvm::Value*& val，是一个指向 llvm::Value的指针的引用，函数可以
+直接修改调用者的指针，让它指向新的对象。这类似于传入指针的“引用版本”，比 llvm::Value** 更自然。
+让它起到一个传入传出参数的作用
+*/
+void CodeGen::CastValue(llvm::Value *&val, llvm::Type *destTy) {
+    if (val->getType() != destTy) {
+        if (val->getType()->isIntegerTy()) {
+            if (destTy->isPointerTy()) {
+                val = irBuilder.CreateIntToPtr(val, destTy);
+            }
+        }
+        else if (val->getType()->isPointerTy()) {
+            if (destTy->isIntegerTy()) {
+                val = irBuilder.CreatePtrToInt(val, destTy);
+            }
+        } else if (val->getType()->isArrayTy()) {
+            if (destTy->isPointerTy()) {
+                auto *load = llvm::dyn_cast<llvm::LoadInst>(val);
+                // 获取数组的地址, 将数组的地址赋值给当前Value
+                // 如果函数的形参是指针，实参数数组，需要将参数转换为指向数组的指针
+                val = load->getPointerOperand();
+            }
+        }
+    }
 }
 
 
