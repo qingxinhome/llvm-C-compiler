@@ -13,6 +13,8 @@
     kw_struct,   // struct
     kw_union,    // union
     kw_return,   // return
+    kw_void,     // void
+    kw_char,     // char
     minus, // -
     plus,  // +
     star,  // *
@@ -85,6 +87,16 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "return";
     case TokenType::kw_void:
         return "void";
+    case TokenType::kw_char:
+        return "char";
+    case TokenType::kw_const:
+        return "const";
+    case TokenType::kw_volatile:
+        return "volatile";
+    case TokenType::kw_static:
+        return "static";
+    case TokenType::kw_extern:
+        return "extern";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -175,8 +187,12 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return ".";
     case TokenType::arrow:
         return "->";
+    case TokenType::ellipse:
+        return "...";
     case TokenType::identifier:
         return "identifier";
+    case TokenType::string:
+        return "string";
     default:
         llvm::llvm_unreachable_internal();
     }
@@ -195,6 +211,58 @@ bool IsDigit(char ch) {
 bool IsLetter(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
+
+
+// Read a single character in a char or string literal.
+static const char *c_char(int *res, const char *p) {
+    // Nonescaped
+    if (*p != '\\') {
+        *res = *p;
+        return p + 1;
+    }
+    p++;
+
+    int esc = 0;
+    switch (*p) {
+        case 'a': {
+            esc = '\a';
+            break;
+        }
+        case 'b': {
+            esc = '\b';
+            break;
+        }
+        case 'f': {
+            esc = '\f';
+            break;
+        }
+        case 'n': {
+            esc = '\n';
+            break;
+        }
+        case 'r': {
+            esc = '\r';
+            break;
+        }
+        case 't': {
+            esc = '\t';
+            break;
+        }
+        case 'v': {
+            esc = '\v';
+            break;
+        }
+        default : {
+            /// '\'' '"'
+            esc = *p;
+            break;
+        }
+    }
+    *res = esc;
+    return p + 1;
+}
+
+
 
 bool Lexer::StartWith(const char* p) {
     return !strncmp(CurBufPtr, p, strlen(p));
@@ -244,10 +312,46 @@ void Lexer::NextToken(Token &token) {
     token.row = row;
     token.col = CurBufPtr - LineHeadPtr + 1;
 
-    // 3. 获取token的起始位置
+    // 3. 获取token的起始位置指针(用于计算token长度)
     const char *startPtr = CurBufPtr;
 
-    if (IsDigit(*CurBufPtr)) {
+
+    // 4. 处理字符值（注意是字符，不是字符串）
+    // 'a'  or '\n'
+    if (CurBufPtr[0] == '\'') {
+        token.tokenType = TokenType::number;    /* 字符的类型也可以认为是一个数字*/
+        CurBufPtr++;     // skip left '
+        token.ptr = CurBufPtr;
+        token.type = CType::IntType;            /* token 的语言类型 */
+        CurBufPtr = c_char(&token.value, CurBufPtr);
+        if (CurBufPtr[0] != '\'') {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(CurBufPtr), diag::err_unclosed_charactor);
+        }
+
+        token.len = CurBufPtr - startPtr;
+        CurBufPtr++;     // skip right '
+    } else if (CurBufPtr[0] == '\"') {
+        CurBufPtr++;     // skip left "
+        token.tokenType = TokenType::string;
+        token.ptr = CurBufPtr;
+
+        std::string value;
+        while (CurBufPtr[0] != '\"') {
+            if (CurBufPtr[0] == '\0') {
+                // 相当于字符串提前结束了
+                diagEngine.Report(llvm::SMLoc::getFromPointer(CurBufPtr), diag::err_unclosed_string);
+            }
+            int c;
+            CurBufPtr = c_char(&c, CurBufPtr);
+            value += c;
+        }
+
+        // 字符串的类型就是数组（字符数组）
+        token.strValue = value;
+        token.type = std::make_shared<CArrayType>(CType::CharType, value.length());
+        token.len = CurBufPtr - startPtr;
+        CurBufPtr++;     // skip right "
+    } else if (IsDigit(*CurBufPtr)) {
         int number = 0;
         int len = 0;
         while(IsDigit(*CurBufPtr)) {
@@ -291,6 +395,16 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_return;
         } else if (content == "void") {
             token.tokenType = TokenType::kw_void;
+        } else if (content == "char") {
+            token.tokenType = TokenType::kw_char;
+        } else if (content == "const") {
+            token.tokenType = TokenType::kw_const;
+        } else if (content == "static") {
+            token.tokenType = TokenType::kw_static;
+        } else if (content == "volatile") {
+            token.tokenType = TokenType::kw_volatile;
+        } else if (content == "extern") {
+            token.tokenType = TokenType::kw_extern;
         }
     } else {
         switch (*CurBufPtr)
@@ -567,10 +681,17 @@ void Lexer::NextToken(Token &token) {
             CurBufPtr++;
             break;
         case '.':
-            token.tokenType = TokenType::dot;
-            token.ptr = startPtr;
-            token.len = 1;
-            CurBufPtr++;
+            if (CurBufPtr[1] == '.' && CurBufPtr[2] == '.') {
+                token.tokenType = TokenType::ellipse;
+                token.ptr = startPtr;
+                token.len = 3;
+                CurBufPtr += 3;
+            } else {
+                token.tokenType = TokenType::dot;
+                token.ptr = startPtr;
+                token.len = 1;
+                CurBufPtr++;
+            }
             break;
         default:
             // token.content = llvm::StringRef(startPtr, 1);

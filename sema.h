@@ -16,7 +16,8 @@ public:
     // 对变量声明节点进行语义检查
     std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type, bool isGloabl);
     std::shared_ptr<VariableAccessExpr> semaVariableAccessNode(Token token);
-    std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, std::shared_ptr<CType> type);
+    std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, int value, std::shared_ptr<CType> type);
+    std::shared_ptr<StringExpr> semaStringExprNode(Token token, std::shared_ptr<CType> type);
 
     std::shared_ptr<UnaryExpr> semaUnaryExprNode(std::shared_ptr<AstNode> unary, UnaryOp op, Token token);
     std::shared_ptr<BinaryExpr> semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op);

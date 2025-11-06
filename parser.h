@@ -47,6 +47,12 @@ private:
         bool hasLBrace
     );
 
+    bool ParseStringInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
+        std::shared_ptr<CType> declType, 
+        std::vector<int> &offsetList
+    );
+
+
     std::shared_ptr<AstNode> ParseIfStmt();
     std::shared_ptr<AstNode> ParseForStmt();
     std::shared_ptr<AstNode> ParseBreakStmt();
@@ -85,12 +91,17 @@ private:
     // 前进一个token
     void Advance();
     void NextToken();
+    // 消解类型类型限定符（在类型声明时有类型限定符，如const, static）
+    void ConsumeTypeQulify();
 
     // 判断当前token是否为是类型声明关键字
     bool IsTypeName(TokenType tokenType);
 
     // 判断是函数声明 or 全局变量声明
     bool IsFunctionDecl();
+
+    // 判断是否为字符串数组类型的声明， 即： char a[20];
+    bool IsStringArrayTy(std::shared_ptr<CType> ty);
 
     // 判断是否为赋值系列运算符
     bool IsAssignOperator();

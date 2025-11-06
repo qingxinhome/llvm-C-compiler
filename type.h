@@ -33,6 +33,7 @@ public:
     enum Kind {
         TY_Int,        // 基础类型 int
         TY_Void,       // 基础类型 void
+        TY_Char,       // 基础类型 char
         TY_Point,      // 指针类型
         TY_Array,      // 数组类型
         TY_Record,     // 聚合类型（struct or union
@@ -62,6 +63,7 @@ public:
     // Note:静态成员变量必须在类内声明，在类外初始化
     static std::shared_ptr<CType> IntType; 
     static std::shared_ptr<CType> VoidType;
+    static std::shared_ptr<CType> CharType;
 
 public:
     // GenAnonyRecordName 用于为匿名结构体或者union生成一个名字
@@ -202,10 +204,11 @@ private:
     std::shared_ptr<CType> retType;     // 函数返回值类型
     std::vector<Parameter> params;      // 函数参数列表
     llvm::StringRef name;               // 函数名字
+    bool isVarArg{false};               // 是否有可变参数， 默认初始值为false
 public:
     bool hasBody{false};                //  是否有函数体， 如果没有函数体说明是函数声明
 public:
-    CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name);
+    CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name, bool isVarArg);
 
     const llvm::StringRef GetName() {
         return name;
@@ -213,6 +216,10 @@ public:
 
     const std::vector<Parameter>& GetParams() {
         return params;
+    }
+
+    bool IsVarArg() {
+        return isVarArg;
     }
 
     const std::shared_ptr<CType> GetRetType() {

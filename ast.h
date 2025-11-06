@@ -28,6 +28,7 @@ class PostMemberDotExpr;
 class PostMemberArrowExpr;
 class PostFunctionCallExpr;
 class NumberExpr;
+class StringExpr;
 
 // 抽象访问者基类
 class Visitor {
@@ -55,6 +56,7 @@ public:
     virtual llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) = 0;
     virtual llvm::Value* VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) = 0;
     virtual llvm::Value* VisitNumberExpr(NumberExpr *expr) = 0;
+    virtual llvm::Value* VisitStringExpr(StringExpr *expr) = 0;
 };
 
 
@@ -82,7 +84,8 @@ public:
         Node_PostMemberDotExpr,
         Node_PostMemberArrowExpr,
         Node_PostFunctionCallExpr,
-        Node_NumberExor,
+        Node_NumberExpr,
+        Node_StringExpr,
         Node_VariableAccessExpr
     };
 private:
@@ -478,15 +481,28 @@ public:
 // 因子表达式
 class NumberExpr : public AstNode {
 public:
-    // int number;
+    int value;
 
-    NumberExpr() : AstNode(Node_NumberExor){}
+    NumberExpr() : AstNode(Node_NumberExpr){}
 
     llvm::Value* Accept(Visitor *v) override {
         return v->VisitNumberExpr(this);
     }
     static bool classof(const AstNode *node) {
-        return node->GetKind() == Node_NumberExor;
+        return node->GetKind() == Node_NumberExpr;
+    }
+};
+
+/// 字符串表达式
+class StringExpr : public AstNode {
+public:
+    StringExpr() : AstNode(Node_StringExpr){}
+
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitStringExpr(this);
+    }
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_StringExpr;
     }
 };
 
