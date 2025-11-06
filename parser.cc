@@ -101,6 +101,8 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
 
 // 处理声明语句中的基础类型，如：int *p; 中的int
 std::shared_ptr<CType> Parser::ParseDeclSpec() {
+    // 先消解类型类型限定符，如const, static）
+    ConsumeTypeQulify();
     if (token.tokenType == TokenType::kw_int) {
         Consume(TokenType::kw_int);
         return CType::IntType;
@@ -110,6 +112,9 @@ std::shared_ptr<CType> Parser::ParseDeclSpec() {
     } else if (token.tokenType == TokenType::kw_void) {
         Consume(TokenType::kw_void);
         return CType::VoidType;
+    } else if (token.tokenType == TokenType::kw_char) {
+        Consume(TokenType::kw_char);
+        return CType::CharType;
     }
     GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_type);
     return nullptr;
@@ -246,7 +251,9 @@ std::shared_ptr<CType> Parser::DirectDeclaratorArraySuffix(std::shared_ptr<CType
 }
 
 /*
-解析函数类型声明的数组后缀： 如： int fun(int a); 中的fun(
+解析函数类型声明的后缀也就是函数参数： 如:
+int fun(int a); 中的 fun(int a)
+文法：
 direct-declarator ::= identifier | direct-declarator "[" assign "]" 
 					| direct-declarator "(" parameter-type-list? ")"
 */
@@ -254,11 +261,20 @@ std::shared_ptr<CType> Parser::DirectDeclaratorFuncSuffix(Token ident, std::shar
     Consume(TokenType::l_parent);
 
     std::vector<Parameter> params;
+    bool isVarArg = false;
     int i = 0;
     while(token.tokenType != TokenType::r_parent) {
         if (i > 0 && token.tokenType == TokenType::comma) {
             Consume(TokenType::comma);
         }
+
+        // 可变参数 ... 只能是函数最后一个参数
+        if (i > 0 && token.tokenType == TokenType::ellipse) {
+            isVarArg = true;
+            Consume(TokenType::ellipse);
+            break;
+        }
+
         // 解析函数形参
         auto ty = ParseDeclSpec();
         auto node = Declarator(ty, isGloabl);
@@ -277,7 +293,7 @@ std::shared_ptr<CType> Parser::DirectDeclaratorFuncSuffix(Token ident, std::shar
     }
 
     Consume(TokenType::r_parent);
-    return std::make_shared<CFuncType>(baseType, params, llvm::StringRef(ident.ptr, ident.len));
+    return std::make_shared<CFuncType>(baseType, params, llvm::StringRef(ident.ptr, ident.len), isVarArg);
 }
 
 
@@ -331,6 +347,50 @@ std::shared_ptr<AstNode> Parser::DirectDeclarator(std::shared_ptr<CType> baseTyp
     return varDeclNode;
 }
 
+
+bool Parser::ParseStringInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
+    std::shared_ptr<CType> declType, 
+    std::vector<int> &offsetList
+) {
+    Token strToken = token;
+    Consume(TokenType::string);
+
+    CArrayType *arrayTy = llvm::dyn_cast<CArrayType>(declType.get());
+
+    int elemCount = arrayTy->GetElementCount();
+    if (elemCount < 0) {
+        elemCount = token.strValue.size();
+        arrayTy->SetElementCount(elemCount);
+    }
+
+    int strCount = strToken.strValue.size();
+    if (elemCount < strCount) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_large_len);
+    }
+    
+    
+    // 字符串初始值的长度小于等于声明长度， 如： 
+    // char a[10] = "12345";  or  char a[10] = "0123456789";
+    for (int i = 0; i < strCount; i++) {
+        // 把字符串的每一个字符当成一个number表达式
+        auto numNode = sema.semaNumberExprNode(strToken, strToken.strValue[i] ,CType::IntType);
+        offsetList.push_back(i);
+        auto initValue = sema.semaDeclInitValue(arrayTy->GetElementType(), numNode, offsetList, strToken);
+        offsetList.pop_back();
+        arr.push_back(initValue);
+    }
+    // 对于字符数组剩余未初始化的字符值，置为0
+    for (int i = strCount; i < elemCount; i++) {
+        auto numNode = sema.semaNumberExprNode(strToken, 0,CType::IntType);
+        offsetList.push_back(i);
+        auto initValue = sema.semaDeclInitValue(arrayTy->GetElementType(), numNode, offsetList, strToken);
+        offsetList.pop_back();
+        arr.push_back(initValue);
+    }
+    return true;
+}
+
+
 /*
 initializer ::= assign | "{" initializer ("," initializer)*  "}"
 解析表达式的初始值
@@ -353,11 +413,19 @@ bool Parser::ParseInitializer(std::vector<std::shared_ptr<VariableDecl::InitValu
         return true;
     }
     
+    // 处理：char a[] = "abcdef"; 这种情况
+    if (token.tokenType == TokenType::string && IsStringArrayTy(declType)) {
+        return ParseStringInitializer(arr, declType, offsetList);
+    }
+
     // {,,}
     if (token.tokenType == TokenType::l_brace) {
         Consume(TokenType::l_brace);
 
-        if (declType->GetKind() == CType::TY_Array) {
+        //  处理：char a[] = {"abcdef"}; 这种情况
+        if (token.tokenType == TokenType::string && IsStringArrayTy(declType)) {
+            ParseStringInitializer(arr, declType, offsetList);
+        } else if (declType->GetKind() == CType::TY_Array) {
             CArrayType *arrType = llvm::dyn_cast<CArrayType>(declType.get());
             int size = arrType->GetElementCount();
 
@@ -1013,10 +1081,11 @@ std::shared_ptr<AstNode> Parser::ParsePostfixExpr() {
     return left;
 }
 
-
+// ParsePrimaryExpr解析基础表达式
 // primary-expr : identifier | number | "(" expr ")" 
 std::shared_ptr<AstNode> Parser::ParsePrimaryExpr() {
     if (token.tokenType == TokenType::l_parent) {
+        // 括号表达式
         NextToken();
 
         auto expr = ParseExpr();
@@ -1029,9 +1098,15 @@ std::shared_ptr<AstNode> Parser::ParsePrimaryExpr() {
         auto expr = sema.semaVariableAccessNode(token);
         NextToken();
         return expr;
-    }else {
+    } else if (token.tokenType == TokenType::string) {
+        // 对字符串字面量进行语义分析
+        auto expr = sema.semaStringExprNode(token, token.type);
+        NextToken();
+        return expr;
+    } else {
+        // 对数值字面量进行语义分析
         Expect(TokenType::number);
-        auto factor = sema.semaNumberExprNode(token, token.type);
+        auto factor = sema.semaNumberExprNode(token, token.value, token.type);
         NextToken();
         return factor;
     }
@@ -1101,6 +1176,17 @@ void Parser::NextToken() {
     lexer.NextToken(token);
 }
 
+// 消解类型类型限定符（在类型声明时有类型限定符，如const, static）
+void Parser::ConsumeTypeQulify() {
+    while (token.tokenType == TokenType::kw_const ||
+        token.tokenType == TokenType::kw_volatile ||
+        token.tokenType == TokenType::kw_static ||
+        token.tokenType == TokenType::kw_extern) {
+            NextToken();
+    }
+}
+
+
 
 bool Parser::IsTypeName(TokenType tokenType) {
     if (tokenType == TokenType::kw_int) {
@@ -1108,6 +1194,8 @@ bool Parser::IsTypeName(TokenType tokenType) {
     } else if (tokenType == TokenType::kw_struct || tokenType == TokenType::kw_union) {
         return true;
     } else if (tokenType == TokenType::kw_void) {
+        return true;
+    } else if (tokenType == TokenType::kw_char) {
         return true;
     }
     return false;
@@ -1141,6 +1229,17 @@ bool Parser::IsFunctionDecl() {
     token = begin;
 
     return isFuncDecl;
+}
+
+
+bool Parser::IsStringArrayTy(std::shared_ptr<CType> ty) {
+    if (ty->GetKind() == CType::TY_Array) {
+        CArrayType *arrayTy = llvm::dyn_cast<CArrayType>(ty.get());
+        if (arrayTy->GetElementType()->GetKind() == CType::TY_Char) {
+            return true;
+        }
+    }
+    return false;
 }
 
 

@@ -37,6 +37,7 @@ public:
     llvm::Value* VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) override;
     llvm::Value* VisitPostFunctionCallExpr(PostFunctionCallExpr *expr) override;
     llvm::Value* VisitNumberExpr(NumberExpr *numberExpr) override;
+    llvm::Value* VisitStringExpr(StringExpr *expr) override;
 
     llvm::Type* VisitPrimaryType(CPrimaryType *type) override;
     llvm::Type* VisitPointType(CPointType *type) override;

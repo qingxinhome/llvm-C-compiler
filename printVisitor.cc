@@ -254,6 +254,11 @@ llvm::Value* PrintVisitor::VisitNumberExpr(NumberExpr *expr) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitStringExpr(StringExpr *expr) {
+    *out << llvm::StringRef(expr->token.ptr, expr->token.len);
+    return nullptr;
+}
+
 
 llvm::Value* PrintVisitor::VisitThreeExpr(ThreeExpr *threeExpr) {
     threeExpr->cond->Accept(this);
@@ -367,6 +372,8 @@ llvm::Type* PrintVisitor::VisitPrimaryType(CPrimaryType *type) {
         *out << "int ";
     } else if (type->GetKind() == CType::TY_Void) {
         *out << "void ";
+    } else if (type->GetKind() == CType::TY_Char) {
+        *out << "char ";
     }
     return nullptr;
 }
@@ -417,6 +424,11 @@ llvm::Type* PrintVisitor::VisitFuncType(CFuncType *type) {
         }
         i++;
     }
+
+    if (type->IsVarArg()) {
+        *out << ", ...";
+    }
+
     *out << ")";
     return nullptr;
 }

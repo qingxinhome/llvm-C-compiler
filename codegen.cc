@@ -745,7 +745,12 @@ llvm::Value* CodeGen::VisitPostDecExpr(PostDecExpr *postDecExpr) {
 
 
 llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
-    return irBuilder.getInt32(numberExpr->token.value);
+    return irBuilder.getInt32(numberExpr->value);
+}
+
+
+llvm::Value* CodeGen::VisitStringExpr(StringExpr *expr) {
+    return nullptr;
 }
 
 

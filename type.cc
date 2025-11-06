@@ -9,7 +9,7 @@
 std::shared_ptr<CType> CType::IntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4);
 // void 类型的大小和对齐 都是 0， 因为它是空类型
 std::shared_ptr<CType> CType::VoidType = std::make_shared<CPrimaryType>(Kind::TY_Void, 0, 0);
-
+std::shared_ptr<CType> CType::CharType = std::make_shared<CPrimaryType>(Kind::TY_Char, 1, 1);
 
 llvm::StringRef CType::GenAnonyRecordName(TagKind tagKind) {
     // 定义静态局部变量
@@ -126,7 +126,7 @@ void CRecordType::UpdateUnionOffset() {
 }
 
 
-CFuncType::CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name) : 
-    CType(Kind::TY_Func, 1, 1), retType(retType), params(params), name(name) {
+CFuncType::CFuncType(std::shared_ptr<CType> retType, const std::vector<Parameter> &params, llvm::StringRef name, bool isVarArg) : 
+    CType(Kind::TY_Func, 1, 1), retType(retType), params(params), name(name), isVarArg(isVarArg) {
     
 }

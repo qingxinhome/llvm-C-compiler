@@ -10,6 +10,7 @@
 enum class TokenType {
     number,
     identifier,
+    string,      // string
     kw_int,      // int type
     kw_if,       // if
     kw_else,     // else
@@ -21,6 +22,11 @@ enum class TokenType {
     kw_union,    // union
     kw_return,   // return
     kw_void,     // void
+    kw_char,     // char
+    kw_const,    // const
+    kw_volatile, // volatile
+    kw_static,   // static
+    kw_extern,   // extern
     minus, // -
     plus,  // +
     star,  // *
@@ -66,6 +72,7 @@ enum class TokenType {
     r_bracket,       // ]
     dot,             // .
     arrow,           // ->
+    ellipse,         // ...
     eof   // end
 };
 
@@ -76,6 +83,7 @@ public:
     int row, col;
     
     int value;   // for number
+    std::string strValue;  // for string
     
     // CType *type; 
     std::shared_ptr<CType> type; // for built-in type, 内置数据类型通过词法分析即可得到

@@ -280,8 +280,16 @@ std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr
 
 
 
-std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, std::shared_ptr<CType> type) {
+std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, int value, std::shared_ptr<CType> type) {
     std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();
+    expr->value = value;
+    expr->token = token;
+    expr->type = type;
+    return expr;
+}
+
+std::shared_ptr<StringExpr> Sema::semaStringExprNode(Token token, std::shared_ptr<CType> type) {
+    std::shared_ptr<StringExpr> expr = std::make_shared<StringExpr>();
     expr->token = token;
     expr->type = type;
     return expr;
@@ -420,7 +428,7 @@ std::shared_ptr<PostFunctionCallExpr> Sema::semaFuncCallExprNode(std::shared_ptr
     CFuncType *funcType = llvm::dyn_cast<CFuncType>(left->type.get());
 
     // 检查函数实参数个数与形参个数是否匹配
-    if (funcType->GetParams().size() != args.size() && (mode == Mode::Normal)) {
+    if ((funcType->GetParams().size() != args.size()) && !funcType->IsVarArg() && (mode == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_miss, "argument count not match");
     }
 
