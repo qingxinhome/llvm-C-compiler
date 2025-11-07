@@ -198,15 +198,20 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
     }
 }
 
-// 判断当前字符是否为空格或者换行
+// 判断当前字符是否为空格或者换行或者制表符
 bool IsWhiteSpace(char ch) {
-    return ch == ' ' || ch == '\r' || ch == '\n';
+    return ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t';
 }
 
 // 判断当前字符是否为数字
 bool IsDigit(char ch) {
     return (ch >= '0' && ch <= '9');
 }
+
+bool IsHexDigit(char ch) {
+    return IsDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F');
+}
+
 
 bool IsLetter(char ch) {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
@@ -351,7 +356,21 @@ void Lexer::NextToken(Token &token) {
         token.type = std::make_shared<CArrayType>(CType::CharType, value.length());
         token.len = CurBufPtr - startPtr;
         CurBufPtr++;     // skip right "
-    } else if (IsDigit(*CurBufPtr)) {
+    } 
+    else if (StartWith("0x") || StartWith("0X")) {
+        CurBufPtr += 2;
+        int number = 0;
+        while (IsHexDigit(*CurBufPtr)) {
+            number =  number * 16 + (*CurBufPtr-'0');
+            CurBufPtr++;
+        }
+        token.tokenType = TokenType::number;
+        token.value = number;
+        token.type = CType::IntType;
+        token.ptr = startPtr;
+        token.len = CurBufPtr - startPtr;
+    }
+    else if (IsDigit(*CurBufPtr)) {
         int number = 0;
         int len = 0;
         while(IsDigit(*CurBufPtr)) {

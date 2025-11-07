@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     Sema sema(diagEngine);
     Parser parser(lexer, sema);
     auto program = parser.ParseProgram();
-    PrintVisitor printVisitor(program);
+    // PrintVisitor printVisitor(program);
     
     CodeGen codegen(program);    /*将AST转换为LLVM IR*/
     auto &module = codegen.GetModule();
