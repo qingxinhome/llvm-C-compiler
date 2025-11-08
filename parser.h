@@ -14,6 +14,8 @@ private:
     std::vector<std::shared_ptr<AstNode>> breakNodes;
     // 存储能够被continue的语句节点（利用vector的栈特性）
     std::vector<std::shared_ptr<AstNode>> continueNodes;
+    // 存储能够使用case语句的节点（利用vector的栈特性）
+    std::vector<std::shared_ptr<AstNode>> switchNodes;
 public:
     Parser(Lexer &lexer, Sema &sema) : lexer(lexer), sema(sema){
         // 初始化Parser的时候首先得到第一个token
@@ -24,7 +26,6 @@ public:
 
 private:
     std::shared_ptr<AstNode> ParseFunctionDecl();
-    std::shared_ptr<AstNode> ParseStmt();
 
     // 一个声明语句可以声明多个变量
     std::shared_ptr<AstNode> ParseDeclareStmt(bool isGloabl = false);
@@ -52,9 +53,14 @@ private:
         std::vector<int> &offsetList
     );
 
-
+    std::shared_ptr<AstNode> ParseStmt();
     std::shared_ptr<AstNode> ParseIfStmt();
     std::shared_ptr<AstNode> ParseForStmt();
+    std::shared_ptr<AstNode> ParseWhileStmt();
+    std::shared_ptr<AstNode> ParseDoWhileStmt();
+    std::shared_ptr<AstNode> ParseSwitchStmt();
+    std::shared_ptr<AstNode> ParseCaseStmt();
+    std::shared_ptr<AstNode> ParseDefaultStmt();
     std::shared_ptr<AstNode> ParseBreakStmt();
     std::shared_ptr<AstNode> ParseContinueStmt();
     std::shared_ptr<AstNode> ParseReturnStmt();

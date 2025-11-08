@@ -58,7 +58,6 @@ std::shared_ptr<AstNode> Parser::ParseFunctionDecl() {
 }
 
 
-
 std::shared_ptr<AstNode> Parser::ParseStmt() {
     // null statement
     if (token.tokenType == TokenType::semi) {
@@ -92,6 +91,26 @@ std::shared_ptr<AstNode> Parser::ParseStmt() {
     // return statement
     else if (token.tokenType == TokenType::kw_return) {
         return ParseReturnStmt();
+    }
+    // while statment
+    else if (token.tokenType == TokenType::kw_while) {
+        return ParseWhileStmt();
+    }
+    // do while statment
+    else if (token.tokenType == TokenType::kw_do) {
+        return ParseDoWhileStmt();
+    }
+    // switch statment
+    else if (token.tokenType == TokenType::kw_switch) {
+        return ParseSwitchStmt();
+    }
+    // case statemnt
+    else if (token.tokenType == TokenType::kw_case) {
+        return ParseCaseStmt();
+    }
+    // default statement
+    else if (token.tokenType == TokenType::kw_default) {
+        return ParseDefaultStmt();
     }
     // expr statement
     else {
@@ -620,6 +639,7 @@ std::shared_ptr<AstNode> Parser::ParseForStmt() {
     sema.EnterScope();
 
     std::shared_ptr<ForStmt> forStmt = std::make_shared<ForStmt>();
+    // -> for循环语句可以被break和continue, 记录父节点信息，为语义检查提供支持
     breakNodes.push_back(forStmt);
     continueNodes.push_back(forStmt);
 
@@ -661,6 +681,139 @@ std::shared_ptr<AstNode> Parser::ParseForStmt() {
 
     return forStmt;
 }
+
+
+std::shared_ptr<AstNode> Parser::ParseWhileStmt() {
+    // while循环语句和for循环语句本质上结构是一样的，可以共用一个语法树节点
+    std::shared_ptr<ForStmt> node = std::make_shared<ForStmt>();
+    // while循环没有初始化表达式，和循环自增表达式
+    node->initNode = nullptr;
+    node->incNode = nullptr;
+
+    Consume(TokenType::kw_while);
+    // -> while循环语句可以被break和continue, 记录父节点信息，为语义检查提供支持
+    breakNodes.push_back(node);
+    continueNodes.push_back(node);
+
+    // 解析循环条件表达式
+    Consume(TokenType::l_parent);
+    node->condNode = ParseExpr();
+    Consume(TokenType::r_parent);
+
+    // 解析函数体
+    node->bodyNode = ParseStmt();
+
+    // <-while循环函数体解析结束后，回溯一下
+    breakNodes.pop_back();
+    continueNodes.pop_back();
+
+    return node;
+}
+
+std::shared_ptr<AstNode> Parser::ParseDoWhileStmt() {
+    std::shared_ptr<DoWhileStmt> node = std::make_shared<DoWhileStmt>();
+
+    // -> do while循环语句可以被break和continue, 记录父节点信息，为语义检查提供支持
+    breakNodes.push_back(node);
+    continueNodes.push_back(node);
+
+    Consume(TokenType::kw_do);
+    // 解析函数体
+    node->body = ParseStmt();
+
+    Consume(TokenType::kw_while);
+    Consume(TokenType::l_parent);
+
+    // 解析循环条件表达式
+    node->cond = ParseExpr();
+    Consume(TokenType::r_parent);
+    Consume(TokenType::semi);
+
+    // <-do while循环函数体解析结束后，回溯一下
+    breakNodes.pop_back();
+    continueNodes.pop_back();
+
+    return node;
+}
+
+std::shared_ptr<AstNode> Parser::ParseSwitchStmt() {
+    std::shared_ptr<SwitchStmt> node = std::make_shared<SwitchStmt>();
+
+    // -> switch语句可以被break, 
+    breakNodes.push_back(node);
+    // 只有switch语句中可以使用case语句，所以要记录父节点信息，为语义检查提供支持
+    switchNodes.push_back(node);
+
+    Consume(TokenType::kw_switch);
+    Consume(TokenType::l_parent);
+    node->expr = ParseExpr();
+    Consume(TokenType::r_parent);
+
+    node->stmt = ParseStmt();
+
+    // switch语句解析结束后，回溯一下
+    breakNodes.pop_back();
+    switchNodes.pop_back();
+
+    return node;
+}
+
+std::shared_ptr<AstNode> Parser::ParseCaseStmt() {
+    if (switchNodes.size() == 0) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_case_stmt);
+    }
+
+    std::shared_ptr<CaseStmt> node = std::make_shared<CaseStmt>();
+
+    Consume(TokenType::kw_case);
+    node->expr = ParseExpr();
+    Consume(TokenType::colon);
+    // 由于case语句的语句体，实际上就是一个block，只是它可以使用{} 进行包裹， 也可以没有{}
+    // 因此这里需要做一下兼容性处理, 将case 关键字后的语句当做一个整体
+    std::shared_ptr<BlockStmt> blockstmt = std::make_shared<BlockStmt>();
+    while(token.tokenType != TokenType::kw_case &&
+            token.tokenType != TokenType::kw_default &&
+            token.tokenType != TokenType::r_brace) {
+        auto stmt = ParseStmt();
+        if (stmt != nullptr) {
+            blockstmt->nodeVec.push_back(stmt);
+        }
+    }
+    node->stmt = blockstmt;
+    return node;
+}
+
+std::shared_ptr<AstNode> Parser::ParseDefaultStmt() {
+    if (switchNodes.size() == 0) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_default_stmt);
+    }
+
+    SwitchStmt *ststmt = llvm::dyn_cast<SwitchStmt>(switchNodes.back().get());
+    if (ststmt->defaultStmt != nullptr) {
+        GetDiagEngine().Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_multi_default_stmt);
+    }
+
+    std::shared_ptr<DefaultStmt> node = std::make_shared<DefaultStmt>();
+    Consume(TokenType::kw_default);
+    Consume(TokenType::colon);
+    
+    // 由于case语句的语句体，实际上就是一个block，只是它可以使用{} 进行包裹， 也可以没有{}
+    // 因此这里需要做一下兼容性处理, 将case 关键字后的语句当做一个整体
+    std::shared_ptr<BlockStmt> blockstmt = std::make_shared<BlockStmt>();
+    while(token.tokenType != TokenType::kw_case &&
+            token.tokenType != TokenType::r_brace) {
+        auto stmt = ParseStmt();
+        if (stmt != nullptr) {
+            blockstmt->nodeVec.push_back(stmt);
+        }
+    }
+    node->stmt = blockstmt;
+
+    // 给上层的switch语句记录已经有一个default语句了
+    ststmt->defaultStmt = node;
+    return node;
+}
+
 
 
 std::shared_ptr<AstNode> Parser::ParseBreakStmt() {

@@ -97,6 +97,16 @@ llvm::StringRef Token::GetSpellingText(TokenType tokenType) {
         return "static";
     case TokenType::kw_extern:
         return "extern";
+    case TokenType::kw_switch:
+        return "switch";
+    case TokenType::kw_while:
+        return "while";
+    case TokenType::kw_do:
+        return "do";
+    case TokenType::kw_case:
+        return "case";
+    case TokenType::kw_default:
+        return "default";
     case TokenType::minus:
         return "-";
     case TokenType::plus:
@@ -424,7 +434,18 @@ void Lexer::NextToken(Token &token) {
             token.tokenType = TokenType::kw_volatile;
         } else if (content == "extern") {
             token.tokenType = TokenType::kw_extern;
+        } else if (content == "switch") {
+            token.tokenType = TokenType::kw_switch;
+        } else if (content == "while") {
+            token.tokenType = TokenType::kw_while;
+        } else if (content == "do") {
+            token.tokenType = TokenType::kw_do;
+        } else if (content == "case") {
+            token.tokenType = TokenType::kw_case;
+        } else if (content == "default") {
+            token.tokenType = TokenType::kw_default;
         }
+
     } else {
         switch (*CurBufPtr)
         {

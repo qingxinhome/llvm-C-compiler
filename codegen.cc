@@ -144,8 +144,8 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     // then语句块的codegen可能会产生很多基本块，当前的block块可能已经不是原来的thenBB对象了
     ifstmt->thenNode->Accept(this);
     // 回到这里， 需要对thenBB重新赋值
-    thenBB = irBuilder.GetInsertBlock();   /*GetInsertBlock() 只告诉你 “当前在哪个基本块”*/
-    if (thenBB->empty() || !thenBB->back().isTerminator()) {
+    auto thenLastBB = irBuilder.GetInsertBlock();   /*GetInsertBlock() 只告诉你 “当前在哪个基本块”*/
+    if (thenLastBB->empty() || !thenLastBB->back().isTerminator()) {
         irBuilder.CreateBr(lastBB); // 无条件跳转
     }
 
@@ -153,12 +153,11 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
     if (elseBB != nullptr) {
         elseBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(elseBB);
-
         // 此处，codegen后也可能会产生很多个基本块
         ifstmt->elseNode->Accept(this);
-        // 回到这里， 需要对elseBB重新赋值
-        elseBB = irBuilder.GetInsertBlock();
-        if (elseBB->empty() || !elseBB->back().isTerminator()) {
+
+        auto elseLastBB = irBuilder.GetInsertBlock();
+        if (elseLastBB->empty() || !elseLastBB->back().isTerminator()) {
             irBuilder.CreateBr(lastBB); // 无条件跳转
         }
     }
@@ -229,22 +228,26 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
 */
 
 llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
-    // llvm::BasicBlock *initBB = llvm::BasicBlock::Create(context, "for.init", curFunc);
     llvm::BasicBlock *condBB = llvm::BasicBlock::Create(context, "for.cond");
     llvm::BasicBlock *incBB = llvm::BasicBlock::Create(context, "for.inc");
     llvm::BasicBlock *bodyBB = llvm::BasicBlock::Create(context, "for.body");
     llvm::BasicBlock *lastBB = llvm::BasicBlock::Create(context, "for.last");
 
-    // 将for循环语句中可以被break跳转到的block块记录在breakBBs Map中
+    // 将for循环语句中可以被break跳转到的block块，记录在breakBBs Map中
     breakBBs.insert({forStmt, lastBB});
-    // 将for循环语句中可以被continue跳转到的block块记录在breakBBs Map中
-    continueBBs.insert({forStmt, incBB});
 
-    // // 1. 先无条件跳转到init块中
-    // irBuilder.CreateBr(initBB);
-    // irBuilder.SetInsertPoint(initBB);
-    // 循环变量的初始化操作在上一个基本块中完成
+    // 将for循环语句中可以被continue跳转到的block块，记录在breakBBs Map中
+    if (forStmt->incNode != nullptr) {
+        // 如果循环自增表达式不为空，contine跳转至incBB
+        continueBBs.insert({forStmt, incBB});
+    } else {
+        continueBBs.insert({forStmt, condBB});
+    }
+    
+
+    // 循环变量的init落在上一个基本块中完成
     if (forStmt->initNode != nullptr) {
+        // 生成 initNode 的代码
         forStmt->initNode->Accept(this);
     }
     // 由初始块无条件跳转至条件块
@@ -267,27 +270,193 @@ llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
     bodyBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(bodyBB);
     if (forStmt->bodyNode != nullptr) {
+        //  一般来说,这里执行完代码生成后会生成很多个basic block
         forStmt->bodyNode->Accept(this);
     }
-    irBuilder.CreateBr(incBB);
 
-
-    incBB->insertInto(curFunc);
-    irBuilder.SetInsertPoint(incBB);
-    if (forStmt->incNode != nullptr) {
-        forStmt->incNode->Accept(this);
+    // 回到这里，我们需要判断最后一个基本块是否有终结指令(isTerminator)
+    // 此处还需要判断是否已经存在终结符(isTerminator)，比如提前break了，就不能再有终结符了
+    auto bodyLastBB = irBuilder.GetInsertBlock();
+    if (bodyLastBB->empty() || !bodyLastBB->back().isTerminator()) {
+        if (forStmt->incNode != nullptr) {
+            irBuilder.CreateBr(incBB);
+        } else {
+            irBuilder.CreateBr(condBB);
+        }
     }
-    irBuilder.CreateBr(condBB);
 
+    if (forStmt->incNode != nullptr) {
+        incBB->insertInto(curFunc);
+        irBuilder.SetInsertPoint(incBB);
+        // 生成 循环自增表达式 的代码
+        forStmt->incNode->Accept(this);
+        irBuilder.CreateBr(condBB);
+    }
 
     lastBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(lastBB);
 
+    // for 循环代码生成完后， 回溯一下
     breakBBs.erase(forStmt);
     continueBBs.erase(forStmt);
 
     return nullptr;
 }
+
+
+llvm::Value* CodeGen::VisitDoWhileStmt(DoWhileStmt *stmt) {
+    auto bodyBB = llvm::BasicBlock::Create(context, "do.while.body");
+    auto condBB = llvm::BasicBlock::Create(context, "do.while.cond");
+    auto thenBB = llvm::BasicBlock::Create(context, "do.while.then");
+
+    //1. 存储do while循环体中执行break后需要跳转到的block块
+    breakBBs.insert({stmt, thenBB});
+    continueBBs.insert({stmt, condBB});
+
+    //2. 生成循环 body 的代码
+    irBuilder.CreateBr(bodyBB);
+    bodyBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(bodyBB);
+    // 一般来说这里会生成很多个basic block
+    stmt->body->Accept(this);
+
+    // 回到这里，我们需要判断body体codegen之后的最后一个基本块是否有终结指令，
+    // 此处还需要判断是否已经存在终结符，如果提前break了，就不能再有终结符了
+    auto bodyLastBB = irBuilder.GetInsertBlock();
+    if (bodyLastBB->empty() || !bodyLastBB->back().isTerminator()) {
+        irBuilder.CreateBr(condBB);
+    }
+
+    condBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(condBB);
+    // 计算条件表达式
+    llvm::Value *val = stmt->cond->Accept(this);
+
+    // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
+    CastValue(val, irBuilder.getInt32Ty());
+    llvm::Value *condval = irBuilder.CreateICmpEQ(val, irBuilder.getInt32(0));
+    /// 此处跳转，要跳转到入口节点
+    irBuilder.CreateCondBr(condval, bodyBB, thenBB);
+
+    // 生成 then 块的代码
+    thenBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(thenBB);
+
+    breakBBs.erase(stmt);
+    continueBBs.erase(stmt);
+
+    return nullptr;
+};
+
+llvm::Value* CodeGen::VisitSwitchStmt(SwitchStmt *stmt) {
+    llvm::Value *cond = stmt->expr->Accept(this);
+
+    auto *defaultBB = llvm::BasicBlock::Create(context, "switch.default");
+    /* thenBB 块代表 switch语句执行完后，后面要执行哪里 */
+    auto *thenBB = llvm::BasicBlock::Create(context, "switch.default");
+
+    // 生成switch指令需要传入一个条件和一个目标块
+    llvm::SwitchInst *switchInst = irBuilder.CreateSwitch(cond, defaultBB);
+
+    breakBBs.insert({stmt, thenBB});
+    switchStack.push_back(switchInst);
+
+    // 这里会产生0到多个case语句，以及0到1个default语句
+    stmt->stmt->Accept(this);
+
+    // 如果switch语句中，没有任何的default语句，需要插入一个空的default语句
+    if (!stmt->defaultStmt) {
+        defaultBB->insertInto(curFunc);
+        irBuilder.SetInsertPoint(defaultBB);
+        irBuilder.CreateBr(thenBB);
+    }
+    // 如果有default语句，但是是一个空的，或者没有终结指令，那么需要补一个
+    if (defaultBB->empty() || !defaultBB->back().isTerminator()) {
+        irBuilder.CreateBr(thenBB);
+    }
+
+
+    thenBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(thenBB);
+
+    // switch 语句代码生成完后， 回溯一下
+    breakBBs.erase(stmt);
+    switchStack.pop_back();
+
+    return nullptr;
+};
+
+llvm::Value* CodeGen::VisitCaseStmt(CaseStmt *stmt) {
+    // 获取case语句对应的上层swith指令
+    llvm::SwitchInst *switchInst = switchStack.back();
+
+    llvm::Value *caseVal = stmt->expr->Accept(this);
+    // 通过switchInst指令可以拿到swith的条件表达式
+    // case的value，需要与switch语句的cond的类型，判断是否要做强转
+    CastValue(caseVal, switchInst->getCondition()->getType());
+
+    auto caseBB = llvm::BasicBlock::Create(context, "case");
+    /*
+        当我们对当前case语句做代码生成的时候，需要考虑上一个case语句是否是空语句(即：case穿透)，如：
+        case 'a':
+        case 'b': {
+            x = 10;
+        }
+    */
+    if (switchInst->getNumCases() > 0) {
+        // switchInst->case_begin() 返回switch指令的case语句的迭代器
+        // 获取当前case之前最后一个case语句的迭代器
+        const auto &lastCase = switchInst->case_begin() + (switchInst->getNumCases() - 1);
+
+        // 获取当前case之前最后一个case语句的最后一个后继基本块
+        llvm::BasicBlock *lastCaseBB = lastCase->getCaseSuccessor();
+        if (lastCaseBB->empty() || !lastCaseBB->back().isTerminator()) {
+            irBuilder.CreateBr(caseBB);
+        }
+    }
+
+    // 将caseVal由llvm::Value 强转为llvm::ConstantInt
+    llvm::ConstantInt *constInt = llvm::dyn_cast<llvm::ConstantInt>(caseVal);
+    if (!constInt) {
+        // 如果强转失败，说明case表达式不是一个int常量，需要报错
+        assert(0 && "case value must be constant");
+    }
+
+    // 为switch语句添加一个case
+    switchInst->addCase(constInt, caseBB);
+    
+    caseBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(caseBB);
+    stmt->stmt->Accept(this);
+
+    return nullptr;
+};
+
+llvm::Value* CodeGen::VisitDefaultStmt(DefaultStmt *caseStmt) {
+    // 获取case语句对应的上层swith指令
+    llvm::SwitchInst *switchInst = switchStack.back();
+    // 通过SwitchInst指令可以获取 SwitchInst对应的default BasicBlock
+    llvm::BasicBlock *defaultBB = switchInst->getDefaultDest();
+
+    if (switchInst->getNumCases() > 0) {
+        // switchInst->case_begin() 返回switch指令的case语句的迭代器
+        // 获取当前default之前最后一个case语句的迭代器
+        const auto &lastCase = switchInst->case_begin() + (switchInst->getNumCases() - 1);
+
+        // 获取当前default之前最后一个case语句的最后一个后继基本块
+        llvm::BasicBlock *lastCaseBB = lastCase->getCaseSuccessor();
+        if (lastCaseBB->empty() || !lastCaseBB->back().isTerminator()) {
+            irBuilder.CreateBr(defaultBB);
+        }
+    }
+
+    defaultBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(defaultBB);
+    caseStmt->stmt->Accept(this);
+
+    return nullptr;
+};
+
 
 
 llvm::Value* CodeGen::VisitContinueStmt(ContinueStmt *continuestmt) {
@@ -1366,8 +1535,8 @@ CastValue函数的参数：llvm::Value*& val，是一个指向 llvm::Value的指
 void CodeGen::CastValue(llvm::Value *&val, llvm::Type *destTy) {
     if (val->getType() != destTy) {
         if (val->getType()->isIntegerTy()) {
-            if (val->getType()->isIntegerTy()) {
-                irBuilder.CreateIntCast(val, irBuilder.getInt32Ty(), true);
+            if (destTy->isIntegerTy()) {
+                val = irBuilder.CreateIntCast(val, destTy, true);
             }
             else if (destTy->isPointerTy()) {
                 val = irBuilder.CreateIntToPtr(val, destTy);
@@ -1399,11 +1568,16 @@ void CodeGen::CastValue(llvm::Value *&val, llvm::Type *destTy) {
 /*
 注：
 1. 在llvm IR中一切指令都是值llvm::Value
+
 2. 在llvm中类型的基类是 llvm::Type, llvm::Type中有一个print函数，可用于打印当前类型的ir
+
 3. 在 LLVM IR 中，alloca 指令必须放在函数的 entry basic block（入口基本块）中。这是 LLVM 语言
    规范（Language Reference）明确规定的规则，不能违反，否则 IR 将被视为 ill-formed（格式错误），后续的 opt、llc 或 clang 等工
    具可能会报错或产生未定义行为。
 
 4. LLVM 要求：每个基本块的 最后一条指令必须是 terminator（如 br, ret, switch 等），中间不能有其他指令。
     在插入 terminator 指令后，立即切换基本块
+
+5. 在做代码生成时， 如果遇到要做跳转指令的时候，一定要注意先判断一下，当前的block块末尾是否已经包含了跳转指令（isTerminator）
+   如果已经包含跳转指令， 就不能再做跳转了
 */

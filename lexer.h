@@ -27,6 +27,11 @@ enum class TokenType {
     kw_volatile, // volatile
     kw_static,   // static
     kw_extern,   // extern
+    kw_switch,   // switch
+    kw_while,    // while
+    kw_do,       // do
+    kw_case,     // case
+    kw_default,  // default
     minus, // -
     plus,  // +
     star,  // *

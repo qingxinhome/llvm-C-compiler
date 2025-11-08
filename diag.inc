@@ -12,6 +12,9 @@ DIAG(err_unclosed_string, Error, "unclosed string literal")
 DIAG(err_expected, Error, "expected '{0}', but found '{1}'")
 DIAG(err_break_stmt, Error, "'break' statement not in loop or switch statement")
 DIAG(err_continue_stmt, Error, "'continue' statement not in loop or switch statement")
+DIAG(err_case_stmt, Error, "'case' statement not in switch statement")
+DIAG(err_default_stmt, Error, "'default' statement not in switch statement")
+DIAG(err_multi_default_stmt, Error, "'default' statement in switch statement only be one")
 DIAG(err_large_len, Error, "string has large size")
 
 /// semantic

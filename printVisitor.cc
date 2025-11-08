@@ -68,6 +68,38 @@ llvm::Value* PrintVisitor::VisitForStmt(ForStmt *ifstmt) {
     return nullptr;
 }
 
+llvm::Value* PrintVisitor::VisitDoWhileStmt(DoWhileStmt *stmt) {
+    *out << "do";
+    stmt->body->Accept(this);
+    *out << "while(";
+    stmt->cond->Accept(this);
+    *out << ")";
+    return nullptr;
+};
+
+llvm::Value* PrintVisitor::VisitSwitchStmt(SwitchStmt *stmt) {
+    *out << "switch(";
+    stmt->expr->Accept(this);
+    *out << ")";
+    stmt->stmt->Accept(this);
+    return nullptr;
+};
+
+llvm::Value* PrintVisitor::VisitCaseStmt(CaseStmt *stmt) {
+    *out << "case ";
+    stmt->expr->Accept(this);
+    *out << ":";
+    stmt->stmt->Accept(this);
+    return nullptr;
+};
+
+llvm::Value* PrintVisitor::VisitDefaultStmt(DefaultStmt *stmt) {
+    *out << "default:";
+    stmt->stmt->Accept(this);
+    return nullptr;
+};
+
+
 llvm::Value* PrintVisitor::VisitBreakStmt(BreakStmt *breakstmt) {
     *out << "break";
      return nullptr;

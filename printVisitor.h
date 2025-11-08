@@ -23,6 +23,11 @@ public:
     llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) override;
     llvm::Value* VisitReturnStmt(ReturnStmt *stmt) override;
     llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
+    llvm::Value* VisitDoWhileStmt(DoWhileStmt *stmt) override;
+    llvm::Value* VisitSwitchStmt(SwitchStmt *stmt) override;
+    llvm::Value* VisitCaseStmt(CaseStmt *stmt) override;
+    llvm::Value* VisitDefaultStmt(DefaultStmt *stmt) override;
+
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) override;
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;

@@ -29,6 +29,12 @@ class PostMemberArrowExpr;
 class PostFunctionCallExpr;
 class NumberExpr;
 class StringExpr;
+class DoWhileStmt;
+class SwitchStmt;
+class CaseStmt;
+class DefaultStmt;
+
+
 
 // 抽象访问者基类
 class Visitor {
@@ -42,6 +48,10 @@ public:
     virtual llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) = 0;
     virtual llvm::Value* VisitReturnStmt(ReturnStmt *stmt) = 0;
     virtual llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) = 0;
+    virtual llvm::Value* VisitDoWhileStmt(DoWhileStmt *stmt) = 0;
+    virtual llvm::Value* VisitSwitchStmt(SwitchStmt *stmt) = 0;
+    virtual llvm::Value* VisitCaseStmt(CaseStmt *stmt) = 0;
+    virtual llvm::Value* VisitDefaultStmt(DefaultStmt *stmt) = 0;
     virtual llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) = 0;
     virtual llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) = 0;
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
@@ -71,6 +81,10 @@ public:
         Node_BreakStmt,
         Node_ContinueStmt,
         Node_BlockStmt,
+        Node_DoWhileStmt,
+        Node_SwithcStmt,
+        Node_CaseStmt,
+        Node_DefaultStmt,
         Node_DeclareStmt,
         Node_VariableDecl,
         Node_FunctionDecl,
@@ -218,6 +232,71 @@ public:
 
     static bool classof(const AstNode *node) {
         return node->GetKind() == Node_ReturnStmt;
+    }
+};
+
+
+class DoWhileStmt : public AstNode {
+public:
+    std::shared_ptr<AstNode> body;   // do while 的循环体
+    std::shared_ptr<AstNode> cond;   // do while 的条件表达式
+public:
+    DoWhileStmt() : AstNode(Node_DoWhileStmt) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitDoWhileStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_DoWhileStmt;
+    }
+};
+
+class SwitchStmt : public AstNode {
+public:
+    std::shared_ptr<AstNode> expr;      // switch语句的判断表达式
+    std::shared_ptr<AstNode> stmt;      // switch语句中body语句
+    // 用来标识是否包含default语句（switch语句中不能包含多个default语句）
+    std::shared_ptr<AstNode> defaultStmt{nullptr};  
+public:
+    SwitchStmt() : AstNode(Node_SwithcStmt) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitSwitchStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_SwithcStmt;
+    }
+};
+
+class CaseStmt : public AstNode {
+public:
+    // case语句的表达式
+    std::shared_ptr<AstNode> expr;
+    // case语句body语句体
+    std::shared_ptr<AstNode> stmt;
+public:
+    CaseStmt() : AstNode(Node_CaseStmt) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitCaseStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_CaseStmt;
+    }
+};
+
+class DefaultStmt : public AstNode {
+public:
+    // default语句的语句体
+    std::shared_ptr<AstNode> stmt;
+public:
+    DefaultStmt() : AstNode(Node_DefaultStmt) {}
+    llvm::Value * Accept(Visitor *v) {
+        return v->VisitDefaultStmt(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_DefaultStmt;
     }
 };
 
