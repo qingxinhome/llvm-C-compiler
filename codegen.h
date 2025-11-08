@@ -30,6 +30,10 @@ private:
     llvm::Value* VisitContinueStmt(ContinueStmt *continuestmt) override;
     llvm::Value* VisitReturnStmt(ReturnStmt *stmt) override;
     llvm::Value* VisitBlockStmt(BlockStmt *blockstmt) override;
+    llvm::Value* VisitDoWhileStmt(DoWhileStmt *stmt) override;
+    llvm::Value* VisitSwitchStmt(SwitchStmt *stmt) override;
+    llvm::Value* VisitCaseStmt(CaseStmt *stmt) override;
+    llvm::Value* VisitDefaultStmt(DefaultStmt *stmt) override;
 
     llvm::Value* VisitVariableDeclExpr(VariableDecl *decl) override;
     llvm::Value* VisitFunctionDeclExpr(FunctionDecl *decl) override;
@@ -68,10 +72,18 @@ private:
     llvm::Function *curFunc{nullptr};
     llvm::IRBuilder<> irBuilder{context}; // // C++11+初始化
 
+
+    /*
+        llvm::DenseMap是LLVM 核心库（ADT-Abstract Data Types）中一个高性能哈希映射容器，
+        专为LLVM 内部使用设计。它是 std::unordered_map的高效替代品
+    */
     // 用于存储，在CodeGen过程中， 执行break后需要跳转到的block块
     llvm::DenseMap<AstNode*, llvm::BasicBlock*> breakBBs;
     // 用于存储，在CodeGen过程中， 执行continue后需要跳转到的block块
     llvm::DenseMap<AstNode*, llvm::BasicBlock*> continueBBs;
+    // 使用SmallVector作为栈结构记录switch指令， 
+    llvm::SmallVector<llvm::SwitchInst*> switchStack;
+
 
 private:
     /*
