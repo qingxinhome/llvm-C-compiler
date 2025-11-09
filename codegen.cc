@@ -591,6 +591,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         irBuilder.CreateCondBr(lval, nextBB, falseBB);
 
         //-----------------------------------------------------------------------------------------
+        // insertInto() 把基本快插入到当前函数
         nextBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(nextBB);
         /// 右子树内部也生成了基本块
@@ -599,13 +600,13 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         right = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
         /*
         IRBuilder::CreateZExt函数用于生成IR的zext零扩展指令，零扩展是指将较小位宽的整数
-        类型（如i1或i8）扩展为较大位宽的整数类型（如i32或 i64），通过在高位填充 0 来保持值的无符号语义
+        类型（如i1或i8)扩展为较大位宽的整数类型（如i32或i64），通过在高位填充0来保持值的无符号语义
         */
         right = irBuilder.CreateZExt(right, irBuilder.getInt32Ty());
         irBuilder.CreateBr(mergeBB);
 
-        // 拿到当前插入的block,对nextBB指针重新赋值， 建立一个值和基本块的关系 {right, nextBB}
-        nextBB = irBuilder.GetInsertBlock();
+        // 拿到当前插入的block, 对nextBB指针重新赋值， 建立一个值和基本块的关系 {right, nextBB}
+        auto lastNextBB = irBuilder.GetInsertBlock();
 
         //-----------------------------------------------------------------------------------------
         falseBB->insertInto(curFunc);
@@ -616,11 +617,11 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         mergeBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(mergeBB);
         /*
-        PHI指令用于在控制流图CFG中处理值合并。它出现在基本块Basic Block的开头，当一个基本块有多个前驱
-        predecessor基本块时，PHI节点从每个前驱选择合适的值，确保 SSA形式：每个变量只有一次赋值。
+          PHI指令用于在控制流图CFG中处理值合并。它出现在基本块Basic Block的开头，当一个基本块有多个前驱
+          predecessor基本块时，PHI节点从每个前驱选择合适的值，确保SSA形式：每个变量只有一次赋值。
         */
         llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
-        phi->addIncoming(right, nextBB);
+        phi->addIncoming(right, lastNextBB);
         phi->addIncoming(irBuilder.getInt32(0), falseBB);
         return phi;
     }
@@ -646,8 +647,8 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         /// right 这个值，所在的基本块，并不一定是 之前的nextBB了.
         /// 原因是：binaryExpr->right->Accept(this) 内部会生成新的基本块
 
-        /// 拿到当前插入的block, 建立一个值和基本块的关系 {right, nextBB}
-        nextBB = irBuilder.GetInsertBlock();
+        /// 拿到当前插入的block, 建立一个值和基本块的关系 {right, lastNextBB}
+        auto lastNextBB = irBuilder.GetInsertBlock();
 
         //-----------------------------------------------------------------------------------------
         trueBB->insertInto(curFunc);
@@ -658,7 +659,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         mergeBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(mergeBB);
         llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
-        phi->addIncoming(right, nextBB);
+        phi->addIncoming(right, lastNextBB);
         phi->addIncoming(irBuilder.getInt32(1), trueBB);
         return phi;
     }
@@ -825,7 +826,7 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     irBuilder.SetInsertPoint(thenBB);
     llvm::Value *thenVal = expr->then->Accept(this);
     /*对三目运算的then表达式执行完codegen之后，当前的block块可能已经不是thenBB了，需要更新当前的block块*/
-    thenBB = irBuilder.GetInsertBlock();
+    auto *lastThenBB = irBuilder.GetInsertBlock();
     irBuilder.CreateBr(mergeBB);
 
 
@@ -834,7 +835,7 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     irBuilder.SetInsertPoint(elseBB);
     llvm::Value *elseVal = expr->els->Accept(this);
     // 更新当前插入指令的基本块
-    elseBB = irBuilder.GetInsertBlock();
+    auto *lastElseBB = irBuilder.GetInsertBlock();
     irBuilder.CreateBr(mergeBB);
 
     // 4. 操作合并后的block块
@@ -843,8 +844,9 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     
     // phi指令代表有多种可能性的情况
     llvm::PHINode* phi = irBuilder.CreatePHI(expr->then->type->Accept(this), 2);
-    phi->addIncoming(thenVal, thenBB);
-    phi->addIncoming(elseVal, elseBB);
+    // phi指令关心的是产生llvm::Value值的基本块是谁
+    phi->addIncoming(thenVal, lastThenBB);
+    phi->addIncoming(elseVal, lastElseBB);
     return phi;
 }
 
