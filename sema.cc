@@ -6,12 +6,12 @@ std::shared_ptr<VariableDecl> Sema::semaVariableDeclNode(Token token, std::share
     // 1. 检查在当前作用域内是否存在重名
     llvm::StringRef text(token.ptr, token.len);
     auto symbol = scope.FindObjSymbolInCurScope(text);
-    if (symbol && (mode == Mode::Normal)) {
+    if (symbol && (GetMode() == Mode::Normal)) {
         // llvm::errs() << "re define variable name " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
     }
 
-    if (this->mode == Mode::Normal) {
+    if (this->GetMode() == Mode::Normal) {
         // 2. 添加到符号表中
         scope.AddObjSymbol(type, text);
     }
@@ -30,7 +30,7 @@ std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
     // 从符号表栈的所有符号表中检查符号是否存在
     llvm::StringRef text(token.ptr, token.len);
     std::shared_ptr<Symbol> symbol = scope.FindObjSymbol(text);
-    if(symbol == nullptr && (this->mode == Mode::Normal)) {
+    if(symbol == nullptr && (this->GetMode() == Mode::Normal)) {
         // llvm::errs() << "use undefined symbol " << text << "\n";
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, text);
     }
@@ -42,8 +42,9 @@ std::shared_ptr<VariableAccessExpr> Sema::semaVariableAccessNode(Token token) {
 }
 
 
-std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op){
+std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op, Token curToken){
     auto binaryExpr = std::make_shared<BinaryExpr>();
+    binaryExpr->token = curToken;
     binaryExpr->op = op;
     binaryExpr->left = left;
     binaryExpr->right = right;
@@ -54,14 +55,99 @@ std::shared_ptr<BinaryExpr> Sema::semaBinaryExprNode(std::shared_ptr<AstNode> le
     // 正常情况下， 二元表达式的类型就是左节点或有节点的类型
     binaryExpr->type = left->type;
 
-    // 指针类型能够进行 + 、- 、+=、-= 运算
-    if (op == BinaryOp::add || op == BinaryOp::sub || op == BinaryOp::add_assign || op == BinaryOp::sub_assign) {
-        // int a = 5; int *p = &a, 3+p; 这种情况要取右节点的类型
-        if ((left->type->GetKind() == CType::TY_Int) && (right->type->GetKind() == CType::TY_Point)) {
-            binaryExpr->type = right->type;
-        }
-    }
+    // 注意：指针类型能够进行 + 、- 、+=、-= 运算
+    CType::Kind leftKind = left->type->GetKind();
+    CType::Kind rightKind = right->type->GetKind();
 
+    switch (op)
+    {
+    case BinaryOp::add:
+        if (!left->type->IsArithType() && leftKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (!right->type->IsArithType() && rightKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (leftKind == CType::TY_Point && rightKind == CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (leftKind == CType::TY_Point && !right->type->IsIntegerType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (rightKind == CType::TY_Point && !left->type->IsIntegerType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (rightKind == CType::TY_Point) {
+            // int a = 5; int *p = &a, 3+p; 这种情况要取右节点的类型
+            binaryExpr->type = right->type;
+            auto tmp = binaryExpr->left;
+            binaryExpr->left = binaryExpr->right;
+            binaryExpr->right = tmp;
+        }
+        break;
+    case BinaryOp::sub:
+        if (!left->type->IsArithType() && leftKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (!right->type->IsArithType() && rightKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (leftKind == CType::TY_Point && rightKind == CType::TY_Point) {
+            binaryExpr->type = CType::LongType;
+        } else if (leftKind == CType::TY_Point && !right->type->IsIntegerType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (rightKind == CType::TY_Point && !left->type->IsIntegerType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (rightKind == CType::TY_Point) {
+            // int a = 5; int *p = &a, 3+p; 这种情况要取右节点的类型
+            binaryExpr->type = right->type;
+            auto tmp = binaryExpr->left;
+            binaryExpr->left = binaryExpr->right;
+            binaryExpr->right = tmp;
+        }
+        break;
+    case BinaryOp::add_assign:
+    case BinaryOp::sub_assign:
+        if (!left->type->IsArithType() && leftKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (!right->type->IsArithType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        } else if (leftKind == CType::TY_Point && !right->type->IsArithType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        }
+        break;
+    case BinaryOp::mul:
+    case BinaryOp::mul_assign:
+    case BinaryOp::div:
+    case BinaryOp::div_assign:
+        if (!left->type->IsArithType() && !right->type->IsArithType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        }
+        break;
+    case BinaryOp::mod:
+    case BinaryOp::mod_assign:
+    case BinaryOp::bitwise_or:
+    case BinaryOp::bitwise_or_assign:
+    case BinaryOp::bitwise_and:
+    case BinaryOp::bitwise_and_assign:
+    case BinaryOp::bitwise_xor:
+    case BinaryOp::bitwise_xor_assign:
+    case BinaryOp::left_shift:
+    case BinaryOp::left_shift_assign:
+    case BinaryOp::right_shift:
+    case BinaryOp::right_shift_assign:
+        if (left->type->IsIntegerType() && !right->type->IsIntegerType()) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        }
+    case BinaryOp::equal: 
+    case BinaryOp::not_equal:
+    case BinaryOp::less:
+    case BinaryOp::less_equal:
+    case BinaryOp::greater:
+    case BinaryOp::greater_equal:
+    case BinaryOp::logic_or:
+    case BinaryOp::logic_and:
+        if (!left->type->IsArithType() && leftKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        }else if (!right->type->IsArithType() && rightKind != CType::TY_Point) {
+            diagEngine.Report(llvm::SMLoc::getFromPointer(curToken.ptr), diag::err_binary_expr_type);
+        }
+    default:
+        break;
+    }
     return binaryExpr;
 }
 
@@ -80,7 +166,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::bitwise_not:
     {
         // 一元加，一元减，逻辑非，按位取反都只能针对数值类型,因此当前节点的类型就是子节点的类型
-        if (unary->type->GetKind() != CType::TY_Int && (this->mode == Mode::Normal)) {
+        if (unary->type->GetKind() != CType::TY_Int && (this->GetMode() == Mode::Normal)) {
             // 一元加，一元减，逻辑非，按位取反 只能针对基本类型
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_type, "int type");
         }
@@ -101,7 +187,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     {
         // int *p = a;  *p = 100;
         // 解引用只能针对指针类型， 需要进行语义检查
-        if (unary->type->GetKind() != CType::TY_Point && (this->mode == Mode::Normal)) {
+        if (unary->type->GetKind() != CType::TY_Point && (this->GetMode() == Mode::Normal)) {
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_type, "pointer type");
         }
         // if (!unary->isLValue) {
@@ -117,7 +203,7 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     case UnaryOp::inc:
     case UnaryOp::dec:
     {
-        if (!unary->isLValue && (this->mode == Mode::Normal)) {
+        if (!unary->isLValue && (this->GetMode() == Mode::Normal)) {
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
         }
         // 指针和变量都可以 ++、--
@@ -130,13 +216,23 @@ std::shared_ptr<UnaryExpr> Sema::semaUnaryExprNode(std::shared_ptr<AstNode> unar
     return unaryExpr;
 }
 
+std::shared_ptr<CastExpr> Sema::semaCastExprNode(std::shared_ptr<CType> targetType, std::shared_ptr<AstNode> node, Token curToken) {
+    std::shared_ptr<CastExpr> expr = std::make_shared<CastExpr>();
+    expr->type = targetType;
+    expr->token = curToken;
+    expr->node = node;
+    expr->targetType = targetType;
+    return expr;
+}
+
+
 std::shared_ptr<ThreeExpr> Sema::semaThreeExprNode(std::shared_ptr<AstNode> cond, std::shared_ptr<AstNode> then, std::shared_ptr<AstNode> els, Token token) {
     std::shared_ptr<ThreeExpr> threeExpr = std::make_shared<ThreeExpr>();
     threeExpr->cond = cond;
     threeExpr->then = then;
     threeExpr->els = els;
 
-    if (then->type->GetKind() != els->type->GetKind() && (this->mode == Mode::Normal)) {
+    if (then->type->GetKind() != els->type->GetKind() && (this->GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_same_type);
     }
 
@@ -155,7 +251,7 @@ std::shared_ptr<SizeOfExpr> Sema::semaSizeOfExprNode(std::shared_ptr<AstNode> un
 
 // eg: a++
 std::shared_ptr<PostIncExpr> Sema::semaPostIncExprNode(std::shared_ptr<AstNode> left, Token token) {
-    if (!left->isLValue && (this->mode == Mode::Normal)) {
+    if (!left->isLValue && (this->GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
     }
     auto node = std::make_shared<PostIncExpr>();
@@ -166,7 +262,7 @@ std::shared_ptr<PostIncExpr> Sema::semaPostIncExprNode(std::shared_ptr<AstNode> 
 
 // eg: a--
 std::shared_ptr<PostDecExpr> Sema::semaPostDecExprNode(std::shared_ptr<AstNode> left, Token token) {
-    if (!left->isLValue && (this->mode == Mode::Normal)) {
+    if (!left->isLValue && (this->GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_expected_lvalue);
     }
     auto node = std::make_shared<PostDecExpr>();
@@ -178,7 +274,7 @@ std::shared_ptr<PostDecExpr> Sema::semaPostDecExprNode(std::shared_ptr<AstNode> 
 // eg: a[3]
 // a[3]; -> *(a + offset(3 * elementSize))
 std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> node, Token curtoken) {
-    if (left->type->GetKind() != CType::TY_Array && left->type->GetKind() != CType::TY_Point && (this->mode == Mode::Normal)) {
+    if (left->type->GetKind() != CType::TY_Array && left->type->GetKind() != CType::TY_Point && (this->GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(curtoken.ptr), diag::err_expected_type, "array or point");
     }
 
@@ -199,7 +295,7 @@ std::shared_ptr<PostSubscript> Sema::semaPostSubscriptNode(std::shared_ptr<AstNo
 }
 
 std::shared_ptr<PostMemberDotExpr> Sema::semaPostMemberDotNode(std::shared_ptr<AstNode> left, Token identoken, Token dotToekn) {
-    if (left->type->GetKind() != CType::TY_Record && (mode == Mode::Normal)) {
+    if (left->type->GetKind() != CType::TY_Record && (GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(dotToekn.ptr), diag::err_expected_type, "struct or union type");
     }
 
@@ -282,16 +378,29 @@ std::shared_ptr<VariableDecl::InitValue> Sema::semaDeclInitValue(std::shared_ptr
 
 std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, int value, std::shared_ptr<CType> type) {
     std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();
-    expr->value = value;
+    expr->value.v = value;
     expr->token = token;
     expr->type = type;
     return expr;
 }
 
-std::shared_ptr<StringExpr> Sema::semaStringExprNode(Token token, std::shared_ptr<CType> type) {
+std::shared_ptr<NumberExpr> Sema::semaNumberExprNode(Token token, std::shared_ptr<CType> type) {
+    std::shared_ptr<NumberExpr> expr = std::make_shared<NumberExpr>();
+    expr->token = token;
+    expr->type = type;
+    if (type->IsIntegerType()) {
+        expr->value.v = token.value.v;
+    } else {
+        expr->value.d = token.value.d;
+    }
+    return expr;
+}
+
+std::shared_ptr<StringExpr> Sema::semaStringExprNode(Token token, std::string val, std::shared_ptr<CType> type) {
     std::shared_ptr<StringExpr> expr = std::make_shared<StringExpr>();
     expr->token = token;
     expr->type = type;
+    expr->value = val;
     return expr;
 }
 
@@ -306,6 +415,32 @@ std::shared_ptr<IfStmt> Sema::semaIfStmtNode(std::shared_ptr<AstNode> condNode, 
 }
 
 
+void Sema::semaTypedefDecl(std::shared_ptr<CType> type, Token token) {
+    llvm::StringRef name(token.ptr, token.len);
+    // typedef 命名的类型与变量在同一个符号空间中， 需要检查命名冲突
+    std::shared_ptr<Symbol> symbol = scope.FindObjSymbolInCurScope(name);
+    if (symbol && GetMode() == Mode::Normal) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, name);
+    }
+    if (GetMode() == Mode::Normal) {
+        // 添加到符号表中（）类别为typedef
+        scope.AddTypedefSymbol(type, name);
+    }
+}
+
+std::shared_ptr<CType> Sema::semaTypedefAccess(Token token) {
+    llvm::StringRef name(token.ptr, token.len);
+    std::shared_ptr<Symbol> symbol = scope.FindObjSymbol(name);
+    if (symbol == nullptr && GetMode() == Mode::Normal) {
+        diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_undefined, name);
+    }
+
+    if (symbol && symbol->GetKind() == SymbolKind::ktypedef) {
+        return symbol->GetType();
+    }
+    return nullptr;
+}
+
 void Sema::EnterScope() {
     scope.EnterScope();
 }
@@ -315,10 +450,16 @@ void Sema::ExitScope() {
 }
 
 void Sema::SetMode(Mode mode) {
-    this->mode = mode;
+    modeStack.push(mode);
 }
 
+void Sema::UnSetMode() {
+    modeStack.pop();
+}
 
+Sema::Mode Sema::GetMode() {
+    return modeStack.top();
+}
 
 
 // 从类型符号表栈中查找 结构体名是否存在，如果存在就返回对应结构体类型
@@ -347,7 +488,7 @@ std::shared_ptr<CType> Sema::semaTagDeclare(Token token, const std::vector<Membe
     }
 
     auto recordType = std::make_shared<CRecordType>(text, members, tagKind);
-    if (this->mode == Mode::Normal) {
+    if (this->GetMode() == Mode::Normal) {
         // 2. 添加到符号表中
         scope.AddTagSymbol(recordType, text);
     }
@@ -364,7 +505,7 @@ std::shared_ptr<CType> Sema::semaTagDeclare(Token token, std::shared_ptr<CType> 
     }
 
     // 2. 添加到tag符号表中
-    if (this->mode == Mode::Normal) {
+    if (this->GetMode() == Mode::Normal) {
         scope.AddTagSymbol(type, text);
     }
     return type;
@@ -374,7 +515,7 @@ std::shared_ptr<CType> Sema::semaTagDeclare(Token token, std::shared_ptr<CType> 
 std::shared_ptr<CType> Sema::semaAnonyTagDeclare(const std::vector<Member> &members, TagKind tagKind) {
     llvm::StringRef text = CType::GenAnonyRecordName(tagKind);
     auto recordType = std::make_shared<CRecordType>(text, members, tagKind);
-    if (this->mode == Mode::Normal) {
+    if (this->GetMode() == Mode::Normal) {
         // 2. 添加到符号表中
         scope.AddTagSymbol(recordType, text);
     }
@@ -392,7 +533,7 @@ std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_pt
 
     if (symbol != nullptr) {
         auto symbolType = symbol->GetType();
-        if (symbolType->GetKind() != CType::TY_Func && mode == Mode::Normal) {
+        if (symbolType->GetKind() != CType::TY_Func && GetMode() == Mode::Normal) {
             // 函数名和全局变量名重名，报错
             diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
         }
@@ -400,13 +541,13 @@ std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_pt
         // 函数可以重复声明， 但不能重复定义
         if (symbolType->GetKind() == CType::TY_Func) {
             auto symFuncType = llvm::dyn_cast<CFuncType>(symbolType.get());
-            if (symFuncType->hasBody && funcType->hasBody && mode == Mode::Normal) {
+            if (symFuncType->hasBody && funcType->hasBody && GetMode() == Mode::Normal) {
                 diagEngine.Report(llvm::SMLoc::getFromPointer(token.ptr), diag::err_redefined, text);
             }
         }
     }
 
-    if((symbol == nullptr || funcType->hasBody) && mode == Mode::Normal) {
+    if((symbol == nullptr || funcType->hasBody) && GetMode() == Mode::Normal) {
         // 添加到符号表中
         scope.AddObjSymbol(type, text);
     }
@@ -421,19 +562,39 @@ std::shared_ptr<FunctionDecl> Sema::semaFunctionDecl(Token token, std::shared_pt
 
 std::shared_ptr<PostFunctionCallExpr> Sema::semaFuncCallExprNode(std::shared_ptr<AstNode> left, std::vector<std::shared_ptr<AstNode>> &args) {
     Token ident = left->token;
-    if (left->type->GetKind() != CType::TY_Func && (mode == Mode::Normal)) {
+    std::shared_ptr<CType> funcType = nullptr;
+    CFuncType *cfuncType = nullptr;
+    if (left->type->GetKind() == CType::TY_Point) {
+        // 符号是函数指针类型
+        CPointType *cPtrType = llvm::dyn_cast<CPointType>(left->type.get());
+        if (cPtrType->GetBaseType()->GetKind() == CType::TY_Func) {
+            cfuncType = llvm::dyn_cast<CFuncType>(cPtrType->GetBaseType().get());
+            funcType = cPtrType->GetBaseType();
+        } else {
+            if (GetMode() == Mode::Normal) {
+                diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_expected, "functype");
+            }
+        }
+    }
+    else if (left->type->GetKind() != CType::TY_Func && GetMode() == Mode::Normal) {
         // 符号不是函数类型
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_expected, "function type");
     }
-    CFuncType *funcType = llvm::dyn_cast<CFuncType>(left->type.get());
+
+    if (cfuncType == nullptr) {
+        cfuncType = llvm::dyn_cast<CFuncType>(left->type.get());
+    }
 
     // 检查函数实参数个数与形参个数是否匹配
-    if ((funcType->GetParams().size() != args.size()) && !funcType->IsVarArg() && (mode == Mode::Normal)) {
+    if ((cfuncType->GetParams().size() != args.size()) && !cfuncType->IsVarArg() && (GetMode() == Mode::Normal)) {
         diagEngine.Report(llvm::SMLoc::getFromPointer(ident.ptr), diag::err_miss, "argument count not match");
     }
 
     auto funcCall = std::make_shared<PostFunctionCallExpr>();
-    funcCall->type = funcType->GetRetType();
+    funcCall->type = cfuncType->GetRetType();
+    if (funcType != nullptr) {
+        left->type = funcType;
+    }
     funcCall->left = left;
     funcCall->args = args;
     funcCall->token = left->token;

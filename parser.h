@@ -30,7 +30,7 @@ private:
     // 一个声明语句可以声明多个变量
     std::shared_ptr<AstNode> ParseDeclareStmt(bool isGloabl = false);
     // decl-spec  ::= "int" | struct-or-union-specifier
-    std::shared_ptr<CType> ParseDeclSpec();
+    std::shared_ptr<CType> ParseDeclSpec(bool &isTypedef);
     std::shared_ptr<CType> ParseStructOrUnionSpec();
     // declarator ::= "*"* direct-declarator
     std::shared_ptr<AstNode> Declarator(std::shared_ptr<CType> baseType, bool isGloabl);
@@ -48,7 +48,7 @@ private:
         bool hasLBrace
     );
 
-    bool ParseStringInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
+    void ParseStringInitializer(std::vector<std::shared_ptr<VariableDecl::InitValue>> &arr, 
         std::shared_ptr<CType> declType, 
         std::vector<int> &offsetList
     );
@@ -82,6 +82,7 @@ private:
     std::shared_ptr<AstNode> ParseRelationalExpr();
     std::shared_ptr<AstNode> ParseAddExpr();
     std::shared_ptr<AstNode> ParseMultExpr(); //std::shared_ptr<AstNode> ParseTerm();
+    std::shared_ptr<AstNode> ParseCastExpr();
     std::shared_ptr<AstNode> ParseUnaryExpr();
     std::shared_ptr<AstNode> ParsePostfixExpr();
     std::shared_ptr<AstNode> ParsePrimaryExpr(); //std::shared_ptr<AstNode> ParseFactor();
@@ -98,16 +99,18 @@ private:
     void Advance();
     void NextToken();
     // 消解类型类型限定符（在类型声明时有类型限定符，如const, static）
-    void ConsumeTypeQulify();
+    void ConsumeTypeQualify();
 
     // 判断当前token是否为是类型声明关键字
-    bool IsTypeName(TokenType tokenType);
+    bool IsTypeName(Token token);
 
     // 判断是函数声明 or 全局变量声明
     bool IsFunctionDecl();
 
+    bool IsFunctionTypeNode(std::shared_ptr<AstNode> node);
+
     // 判断是否为字符串数组类型的声明， 即： char a[20];
-    bool IsStringArrayTy(std::shared_ptr<CType> ty);
+    bool IsStringArrayType(std::shared_ptr<CType> ty);
 
     // 判断是否为赋值系列运算符
     bool IsAssignOperator();

@@ -98,10 +98,8 @@ llvm::Value* CodeGen::VisitDeclareStmt(DeclareStmt *declstmt) {
 
 llvm::Value* CodeGen::VisitBlockStmt(BlockStmt *blockstmt) {
     PushScope();
-    // block块中最后的语句有可能是一个表达式
-    llvm::Value* lastValue;
     for (const auto &stmt : blockstmt->nodeVec) {
-        lastValue = stmt->Accept(this);
+        stmt->Accept(this);
         if (llvm::dyn_cast<ReturnStmt>(stmt.get()) ||
             llvm::dyn_cast<BreakStmt>(stmt.get()) ||
             llvm::dyn_cast<ContinueStmt>(stmt.get())) {
@@ -111,7 +109,7 @@ llvm::Value* CodeGen::VisitBlockStmt(BlockStmt *blockstmt) {
         }
     }
     PopScope();
-    return lastValue;
+    return nullptr;
 }
 
 llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
@@ -124,11 +122,8 @@ llvm::Value* CodeGen::VisitIfStmt(IfStmt *ifstmt) {
 
     // if 语句条件的计算，直接构建指令即可，这些指令是在上一个基本块的内容
     llvm::Value* val = ifstmt->condNode->Accept(this);
-    // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
-    CastValue(val, irBuilder.getInt32Ty());
-
-    // int32 类型的比较指令ne ：不等于
-    llvm::Value* condval =irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+    // 条件表达式有可能是一个指针判等， 需要先将其转换
+    llvm::Value* condval = BooleanCast(val);
     if (elseBB != nullptr) {
         // 条件跳转
         irBuilder.CreateCondBr(condval, thenBB, elseBB);
@@ -235,14 +230,16 @@ llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
 
     // 将for循环语句中可以被break跳转到的block块，记录在breakBBs Map中
     breakBBs.insert({forStmt, lastBB});
-
     // 将for循环语句中可以被continue跳转到的block块，记录在breakBBs Map中
-    if (forStmt->incNode != nullptr) {
-        // 如果循环自增表达式不为空，contine跳转至incBB
-        continueBBs.insert({forStmt, incBB});
-    } else {
-        continueBBs.insert({forStmt, condBB});
-    }
+    continueBBs.insert({forStmt, incBB});
+    
+    // // 将for循环语句中可以被continue跳转到的block块，记录在breakBBs Map中
+    // if (forStmt->incNode != nullptr) {
+    //     // 如果循环自增表达式不为空，contine跳转至incBB
+    //     continueBBs.insert({forStmt, incBB});
+    // } else {
+    //     continueBBs.insert({forStmt, condBB});
+    // }
     
 
     // 循环变量的init落在上一个基本块中完成
@@ -258,12 +255,14 @@ llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
     irBuilder.SetInsertPoint(condBB);
     if (forStmt->condNode != nullptr) {
         llvm::Value *val = forStmt->condNode->Accept(this);
-        // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
-        CastValue(val, irBuilder.getInt32Ty());
-        llvm::Value *condVal = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+        // 条件表达式有可能是一个指针判等， 需要先将其转换
+        llvm::Value *condVal = BooleanCast(val);
+        // CastValue(val, irBuilder.getInt32Ty());
+        // llvm::Value *condVal = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+        
         irBuilder.CreateCondBr(condVal, bodyBB, lastBB);
     } else {
-         irBuilder.CreateBr(bodyBB);
+        irBuilder.CreateBr(bodyBB);
     }
 
 
@@ -278,20 +277,16 @@ llvm::Value* CodeGen::VisitForStmt(ForStmt *forStmt) {
     // 此处还需要判断是否已经存在终结符(isTerminator)，比如提前break了，就不能再有终结符了
     auto bodyLastBB = irBuilder.GetInsertBlock();
     if (bodyLastBB->empty() || !bodyLastBB->back().isTerminator()) {
-        if (forStmt->incNode != nullptr) {
-            irBuilder.CreateBr(incBB);
-        } else {
-            irBuilder.CreateBr(condBB);
-        }
+        irBuilder.CreateBr(incBB);
     }
 
+    incBB->insertInto(curFunc);
+    irBuilder.SetInsertPoint(incBB);
     if (forStmt->incNode != nullptr) {
-        incBB->insertInto(curFunc);
-        irBuilder.SetInsertPoint(incBB);
         // 生成 循环自增表达式 的代码
         forStmt->incNode->Accept(this);
-        irBuilder.CreateBr(condBB);
     }
+    irBuilder.CreateBr(condBB);
 
     lastBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(lastBB);
@@ -327,18 +322,18 @@ llvm::Value* CodeGen::VisitDoWhileStmt(DoWhileStmt *stmt) {
         irBuilder.CreateBr(condBB);
     }
 
+    // 生成 then 块的指令inst
     condBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(condBB);
     // 计算条件表达式
     llvm::Value *val = stmt->cond->Accept(this);
 
-    // 条件表达式有可能是一个指针判等， 需要先将其转换为int32 Type
-    CastValue(val, irBuilder.getInt32Ty());
-    llvm::Value *condval = irBuilder.CreateICmpEQ(val, irBuilder.getInt32(0));
+    // 条件表达式有可能是一个指针判等， 需要先将其转换bool
+    llvm::Value *condval = BooleanCast(val);
     /// 此处跳转，要跳转到入口节点
     irBuilder.CreateCondBr(condval, bodyBB, thenBB);
 
-    // 生成 then 块的代码
+    // 生成 then 块的指令代码inst
     thenBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(thenBB);
 
@@ -372,6 +367,7 @@ llvm::Value* CodeGen::VisitSwitchStmt(SwitchStmt *stmt) {
     }
     // 如果有default语句，但是是一个空的，或者没有终结指令，那么需要补一个
     if (defaultBB->empty() || !defaultBB->back().isTerminator()) {
+        irBuilder.SetInsertPoint(defaultBB);
         irBuilder.CreateBr(thenBB);
     }
 
@@ -393,9 +389,17 @@ llvm::Value* CodeGen::VisitCaseStmt(CaseStmt *stmt) {
     llvm::Value *caseVal = stmt->expr->Accept(this);
     // 通过switchInst指令可以拿到swith的条件表达式
     // case的value，需要与switch语句的cond的类型，判断是否要做强转
-    CastValue(caseVal, switchInst->getCondition()->getType());
+    AssignCast(caseVal, switchInst->getCondition()->getType());
 
+    // case 语句需要新建一个基本块
     auto caseBB = llvm::BasicBlock::Create(context, "case");
+    // 将caseVal由llvm::Value 强转为llvm::ConstantInt
+    llvm::ConstantInt *constInt = llvm::dyn_cast<llvm::ConstantInt>(caseVal);
+    if (!constInt) {
+        // 如果强转失败，说明case表达式不是一个int常量，需要报错
+        assert(0 && "expected constant expression in case");
+    }
+
     /*
         当我们对当前case语句做代码生成的时候，需要考虑上一个case语句是否是空语句(即：case穿透)，如：
         case 'a':
@@ -403,6 +407,7 @@ llvm::Value* CodeGen::VisitCaseStmt(CaseStmt *stmt) {
             x = 10;
         }
     */
+    // 考虑上一个case 语句
     if (switchInst->getNumCases() > 0) {
         // switchInst->case_begin() 返回switch指令的case语句的迭代器
         // 获取当前case之前最后一个case语句的迭代器
@@ -415,20 +420,14 @@ llvm::Value* CodeGen::VisitCaseStmt(CaseStmt *stmt) {
         }
     }
 
-    // 将caseVal由llvm::Value 强转为llvm::ConstantInt
-    llvm::ConstantInt *constInt = llvm::dyn_cast<llvm::ConstantInt>(caseVal);
-    if (!constInt) {
-        // 如果强转失败，说明case表达式不是一个int常量，需要报错
-        assert(0 && "case value must be constant");
-    }
-
     // 为switch语句添加一个case
     switchInst->addCase(constInt, caseBB);
     
     caseBB->insertInto(curFunc);
     irBuilder.SetInsertPoint(caseBB);
-    stmt->stmt->Accept(this);
-
+    if (stmt->stmt != nullptr) {
+        stmt->stmt->Accept(this);
+    }
     return nullptr;
 };
 
@@ -471,6 +470,7 @@ llvm::Value* CodeGen::VisitReturnStmt(ReturnStmt *stmt) {
     // return语句就是产生一条IR的return 指令
     if (stmt->expr != nullptr) {
         llvm::Value *val= stmt->expr->Accept(this);
+        AssignCast(val, curFunc->getReturnType());
         return irBuilder.CreateRet(val);
     } else {
         //如果没有返回值表达式， 返回一个空的return指令
@@ -497,6 +497,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     switch (binaryExpr->op)
     {
     case BinaryOp::add:{
+        BinaryArithCast(left, right);
         /* 加法和减法需要考虑指针类型, 注意： 指针加指针的语义是不支持的 */
         llvm::Type *lty = binaryExpr->left->type->Accept(this);
         llvm::Type *rty = binaryExpr->right->type->Accept(this);
@@ -509,15 +510,27 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
             llvm::Value* newVal = irBuilder.CreateInBoundsGEP(rty, right, {left});
             return newVal;
         }
-        else {
+        else if (lty->isIntegerTy()) {
             return irBuilder.CreateNSWAdd(left, right);
+        }
+        else {
+            return irBuilder.CreateFAdd(left, right);
         }
     }
     case BinaryOp::sub:{
+        BinaryArithCast(left, right);
         /* 加法和减法需要考虑指针类型 */
         llvm::Type *lty = binaryExpr->left->type->Accept(this);
         llvm::Type *rty = binaryExpr->right->type->Accept(this);
-        if (lty->isPointerTy()) {
+        
+        if (lty->isPointerTy() && rty->isPointerTy()) {
+            // CreateNSWSub 是 IRBuilder 的成员函数，用于创建 有符号整数减法，并标记为 nsw
+            llvm::Value * res = irBuilder.CreateNSWSub(left, right);
+            // 减法之后确保结果是整型 i64
+            AssignCast(res, irBuilder.getInt64Ty());
+            return res;
+        }
+        else if (lty->isPointerTy()) {
             // GEP指令用于计算指针的偏移地址
             llvm::Value* newVal = irBuilder.CreateInBoundsGEP(lty, left, {irBuilder.CreateNeg(right)});
             return newVal;
@@ -525,59 +538,121 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
             // GEP指令用于计算指针的偏移地址
             llvm::Value* newVal = irBuilder.CreateInBoundsGEP(rty, right, {irBuilder.CreateNeg(left)});
             return newVal;
+        } 
+        else if (lty->isIntegerTy()) {
+            return irBuilder.CreateNSWSub(left, right);
         }
         else {
-            return irBuilder.CreateNSWSub(left, right);
+            // 语义模块已经做了校验，此处不用考虑其它情况了
+            return irBuilder.CreateFSub(left, right);
         }
     }
     case BinaryOp::mul:{
-        return irBuilder.CreateNSWMul(left, right);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntegerTy()) {
+            // CreateNSWMul() 创建有符号整数乘法指令 + 无溢出断言
+            return irBuilder.CreateNSWMul(left, right);
+        }
+        else{
+            // CreateFMul() 创建浮点数乘法指令
+            return irBuilder.CreateFMul(left, right);
+        }
     }
     case BinaryOp::div:{
-        return irBuilder.CreateSDiv(left, right);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntegerTy()) {
+            return irBuilder.CreateSDiv(left, right);
+        }
+        else {
+            return irBuilder.CreateFDiv(left, right);
+        }
     }
     case BinaryOp::mod:{
+        BinaryArithCast(left, right);
         return irBuilder.CreateSRem(left, right);
     }
     case BinaryOp::bitwise_or: {
+        BinaryArithCast(left, right);
         return irBuilder.CreateOr(left, right);
     }
     case BinaryOp::bitwise_and: {
+        BinaryArithCast(left, right);
         return irBuilder.CreateAnd(left, right);
     }
     case BinaryOp::bitwise_xor: {
+        BinaryArithCast(left, right);
         return irBuilder.CreateXor(left, right);
     }
     case BinaryOp::left_shift: {
+        BinaryArithCast(left, right);
         return irBuilder.CreateShl(left, right);
     }
     case BinaryOp::right_shift: {
+        BinaryArithCast(left, right);
         return irBuilder.CreateAShr(left, right);
     }
     case BinaryOp::equal:{
         // 比较运算返回的结果是一个1byte整形值， 返回后无法与后来的int32表达式做运算, 需要做类型转换
-        llvm::Value *value = irBuilder.CreateICmpEQ(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpEQ(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpUEQ(left, right);
+        }
+        //  to bool 的转换，交给另外的函数
+        return left;
     }
     case BinaryOp::not_equal:{
-        llvm::Value *value = irBuilder.CreateICmpNE(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpNE(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpUNE(left, right);
+        }
+        //  to bool 的转换，交给另外的函数
+        return left;
     }
     case BinaryOp::less:{
-        llvm::Value *value = irBuilder.CreateICmpSLT(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpSLT(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpULT(left, right);
+        }
+        return left;
     }
     case BinaryOp::less_equal:{
-        llvm::Value *value = irBuilder.CreateICmpSLE(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpSLE(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpULE(left, right);
+        }
+        return left;
     }
     case BinaryOp::greater:{
-        llvm::Value *value = irBuilder.CreateICmpSGT(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpSGT(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpUGT(left, right);
+        }
+        return left;
     }
     case BinaryOp::greater_equal:{
-        llvm::Value *value = irBuilder.CreateICmpSGE(left, right);
-        return irBuilder.CreateIntCast(value, irBuilder.getInt32Ty(), true);
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntOrPtrTy()) {
+            left = irBuilder.CreateICmpSGE(left, right);
+        }
+        else if (left->getType()->isFloatingPointTy()) {
+            left = irBuilder.CreateFCmpUGE(left, right);
+        }
+        return left;
     }
     case BinaryOp::logic_and:{
         // A && B
@@ -586,9 +661,8 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB");
 
         llvm::Value* left = binaryExpr->left->Accept(this);
-        CastValue(left, irBuilder.getInt32Ty());
-        llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
-        irBuilder.CreateCondBr(lval, nextBB, falseBB);
+        left = BooleanCast(left);
+        irBuilder.CreateCondBr(left, nextBB, falseBB);
 
         //-----------------------------------------------------------------------------------------
         // insertInto() 把基本快插入到当前函数
@@ -596,8 +670,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         irBuilder.SetInsertPoint(nextBB);
         /// 右子树内部也生成了基本块
         llvm::Value* right = binaryExpr->right->Accept(this);
-        // LLVM IR的比较指令（icmp）返回结果是 1 位（i1 类型），而不是 32 位。
-        right = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        right = BooleanCast(right);
         /*
         IRBuilder::CreateZExt函数用于生成IR的zext零扩展指令，零扩展是指将较小位宽的整数
         类型（如i1或i8)扩展为较大位宽的整数类型（如i32或i64），通过在高位填充0来保持值的无符号语义
@@ -620,6 +693,7 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
           PHI指令用于在控制流图CFG中处理值合并。它出现在基本块Basic Block的开头，当一个基本块有多个前驱
           predecessor基本块时，PHI节点从每个前驱选择合适的值，确保SSA形式：每个变量只有一次赋值。
         */
+        // 使用phi指令来表达分支的汇合
         llvm::PHINode *phi = irBuilder.CreatePHI(irBuilder.getInt32Ty(), 2);
         phi->addIncoming(right, lastNextBB);
         phi->addIncoming(irBuilder.getInt32(0), falseBB);
@@ -632,16 +706,15 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
         llvm::BasicBlock* mergeBB = llvm::BasicBlock::Create(context, "mergeBB");
 
         llvm::Value* left = binaryExpr->left->Accept(this);
-        CastValue(left, irBuilder.getInt32Ty());
-        llvm::Value* lval = irBuilder.CreateICmpNE(left, irBuilder.getInt32(0));
-        irBuilder.CreateCondBr(lval, trueBB, nextBB);
+        left = BooleanCast(left);
+        irBuilder.CreateCondBr(left, trueBB, nextBB);
 
         //-----------------------------------------------------------------------------------------
         nextBB->insertInto(curFunc);
         irBuilder.SetInsertPoint(nextBB);
         /// 右子树内部也生成了基本块
         llvm::Value* right = binaryExpr->right->Accept(this);
-        right = irBuilder.CreateICmpNE(right, irBuilder.getInt32(0));
+        right = BooleanCast(right);
         right = irBuilder.CreateZExt(right, irBuilder.getInt32Ty());
         irBuilder.CreateBr(mergeBB);
         /// right 这个值，所在的基本块，并不一定是 之前的nextBB了.
@@ -667,8 +740,8 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     case BinaryOp::assign:{
         // 赋值运算的左表达式必须是一个load指令， 先做强转
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);   // 保证不为空
-
+        assert(load && "assign expr left hand is not lvalue");   // 保证不为空
+        AssignCast(right, left->getType());
         
         /* 
          注：load指令相当于对指针解引用后的值， 而load->getPointerOperand()，相当于对变量取地址
@@ -683,7 +756,8 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     case BinaryOp::add_assign:{
         // 同样的，赋值运算的左表达式必须是一个load指令， 先做强转
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "add assign expr left hand is not lvalue"); 
+        BinaryArithCast(left, right);
 
         llvm::Type *ty = binaryExpr->left->type->Accept(this);
         if (ty->isPointerTy()) {
@@ -691,9 +765,17 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
             llvm::Value* newVal = irBuilder.CreateInBoundsGEP(ty, left, {right});
             irBuilder.CreateStore(newVal, load->getPointerOperand());
             return newVal;
-        } else {
+        } 
+        else if (ty->isFloatingPointTy()) {
+            llvm::Value* newVal = irBuilder.CreateFAdd(left, right);
+            AssignCast(newVal, left->getType());
+            irBuilder.CreateStore(newVal, load->getPointerOperand());
+            return newVal;
+        }
+        else {
             // a+=3  => a = a + 3
             llvm::Value *tmp = irBuilder.CreateAdd(left, right);
+            AssignCast(tmp, left->getType());
             // load指令是一个右值， 需要先获取指针操作数
             irBuilder.CreateStore(tmp, load->getPointerOperand());
             return tmp;
@@ -701,17 +783,26 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     }
     case BinaryOp::sub_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "sub assign expr left hand is not lvalue"); 
 
+        BinaryArithCast(left, right);
         llvm::Type *ty = binaryExpr->left->type->Accept(this);
         if (ty->isPointerTy()) {
             // GEP指令用于计算指针的偏移地址
             llvm::Value* newVal = irBuilder.CreateInBoundsGEP(ty, left, {irBuilder.CreateNeg(right)});
             irBuilder.CreateStore(newVal, load->getPointerOperand());
             return newVal;
-        } else {
+        }
+        else if (ty->isFloatingPointTy()) {
+            llvm::Value* newVal = irBuilder.CreateFSub(left, right);
+            AssignCast(newVal, left->getType());
+            irBuilder.CreateStore(newVal, load->getPointerOperand());
+            return newVal;
+        }
+        else {
             // a-=3  => a = a - 3
             llvm::Value *tmp = irBuilder.CreateSub(left, right);
+            AssignCast(tmp, left->getType());
             // load指令是一个右值， 需要先获取指针操作数
             irBuilder.CreateStore(tmp, load->getPointerOperand());
             return tmp;
@@ -719,80 +810,111 @@ llvm::Value* CodeGen::VisitBinaryExpr(BinaryExpr *binaryExpr){
     }
     case BinaryOp::mul_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "mul assign expr left hand is not lvalue");
 
-        // a*=3  => a = a * 3
-        llvm::Value *tmp = irBuilder.CreateMul(left, right);
-        // load指令是一个右值， 需要先获取指针操作数
-        irBuilder.CreateStore(tmp, load->getPointerOperand());
-        return tmp;
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntegerTy()) {
+            // a*=3  => a = a * 3
+            llvm::Value *tmp = irBuilder.CreateMul(left, right);
+            AssignCast(tmp, left->getType());
+            // load指令是一个右值， 需要先获取指针操作数
+            irBuilder.CreateStore(tmp, load->getPointerOperand());
+            return tmp;
+        } else {
+            llvm::Value *tmp = irBuilder.CreateFMul(left, right);
+            AssignCast(tmp, left->getType());
+            irBuilder.CreateStore(tmp, load->getPointerOperand());
+            return tmp;
+        }
     }
     case BinaryOp::div_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "div assign expr left hand is not lvalue");
 
-        // a/=3  => a = a / 3
-        llvm::Value *tmp = irBuilder.CreateSDiv(left, right);
-        // load指令是一个右值， 需要先获取指针操作数
-        irBuilder.CreateStore(tmp, load->getPointerOperand());
-        return tmp;
+        BinaryArithCast(left, right);
+        if (left->getType()->isIntegerTy()) {
+            // a/=3  => a = a / 3
+            llvm::Value *tmp = irBuilder.CreateSDiv(left, right);
+            AssignCast(tmp, left->getType());
+            // load指令是一个右值， 需要先获取指针操作数
+            irBuilder.CreateStore(tmp, load->getPointerOperand());
+            return tmp;
+        }
+        else{
+            llvm::Value *tmp = irBuilder.CreateFDiv(left, right);
+            AssignCast(tmp, left->getType());
+            irBuilder.CreateStore(tmp, load->getPointerOperand());
+            return tmp;
+        }
     }
     case BinaryOp::mod_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "mod assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a%=3  => a = a % 3
         llvm::Value *tmp = irBuilder.CreateSRem(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
     }
     case BinaryOp::bitwise_and_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "bit and assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a &=3  => a = a & 3
         llvm::Value *tmp = irBuilder.CreateAnd(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
     }
     case BinaryOp::bitwise_or_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "bit or assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a |=3  => a = a | 3
         llvm::Value *tmp = irBuilder.CreateOr(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
     }
     case BinaryOp::bitwise_xor_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "bit xor assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a ^=3  => a = a ^ 3
         llvm::Value *tmp = irBuilder.CreateXor(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
     }
     case BinaryOp::left_shift_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "left shift assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a ^=3  => a = a ^ 3
         llvm::Value *tmp = irBuilder.CreateShl(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
     }
     case BinaryOp::right_shift_assign:{
         llvm::LoadInst *load = llvm::dyn_cast<llvm::LoadInst>(left);
-        assert(load);
+        assert(load && "right shift assign expr left hand is not lvalue");
 
+        BinaryArithCast(left, right);
         // a ^=3  => a = a ^ 3
         llvm::Value *tmp = irBuilder.CreateAShr(left, right);
+        AssignCast(tmp, left->getType());
         // load指令是一个右值， 需要先获取指针操作数
         irBuilder.CreateStore(tmp, load->getPointerOperand());
         return tmp;
@@ -818,8 +940,9 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     // 1. 计算条件表达式
     llvm::Value *val = expr->cond->Accept(this);
     // 条件表达式有可能是一个指针判等，需要先将其转换为int32Type
-    CastValue(val, irBuilder.getInt32Ty());
-    llvm::Value *cond = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
+    llvm::Value *cond = BooleanCast(val);
+    // CastValue(val, irBuilder.getInt32Ty());
+    // llvm::Value *cond = irBuilder.CreateICmpNE(val, irBuilder.getInt32(0));
     irBuilder.CreateCondBr(cond, thenBB, elseBB);
 
     // 2. 计算then表达式
@@ -841,7 +964,8 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     // 4. 操作合并后的block块
     mergeBB->insertInto(curFunc);         /* 将当前的block块插入到目标函数中*/
     irBuilder.SetInsertPoint(mergeBB);
-    
+    BinaryArithCast(thenVal, elseVal);
+
     // phi指令代表有多种可能性的情况
     llvm::PHINode* phi = irBuilder.CreatePHI(expr->then->type->Accept(this), 2);
     // phi指令关心的是产生llvm::Value值的基本块是谁
@@ -849,6 +973,14 @@ llvm::Value* CodeGen::VisitThreeExpr(ThreeExpr *expr) {
     phi->addIncoming(elseVal, lastElseBB);
     return phi;
 }
+
+llvm::Value* CodeGen::VisitCastExpr(CastExpr *expr) {
+    llvm::Type *type = expr->targetType->Accept(this);
+    llvm::Value *value = expr->node->Accept(this);
+    AssignCast(value, type);
+    return value;
+}
+
 
 llvm::Value* CodeGen::VisitUnaryExpr(UnaryExpr *unaryExpr) {
     llvm::Value *val = unaryExpr->node->Accept(this);
@@ -997,7 +1129,18 @@ llvm::Value* CodeGen::VisitPostDecExpr(PostDecExpr *postDecExpr) {
 
 
 llvm::Value* CodeGen::VisitNumberExpr(NumberExpr *numberExpr){
-    return irBuilder.getInt32(numberExpr->value);
+    if (numberExpr->type->IsIntegerType()) {
+        int bitCount = numberExpr->type->GetSize() * 8;
+        return irBuilder.getIntN(bitCount, numberExpr->value.v);
+    } else {
+        if (numberExpr->type->GetKind() == CType::TY_Float) {
+            return llvm::ConstantFP::get(irBuilder.getFloatTy(), numberExpr->value.d);
+        } else {
+            return llvm::ConstantFP::get(irBuilder.getDoubleTy(), numberExpr->value.d);
+        }
+    }
+    // return irBuilder.getInt32(numberExpr->value);
+    // return nullptr;
 }
 
 
@@ -1122,7 +1265,9 @@ llvm::Value* CodeGen::VisitPostMemberArrowExpr(PostMemberArrowExpr *expr) {
         llvm::Value* val = arg->Accept(this);
         if (i < size) {
             // 只有显式定义的形参才需要转换， 可变参数除外
-            CastValue(val, params[i].type->Accept(this));
+            AssignCast(val, params[i].type->Accept(this));
+        } else {
+            Cast(val);
         }
         args.push_back(val);
         i++;
@@ -1166,7 +1311,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                 std::shared_ptr<VariableDecl::InitValue> initVal = GetInitValueByOffset(offset);
                 if (initVal != nullptr) {
                     auto *val = initVal->value->Accept(this);
-                    CastValue(val, ty);
+                    AssignCast(val, ty);
                     return llvm::dyn_cast<llvm::Constant>(val);
                 }
                 // 如果没有初始值，则它的默认初始值为0
@@ -1175,7 +1320,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                 std::shared_ptr<VariableDecl::InitValue> initVal = GetInitValueByOffset(offset);
                 if (initVal != nullptr) {
                     auto *val = initVal->value->Accept(this);
-                    CastValue(val, ty);
+                    AssignCast(val, ty);
                     return llvm::dyn_cast<llvm::Constant>(val);
                 }
 
@@ -1218,6 +1363,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                 return llvm::ConstantArray::get(arrayTy, elemsConstantVal);
             } else {
                 // TODO: 不支持的类型， 如果未来类型扩展在此处补充
+                assert(0);
             }
         };
 
@@ -1264,7 +1410,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
             if (decl->initValues.size() == 1) {
                 llvm::Value *initValue = decl->initValues[0]->value->Accept(this);
                 // 根据类型对值做一次转换， 保证值和类型是一致的
-                CastValue(initValue,  decl->initValues[0]->decType->Accept(this));
+                AssignCast(initValue,  decl->initValues[0]->decType->Accept(this));
                 irBuilder.CreateStore(initValue, alloc);
             } else {
                 // 处理数组声明的初始化
@@ -1277,7 +1423,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                         llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                         llvm::Value *val = initValue->value->Accept(this);
                         // 根据类型对值做一次转换， 保证值和类型是一致的
-                        CastValue(val, initValue->decType->Accept(this));
+                        AssignCast(val, initValue->decType->Accept(this));
                         irBuilder.CreateStore(val, addr);
                     }
                 } 
@@ -1294,7 +1440,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                             }
                             llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                             llvm::Value *val = initValue->value->Accept(this);
-                            CastValue(val, initValue->decType->Accept(this));
+                            AssignCast(val, initValue->decType->Accept(this));
                             irBuilder.CreateStore(val, addr);
                         }
                     } else {
@@ -1308,7 +1454,7 @@ llvm::Value* CodeGen::VisitVariableDeclExpr(VariableDecl *decl) {
                         }
                         llvm::Value *addr = irBuilder.CreateInBoundsGEP(ty, alloc, vec);
                         llvm::Value *val = initValue->value->Accept(this);
-                        CastValue(val, initValue->decType->Accept(this));
+                        AssignCast(val, initValue->decType->Accept(this));
                         irBuilder.CreateStore(val, addr);
                     }
                 } else {
@@ -1389,8 +1535,21 @@ llvm::Value* CodeGen::VisitFunctionDeclExpr(FunctionDecl *decl) {
         // 判断最后一个基本块最后一条指令是否是ret指令， 如果没有则补充ret指令
         if (cFuncTy->GetRetType()->GetKind() == CType::TY_Void) {
             irBuilder.CreateRetVoid();
-        }else {
-            irBuilder.CreateRet(irBuilder.getInt32(0));
+        }
+        else if(curFunc->getReturnType()->isIntegerTy()) {
+            irBuilder.CreateRet(irBuilder.getIntN(curFunc->getReturnType()->getIntegerBitWidth(), 0));
+        }
+        else if(curFunc->getReturnType()->isFloatTy()) {
+            irBuilder.CreateRet(llvm::ConstantFP::get(irBuilder.getFloatTy(), 1.0f));
+        }
+        else if (curFunc->getReturnType()->isDoubleTy()) {
+            irBuilder.CreateRet(llvm::ConstantFP::get(irBuilder.getDoubleTy(), 1.0));
+        }
+        else if (curFunc->getReturnType()->isPointerTy()) {
+            auto *nullPtr = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(curFunc->getReturnType()));
+            irBuilder.CreateRet(nullPtr);
+        } else {
+            assert(0 && "no return value");
         }
     }
     // <<<< 离开一个函数时，就要退出当前作用域
@@ -1426,12 +1585,21 @@ llvm::Value* CodeGen::VisitVariableAccessExpr(VariableAccessExpr *expr) {
 /// 基础类型(int,char, void, ...)的codegen
 llvm::Type* CodeGen::VisitPrimaryType(CPrimaryType *type) {
     if (type->GetKind() == CType::TY_Int) {
-        return irBuilder.getInt32Ty();
-    } else if (type->GetKind() == CType::TY_Void) {
+        int bitCount = type->GetSize() * 8;
+        return irBuilder.getIntNTy(bitCount);
+    } 
+    else if (type->GetKind() == CType::TY_Void) {
         // 返回llvm IR的void类型
         return irBuilder.getVoidTy();
-    } else if (type->GetKind() == CType::TY_Char) {
+    } 
+    else if (type->GetKind() == CType::TY_Char) {
         return irBuilder.getInt8Ty();
+    } 
+    else if (type->GetKind() == CType::TY_Float) {
+        return irBuilder.getFloatTy();
+    }
+    else if (type->GetKind() == CType::TY_Double || type->GetKind() == CType::TY_LDouble) {
+        return irBuilder.getDoubleTy();
     }
     assert(0);
     return nullptr;
@@ -1529,6 +1697,27 @@ void CodeGen::ClearVarScope() {
     localVarMap.clear();
 }
 
+
+void CodeGen::Cast(llvm::Value *&val) {
+    if (val->getType()->isArrayTy()) {
+        auto *load = llvm::dyn_cast<llvm::LoadInst>(val);
+        if (load) {
+            val = load->getPointerOperand();
+        }else {
+            llvm::ArrayType *pty = llvm::dyn_cast<llvm::ArrayType>(val->getType());
+            llvm::Value *zero = irBuilder.getInt32(0);
+            val = irBuilder.CreateInBoundsGEP(pty->getArrayElementType(), val, {zero});
+        }
+    }else if (val->getType()->isFunctionTy()) {
+        auto *load = llvm::dyn_cast<llvm::LoadInst>(val);
+        if (load) {
+            val = load->getPointerOperand();
+        }else {
+            assert(0 && "can't convert to pointer to func");
+        }
+    }
+}
+
 /*
 CastValue函数的参数：llvm::Value*& val，是一个指向 llvm::Value的指针的引用，函数可以
 直接修改调用者的指针，让它指向新的对象。这类似于传入指针的“引用版本”，比 llvm::Value** 更自然。
@@ -1566,6 +1755,187 @@ void CodeGen::CastValue(llvm::Value *&val, llvm::Type *destTy) {
     }
 }
 
+// 赋值的类型转换，用于源类型到目标类型
+void CodeGen::AssignCast(llvm::Value *&val, llvm::Type *destTy) {
+    if (val->getType() == destTy) {
+        return;
+    }
+
+    if (val->getType() != destTy) {
+        if (val->getType()->isIntegerTy()) {
+            if (destTy->isIntegerTy()) {
+                val = irBuilder.CreateIntCast(val, destTy, true);
+            }
+            // isFloatingPointTy()用于判断当前类型是否为浮点类型
+            else if (destTy->isFloatingPointTy()) {
+                // CreateSIToFP 用于创建有符号整数到浮点数类型转换指令
+                val = irBuilder.CreateSIToFP(val, destTy);
+            }
+            else if (destTy->isPointerTy()) {
+                // getIntegerBitWidth()是IntegerType类的成员函数，用于获取整数类型的位宽
+                if (val->getType()->getIntegerBitWidth() != 64) {
+                    val = irBuilder.CreateIntCast(val, irBuilder.getInt64Ty(), true);
+                }
+                val =  irBuilder.CreateIntToPtr(val, destTy);
+            } else {
+                assert(0 && "an integer type cannot be converted to a type that is not an integer, floating point, or pointer type");
+            }
+        }
+        // isFloatingPointTy()是 llvm::Type类的成员函数，用于判断当前类型是否为浮点类型
+        else if (val->getType()->isFloatingPointTy()) {
+            if (destTy->isFloatingPointTy()) {
+                // CreateFPCast是IRBuilder 的成员函数，用于创建浮点类型之间的转换指令，即浮点类型扩展或截断
+                val = irBuilder.CreateFPCast(val, destTy);
+            } 
+            else if (destTy->isIntegerTy()) {
+                // CreateFPToSI是IRBuilder 的成员函数，用于创建浮点数到有符号整数的类型转换指令
+                val = irBuilder.CreateFPToSI(val, destTy);
+            } 
+            else {
+                assert(0 && "an float type cannot be converted to a type that is not an float or integer type");
+            }
+        }
+        else if (val->getType()->isPointerTy()) {
+            if (destTy->isIntegerTy()) {
+                // CreatePtrToInt 是 IRBuilder 的成员函数，用于创建 指针到整数 的类型转换指令
+                val = irBuilder.CreatePtrToInt(val, destTy);
+            } 
+            else {
+                assert(0 && "an pointer type cannot be converted to a type that is not an integer type");
+            }
+        }
+        else if (val->getType()->isArrayTy()) {
+            // isIntOrPtrTy()是llvm::Type类的成员函数，用于判断一个类型是否为 整数类型（Integer）或指针类型（Pointer）
+            if (destTy->isIntOrPtrTy()) {
+                auto *loadInst = llvm::dyn_cast<llvm::LoadInst>(val);
+                if (loadInst != nullptr) {
+                    val = loadInst->getPointerOperand();
+                } else {
+                    llvm::ArrayType *pty = llvm::dyn_cast<llvm::ArrayType>(val->getType());
+                    llvm::Value *zero = irBuilder.getInt32(0);
+                    val = irBuilder.CreateInBoundsGEP(pty->getArrayElementType(), val, {zero});
+                }
+                if (destTy->isIntegerTy()) {
+                    val = irBuilder.CreatePtrToInt(val, destTy);
+                }
+            }
+        } else  {
+            assert(0 && "an array type cannot be converted to a type that is not an integer type or pointer type");
+        }
+    } 
+    else if (val->getType()->isFunctionTy()) {
+        if (destTy->isPointerTy()) {
+            auto *loadInst = llvm::dyn_cast<LoadInst>(val);
+            if (loadInst) {
+                val = loadInst->getPointerOperand();
+            }
+        }
+        else {
+            assert(0 && "an function type cannot be converted to a type that is not pointer type");
+        }
+    }
+}
+
+// 统一算术类型转换，用于二元操作符 ，以及三元操作符的then和else
+void CodeGen::BinaryArithCast(llvm::Value *&left, llvm::Value *&right) {
+    /*
+    在llvmIR中， floatTy和doubleTy都是浮点类，但是它们不是同一个类型：
+        floatTy = 32 位单精度浮点
+        doubleTy = 64 位双精度浮点
+    */
+    auto CastToDouble = [&](llvm::Value *&value) {
+        if (!value->getType()->isDoubleTy()) {
+            if (value->getType()->isIntegerTy()) {
+                value = irBuilder.CreateSIToFP(value, irBuilder.getDoubleTy());
+            }
+            else{
+                value = irBuilder.CreateFPCast(value, irBuilder.getDoubleTy());
+            }
+        }
+    };
+
+    auto CastToFloat = [&](llvm::Value *&value) {
+        /*
+        isFloatTy() vs isFloatingPointTy() 区别：
+          isFloatTy()：只判断是否为 float（32 位单精度）， double、half、x86_fp80 等全返回 false
+          isFloatingPointTy()：判断是否为任意内置浮点标量类型，包括 half、bfloat、float、double、x86_fp80、fp128、ppc_fp128
+        */
+        if (!value->getType()->isFloatTy()) {
+            if (value->getType()->isIntegerTy()) {
+                value = irBuilder.CreateSIToFP(value, irBuilder.getFloatTy());
+            }
+            else {
+                value = irBuilder.CreateFPCast(value, irBuilder.getFloatTy());
+            }
+        }
+    };
+
+    // 如果左右操作数有任何一个是double类型，统一转成double类型
+    if (left->getType()->isDoubleTy() || right->getType()->isDoubleTy()) {
+        CastToDouble(left);
+        CastToDouble(right);
+    }
+    // 否则，如果左右操作数有任何一个是float类型，统一转成float类型
+    else if (left->getType()->isFloatTy() || right->getType()->isFloatTy()) {
+        CastToFloat(left);
+        CastToFloat(right);
+    }
+    else{
+        // 如果左右操作数都是整型
+        unsigned int leftBitWidth = left->getType()->getIntegerBitWidth();     /*获取左操作数的位宽*/
+        unsigned int rightBitWidth = right->getType()->getIntegerBitWidth();   /*获取右操作数的位宽*/
+        
+        // 在做 + - * / 之前，把两个整数：至少提升到 32 位（防溢出）, 位宽必须一样（LLVM 要求同类型才能运算）
+        if (leftBitWidth < 32u || leftBitWidth < rightBitWidth) {
+            left = irBuilder.CreateIntCast(left, irBuilder.getIntNTy(std::max(32u, rightBitWidth)), true);
+            leftBitWidth = left->getType()->getIntegerBitWidth();
+        }
+        if (rightBitWidth < 32u || rightBitWidth < leftBitWidth) {
+            right = irBuilder.CreateIntCast(right, irBuilder.getIntNTy(std::max(32u, leftBitWidth)), true);
+        }
+    }
+}
+
+// bool类型的转换, 条件判断的位置都需要隐式的转成bool类型
+llvm::Value *CodeGen::BooleanCast(llvm::Value *value) {
+    // 整型转成bool类型, 与0进行比较
+    if (value->getType()->isIntegerTy()) {
+        if (value->getType()->getIntegerBitWidth() > 1) {
+            return irBuilder.CreateICmpNE(value, irBuilder.getIntN(value->getType()->getIntegerBitWidth(), 0));
+        }
+        return value;
+    }
+    else if (value->getType()->isFloatingPointTy()) {
+        // CreateFCmpUNE是IRBuilder 的成员函数，用于创建 浮点数“不相等”比较指令
+        return irBuilder.CreateFCmpUNE(value, llvm::ConstantFP::get(value->getType(), 0));
+    }
+    // 指针转成bool类型, 与null指针进行比较
+    else if (value->getType()->isPointerTy()) {
+        // 获取一个 null 指针，类型和 value 的指针类型 完全一致
+        llvm::ConstantPointerNull *nullVal = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(value->getType()));
+        // 判断一个指针是否为 null，等价于 C/C++ 中的 ptr != nullptr
+        return irBuilder.CreateICmpNE(value, nullVal);
+    }
+    else if (value->getType()->isArrayTy()) {
+        llvm::Value *ptr;
+        // 1. 将数组转成指针
+        auto *loadInst = llvm::dyn_cast<llvm::LoadInst>(value);
+        if (loadInst) {
+            ptr = loadInst->getPointerOperand();
+        }
+        else {
+            llvm:ArrayType * arrType = llvm::dyn_cast<llvm::ArrayType>(value->getType());
+            llvm::Value *zero = irBuilder.getInt32(0);
+            ptr = irBuilder.CreateInBoundsGEP(arrType->getArrayElementType(), value, {zero});
+        }
+        // 2. 和空指针进行比较
+        // 获取一个 null 指针，类型和 value 的指针类型 完全一致
+        llvm::ConstantPointerNull *nullVal = llvm::ConstantPointerNull::get(llvm::dyn_cast<llvm::PointerType>(ptr->getType()));
+        return irBuilder.CreateICmpNE(ptr, nullVal);
+    } else {
+        return nullptr;
+    }
+}
 
 /*
 注：

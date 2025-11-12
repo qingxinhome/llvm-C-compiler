@@ -31,16 +31,27 @@ enum class TagKind {
 class CType {
 public:
     enum Kind {
-        TY_Int,        // 基础类型 int
         TY_Void,       // 基础类型 void
         TY_Char,       // 基础类型 char
+        TY_UChar,      // 基础类型 unsigned char
+        TY_Short,      // 基础类型 short
+        TY_UShort,     // 基础类型 unsigned short
+        TY_Int,        // 基础类型 int
+        TY_UInt,       // 基础类型 unsigned int
+        TY_Long,       // 基础类型 long
+        TY_ULong,      // 基础类型 unsigned long
+        TY_LLong,      // 基础类型 long long 
+        TY_ULLong,     // 基础类型 unsigned long long 
+        TY_Float,      // 基础类型 float
+        TY_Double,     // 基础类型
+        TY_LDouble,     // 基础类型 long double 扩展精度，**取决于编译器和平台**
         TY_Point,      // 指针类型
         TY_Array,      // 数组类型
         TY_Record,     // 聚合类型（struct or union
         TY_Func        // 函数类型
     };
 public:
-    CType(Kind kind, int size, int align): kind(kind), size(size), align(align) {};
+    CType(Kind kind, int size, int align, bool sign = true): kind(kind), size(size), align(align), sign(sign) {};
     virtual ~CType(){}  // 虚析构函数
     
     const Kind GetKind() const {
@@ -55,16 +66,32 @@ public:
         return align;
     }
 
+    bool IsIntegerType();
+
+    bool IsFloatType();
+
+    bool IsArithType();
+
     virtual llvm::Type* Accept(TypeVisitor *v) {
         return nullptr;
     }
 public:
     // 使用静态成员变量来枚举C语言中的基础类型：
     // Note:静态成员变量必须在类内声明，在类外初始化
-    static std::shared_ptr<CType> IntType; 
     static std::shared_ptr<CType> VoidType;
     static std::shared_ptr<CType> CharType;
-
+    static std::shared_ptr<CType> UCharType;
+    static std::shared_ptr<CType> ShortType; 
+    static std::shared_ptr<CType> UShortType; 
+    static std::shared_ptr<CType> IntType;
+    static std::shared_ptr<CType> UIntType;
+    static std::shared_ptr<CType> LongType;
+    static std::shared_ptr<CType> ULongType;
+    static std::shared_ptr<CType> LongLongType;
+    static std::shared_ptr<CType> ULongLongType;
+    static std::shared_ptr<CType> FloatType;
+    static std::shared_ptr<CType> DoubleType;
+    static std::shared_ptr<CType> LDoubleType;
 public:
     // GenAnonyRecordName 用于为匿名结构体或者union生成一个名字
     static llvm::StringRef GenAnonyRecordName(TagKind tagKind);
@@ -72,20 +99,25 @@ protected:
     Kind kind;
     int size;      // 类型占用空间大小(字节)
     int align;     // 对齐数， 通常内置类型的对齐数和类型的大小相同
+    bool sign{true}; //是否为有符号， 默认是有符号数
 };
 
 
 // 基础类型
 class CPrimaryType : public CType {
 public:
-    CPrimaryType(Kind kind, int size, int align) : CType(kind, size, align){};
+    CPrimaryType(Kind kind, int size, int align, bool sign) : CType(kind, size, align, sign){};
     
     llvm::Type* Accept(TypeVisitor *v) override{
         return v->VisitPrimaryType(this);
     }
     
     static bool classof(const CType *ty) {
-        return ty->GetKind() == Kind::TY_Int;
+        return ty->GetKind() == Kind::TY_Char || ty->GetKind() == Kind::TY_UChar ||
+            ty->GetKind() == Kind::TY_Int || ty->GetKind() == Kind::TY_UInt ||
+            ty->GetKind() == Kind::TY_Long || ty->GetKind() == Kind::TY_ULong ||
+            ty->GetKind() == Kind::TY_LLong || ty->GetKind() == Kind::TY_ULLong ||
+            ty->GetKind() == Kind::TY_Float || ty->GetKind() == Kind::TY_Double || ty->GetKind() == Kind::TY_LDouble;
     }
 };
 
@@ -112,7 +144,7 @@ public:
 class CArrayType : public CType {
 private:
     std::shared_ptr<CType> elementType;      /* 数组元素类型*/
-    int elementCount;                        /* 数组元素个数*/
+    int elementCount{-1};                    /* 数组元素个数*/
 public:
     CArrayType(std::shared_ptr<CType> elemType, int elemCount) : \
         CType(Kind::TY_Array, elemCount*elemType->GetSize(), elemType->GetAlign()), \

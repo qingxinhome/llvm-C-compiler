@@ -40,6 +40,7 @@ private:
     llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) override;
     llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) override;
     llvm::Value* VisitThreeExpr(ThreeExpr *expr) override;
+    llvm::Value* VisitCastExpr(CastExpr *expr) override;
     llvm::Value* VisitUnaryExpr(UnaryExpr *unaryExpr) override;
     llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) override;
     llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) override;
@@ -58,8 +59,12 @@ private:
     llvm::Type* VisitFuncType(CFuncType *type) override;
 
 private:
+    void Cast(llvm::Value *&val) ;
     /* CastValue用于将Value转换为目标类型的Value值*/
     void CastValue(llvm::Value *&val, llvm::Type *destTy);
+    void AssignCast(llvm::Value *&val, llvm::Type *destTy);
+    void BinaryArithCast(llvm::Value *&left, llvm::Value *&right);
+    llvm::Value *BooleanCast(llvm::Value *value);
 
 private:
     llvm::LLVMContext context;

@@ -2,6 +2,7 @@
 
 #include "scope.h"
 #include "ast.h"
+#include <stack>
 
 // Semantic 语义分析模块
 class Sema {
@@ -12,15 +13,19 @@ public:
         Skip         /* 跳过模式，用于提前初探 */
     };
 public:
-    Sema(DiagEngine &diagEngine) : diagEngine(diagEngine) {}
+    Sema(DiagEngine &diagEngine) : diagEngine(diagEngine) {
+        modeStack.push(Mode::Normal);
+    }
     // 对变量声明节点进行语义检查
     std::shared_ptr<VariableDecl> semaVariableDeclNode(Token token, std::shared_ptr<CType> type, bool isGloabl);
     std::shared_ptr<VariableAccessExpr> semaVariableAccessNode(Token token);
     std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, int value, std::shared_ptr<CType> type);
-    std::shared_ptr<StringExpr> semaStringExprNode(Token token, std::shared_ptr<CType> type);
+    std::shared_ptr<NumberExpr> semaNumberExprNode(Token token, std::shared_ptr<CType> type);
+    std::shared_ptr<StringExpr> semaStringExprNode(Token token, std::string val, std::shared_ptr<CType> type);
 
+    std::shared_ptr<CastExpr> semaCastExprNode(std::shared_ptr<CType> targetType, std::shared_ptr<AstNode> node, Token curToken);
     std::shared_ptr<UnaryExpr> semaUnaryExprNode(std::shared_ptr<AstNode> unary, UnaryOp op, Token token);
-    std::shared_ptr<BinaryExpr> semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op);
+    std::shared_ptr<BinaryExpr> semaBinaryExprNode(std::shared_ptr<AstNode> left, std::shared_ptr<AstNode> right, BinaryOp op, Token curToken);
     std::shared_ptr<ThreeExpr> semaThreeExprNode(std::shared_ptr<AstNode> cond, std::shared_ptr<AstNode> then, std::shared_ptr<AstNode> els, Token token);
     std::shared_ptr<SizeOfExpr> semaSizeOfExprNode(std::shared_ptr<AstNode> unary, std::shared_ptr<CType> type);
     std::shared_ptr<PostIncExpr> semaPostIncExprNode(std::shared_ptr<AstNode> left, Token token);
@@ -42,12 +47,20 @@ public:
     std::shared_ptr<FunctionDecl> semaFunctionDecl(Token token, std::shared_ptr<CType> type, std::shared_ptr<AstNode> blockStmt);
     std::shared_ptr<PostFunctionCallExpr> semaFuncCallExprNode(std::shared_ptr<AstNode> left, std::vector<std::shared_ptr<AstNode>> &args);
 
+    void semaTypedefDecl(std::shared_ptr<CType> type, Token token);
+    std::shared_ptr<CType> semaTypedefAccess(Token token);
+
+
     void EnterScope();
     void ExitScope();
 
-    void SetMode(Mode mode);
+    void SetMode(Mode mode);  // 设置mode
+    void UnSetMode();         // 取消mode设置 
+    Mode GetMode();
 private:
     Scope scope;                     /* 作用域管理器*/
-    Mode mode{Mode::Normal};         /* 语义检查模式 */
+    std::stack<Mode> modeStack;      /* 语义检查模式栈 */
+    // Mode mode{Mode::Normal};       /* 语义检查模式 */
+
     DiagEngine &diagEngine;
 };

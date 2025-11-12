@@ -6,10 +6,40 @@
 // }
 
 // CType类的静态成员变量的初始化: 必须在类内声明，在类外初始化
-std::shared_ptr<CType> CType::IntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4);
 // void 类型的大小和对齐 都是 0， 因为它是空类型
-std::shared_ptr<CType> CType::VoidType = std::make_shared<CPrimaryType>(Kind::TY_Void, 0, 0);
-std::shared_ptr<CType> CType::CharType = std::make_shared<CPrimaryType>(Kind::TY_Char, 1, 1);
+std::shared_ptr<CType> CType::VoidType = std::make_shared<CPrimaryType>(Kind::TY_Void, 0, 0, true);
+std::shared_ptr<CType> CType::CharType = std::make_shared<CPrimaryType>(Kind::TY_Char, 1, 1, true);
+std::shared_ptr<CType> CType::UCharType = std::make_shared<CPrimaryType>(Kind::TY_Char, 1, 1, false);
+std::shared_ptr<CType> CType::ShortType = std::make_shared<CPrimaryType>(Kind::TY_Int, 2, 2, true);
+std::shared_ptr<CType> CType::UShortType = std::make_shared<CPrimaryType>(Kind::TY_Int, 2, 2, false);
+std::shared_ptr<CType> CType::IntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4, true);
+std::shared_ptr<CType> CType::UIntType = std::make_shared<CPrimaryType>(Kind::TY_Int, 4, 4, false);
+std::shared_ptr<CType> CType::LongType = std::make_shared<CPrimaryType>(Kind::TY_Long, 8, 8, true);
+std::shared_ptr<CType> CType::ULongType = std::make_shared<CPrimaryType>(Kind::TY_ULong, 8, 8, false);
+std::shared_ptr<CType> CType::LongLongType = std::make_shared<CPrimaryType>(Kind::TY_Long, 8, 8, true);
+std::shared_ptr<CType> CType::ULongLongType = std::make_shared<CPrimaryType>(Kind::TY_ULong, 8, 8, false);
+std::shared_ptr<CType> CType::FloatType = std::make_shared<CPrimaryType>(Kind::TY_Float, 4, 4, true);
+std::shared_ptr<CType> CType::DoubleType = std::make_shared<CPrimaryType>(Kind::TY_Double, 8, 8, false);
+std::shared_ptr<CType> CType::LDoubleType = std::make_shared<CPrimaryType>(Kind::TY_LDouble, 8, 8, false);
+
+
+
+bool CType::IsIntegerType() {
+    return kind == Kind::TY_Char || kind == Kind::TY_UChar ||
+            kind == Kind::TY_Int || kind == Kind::TY_UInt ||
+            kind == Kind::TY_Long || kind == Kind::TY_ULong ||
+            kind == Kind::TY_LLong || kind == Kind::TY_ULLong;
+}
+
+bool CType::IsFloatType() {
+    return kind == Kind::TY_Float || kind == Kind::TY_Double || kind == Kind::TY_LDouble;
+}
+
+bool CType::IsArithType() {
+    return IsFloatType() || IsIntegerType();
+}
+
+
 
 llvm::StringRef CType::GenAnonyRecordName(TagKind tagKind) {
     // 定义静态局部变量

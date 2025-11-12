@@ -1,0 +1,1 @@
+int main(){int a=0,b=3;a=2;return a;}
