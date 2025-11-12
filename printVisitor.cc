@@ -282,7 +282,12 @@ llvm::Value* PrintVisitor::VisitBinaryExpr(BinaryExpr *binaryExpr) {
 }
 
 llvm::Value* PrintVisitor::VisitNumberExpr(NumberExpr *expr) {
-    *out << llvm::StringRef(expr->token.ptr, expr->token.len);
+    if (expr->type->IsIntegerType()) {
+        *out << expr->value.v;
+    } else {
+        *out << expr->value.d;
+    }
+
     return nullptr;
 }
 
@@ -332,6 +337,15 @@ llvm::Value* PrintVisitor::VisitUnaryExpr(UnaryExpr *unaryExpr) {
         break;
     }
     unaryExpr->node->Accept(this);
+    return nullptr;
+}
+
+llvm::Value* PrintVisitor::VisitCastExpr(CastExpr *expr) {
+    *out << "(";
+    expr->targetType->Accept(this);
+    *out << ")";
+    expr->node->Accept(this);
+    
     return nullptr;
 }
 

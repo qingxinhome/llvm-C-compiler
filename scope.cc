@@ -37,6 +37,12 @@ void Scope::AddObjSymbol(std::shared_ptr<CType> type, llvm::StringRef name){
     curTable.insert({name, symbol});
 }
 
+void Scope::AddTypedefSymbol(std::shared_ptr<CType> type, llvm::StringRef name) {
+    std::shared_ptr<Symbol> symbol = std::make_shared<Symbol>(SymbolKind::ktypedef, type, name);
+    auto &curTable = envs.back()->objSymbolTable;
+    curTable.insert({name, symbol});
+}
+
 // 从作用域栈中反向查找类型符合表，查找目标类型的符号是否存在
 std::shared_ptr<Symbol> Scope::FindTagSymbol(llvm::StringRef name) {
     // 反向遍历(从栈顶开始查找)

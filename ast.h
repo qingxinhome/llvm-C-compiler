@@ -19,6 +19,7 @@ class FunctionDecl;
 class VariableAccessExpr;
 class BinaryExpr;
 class ThreeExpr;
+class CastExpr;
 class UnaryExpr;
 class SizeOfExpr;
 class PostDecExpr;
@@ -57,6 +58,7 @@ public:
     virtual llvm::Value* VisitVariableAccessExpr(VariableAccessExpr *expr) = 0;
     virtual llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) = 0;
     virtual llvm::Value* VisitThreeExpr(ThreeExpr *threeExpr) = 0;
+    virtual llvm::Value* VisitCastExpr(CastExpr *expr) = 0;
     virtual llvm::Value* VisitUnaryExpr(UnaryExpr *unaryExpr) = 0;
     virtual llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) = 0;
     virtual llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) = 0;
@@ -91,6 +93,7 @@ public:
         Node_BinaryExpr,
         Node_ThreeExpr,
         Node_UnaryExpr,
+        Node_CastExpr,
         Node_SizeOfExpr,
         Node_PostIncExpr,
         Node_PostDecExpr,
@@ -273,7 +276,7 @@ public:
     // case语句的表达式
     std::shared_ptr<AstNode> expr;
     // case语句body语句体
-    std::shared_ptr<AstNode> stmt;
+    std::shared_ptr<AstNode> stmt{nullptr};
 public:
     CaseStmt() : AstNode(Node_CaseStmt) {}
     llvm::Value * Accept(Visitor *v) {
@@ -442,6 +445,20 @@ public:
     }
 };
 
+class CastExpr : public AstNode {
+public:
+    std::shared_ptr<CType> targetType;
+    std::shared_ptr<AstNode> node;
+
+    CastExpr() : AstNode(Node_CastExpr){}
+    llvm::Value* Accept(Visitor *v) override {
+        return v->VisitCastExpr(this);
+    }
+
+    static bool classof(const AstNode *node) {
+        return node->GetKind() == Node_CastExpr;
+    }
+};
 
 class SizeOfExpr : public AstNode {
 public:
@@ -560,7 +577,11 @@ public:
 // 因子表达式
 class NumberExpr : public AstNode {
 public:
-    int value;
+    // int value;
+    union {
+        int64_t v;
+        double d;
+    } value;
 
     NumberExpr() : AstNode(Node_NumberExpr){}
 
@@ -575,6 +596,7 @@ public:
 /// 字符串表达式
 class StringExpr : public AstNode {
 public:
+    std::string value;
     StringExpr() : AstNode(Node_StringExpr){}
 
     llvm::Value* Accept(Visitor *v) override {

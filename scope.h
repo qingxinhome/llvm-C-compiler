@@ -8,6 +8,7 @@
 // 符号类别
 enum SymbolKind {
     obj,      // variable, function
+    ktypedef, // typedef type
     tag       // struct or union type name
 };
 
@@ -21,6 +22,9 @@ public:
     Symbol(SymbolKind kind, std::shared_ptr<CType> type, llvm::StringRef name) : symKind(kind), type(type), name(name) {}
     std::shared_ptr<CType> GetType(){
         return type;
+    }
+    SymbolKind GetKind() {
+        return symKind;
     }
 };
 
@@ -48,6 +52,7 @@ public:
     std::shared_ptr<Symbol> FindObjSymbol(llvm::StringRef name);
     std::shared_ptr<Symbol> FindObjSymbolInCurScope(llvm::StringRef name);
     void AddObjSymbol(std::shared_ptr<CType> type, llvm::StringRef name);
+    void AddTypedefSymbol(std::shared_ptr<CType> type, llvm::StringRef name);
 
 
     std::shared_ptr<Symbol> FindTagSymbol(llvm::StringRef name);

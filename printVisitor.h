@@ -34,6 +34,7 @@ public:
     llvm::Value* VisitBinaryExpr(BinaryExpr *binaryExpr) override;
     llvm::Value* VisitThreeExpr(ThreeExpr *threeExpr) override;
     llvm::Value* VisitUnaryExpr(UnaryExpr *unaryExpr) override;
+    llvm::Value* VisitCastExpr(CastExpr *expr) override;
     llvm::Value* VisitSizeOfExpr(SizeOfExpr *sizeofExpr) override;
     llvm::Value* VisitPostIncExpr(PostIncExpr *postIncExpr) override;
     llvm::Value* VisitPostDecExpr(PostDecExpr *postDecExpr) override;

@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/subc",
             "args": [
-                "demo/e16.c"
+                "demo/lisp.c"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

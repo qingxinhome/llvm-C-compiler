@@ -4,14 +4,25 @@
 #include <llvm/Support/raw_ostream.h>
 #include "type.h"
 #include "diag_engine.h"
+#include <string>
+#include <stack>
 
 // char stream -> token
 
 enum class TokenType {
     number,
     identifier,
-    string,      // string
+    str,         // string
     kw_int,      // int type
+    kw_void,     // void
+    kw_char,     // char
+    kw_short,    // short
+    kw_long,
+    kw_float,
+    kw_double,
+    kw_signed,
+    kw_unsigned,
+    kw_typedef,
     kw_if,       // if
     kw_else,     // else
     kw_for,      // for
@@ -21,12 +32,13 @@ enum class TokenType {
     kw_struct,   // struct
     kw_union,    // union
     kw_return,   // return
-    kw_void,     // void
-    kw_char,     // char
     kw_const,    // const
     kw_volatile, // volatile
     kw_static,   // static
     kw_extern,   // extern
+    kw_auto,
+    kw_register,
+    kw_inline,
     kw_switch,   // switch
     kw_while,    // while
     kw_do,       // do
@@ -86,8 +98,11 @@ class Token {
 public:
     TokenType tokenType;
     int row, col;
-    
-    int value;   // for number
+    union {
+        int64_t v;
+        double d;
+    } value;  // for number
+
     std::string strValue;  // for string
     
     // CType *type; 
@@ -133,6 +148,10 @@ public:
 
 private:
     bool StartWith(const char* p);
+    bool StartWith(const char *source, const char *target);
+    const char* ConvertNumber(Token &token, const char *startPtr, const char* endPtr);
+    std::pair<bool, const char*> ConvertIntNumber(Token &token, const char *startPtr, const char* endPtr);
+    std::pair<bool, const char*> ConvertFloatNumber(Token &token, const char *startPtr, const char* endPtr);
 private:
     const char *CurBufPtr;
     const char *LineHeadPtr;
@@ -146,5 +165,5 @@ private:
         const char *BufEnd;
         int row;
     };
-    State state;
+    std::stack<State> stateStack;
 };

@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     Sema sema(diagEngine);
     Parser parser(lexer, sema);
     auto program = parser.ParseProgram();
-    // PrintVisitor printVisitor(program);
+    PrintVisitor printVisitor(program);
     
     CodeGen codegen(program);    /*将AST转换为LLVM IR*/
     auto &module = codegen.GetModule();
@@ -66,7 +66,9 @@ int main(int argc, char* argv[]) {
                 .create()
         );
 
-        ref->finalizeMemory(&error);                           /* finalizeMemory方法用于完成JIT代码的内存布局*/
+        ee->finalizeObject();
+        // 错误！ptr 所有权已转移！所有权转移后，别碰旧指针！让引擎自己 finalize
+        // ref->finalizeMemory(&error);                        /* finalizeMemory方法用于完成JIT代码的内存布局*/
         void *addr = (void *)ee->getFunctionAddress("main");   /* 通过ExecutionEngine的getFunctionAddress 方法获取main 函数的内存地址*/
         int res = ((int (*)())addr)();                         /* 将addr强制转换为函数指针类型int (*)()（无参，返回 int）*/
         llvm::errs() << "result:" << res << "\n";
