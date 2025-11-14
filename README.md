@@ -121,7 +121,7 @@ sudo make install
 
 > **清理构建**：`make clean` 或 `rm -rf build`
 
-构建完成后，可执行文件位于 `build/bin/llvm-c-compiler`。
+构建完成后，可执行文件位于 `build/bin/subc`。
 
 ---
 
@@ -132,13 +132,13 @@ sudo make install
 
 1. **编译 C 源代码**（默认生成 RISCV32i ELF）：
    ```bash
-   ./bin/llvm-c-compiler input.c -o output
+   ./bin/subc input.c -o output
    ```
 
 2. **指定目标架构**：
    ```bash
-   ./bin/llvm-c-compiler input.c -march=riscv32 -o output.s  # 生成汇编
-   ./bin/llvm-c-compiler input.c -march=riscv32 -O2 -o output  # 优化级别 2
+   ./bin/subc input.c -march=riscv32 -o output.s  # 生成汇编
+   ./bin/subc input.c -march=riscv32 -O2 -o output  # 优化级别 2
    ```
 
 3. **运行生成的程序**（使用 QEMU）：
@@ -168,11 +168,14 @@ int main() {
 ```
 
 ```bash
-# 编译
-./bin/llvm-c-compiler examples/hello.c -o hello
+# 编译运行
+./bin/subc examples/hello.c
 
-# 运行
-qemu-riscv32 hello
+```
+
+### 运行单元测试
+```
+./script/test.sh
 ```
 
 **预期输出**：
